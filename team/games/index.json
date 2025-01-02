@@ -1,0 +1,36 @@
+{
+  "games": [
+    {
+      "id": "001",
+      "name": "SaiPa-Rangers 0610"
+    },
+    {
+      "id": "002",
+      "name": "SaiPa-SB Heinola 0610"
+    },
+    {
+      "id": "003",
+      "name": "SaiPa-EräViikingit 2010"
+    },
+    {
+      "id": "004",
+      "name": "SaiPa-Blackbirds 2010"
+    }, 
+    {
+      "id": "005",
+      "name": "SaiPa-Rangers 1711"
+    },
+    {
+      "id": "006",
+      "name": "SaiPa-SB Heinola 1711"
+    },
+    {
+      "id": "007",
+      "name": "SaiPa-EräViikingit 0712"
+    },
+    {
+      "id": "100",
+      "name": "Kaikki ottelut"
+    }
+  ]
+}

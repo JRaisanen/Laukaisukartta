@@ -1,0 +1,819 @@
+{
+  "teamNames": "SaiPa - EräViikingit 07.12.2024",
+  "events": [
+    {
+      "id": 1734852019371,
+      "x": 43.39820906432749,
+      "y": 16.376306620209057,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734852127921,
+      "x": 41.05902777777778,
+      "y": 43.37979094076655,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734852140473,
+      "x": 73.51516812865498,
+      "y": 28.222996515679444,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734852250364,
+      "x": 6.556103801169591,
+      "y": 37.10801393728223,
+      "player": {
+        "id": 13,
+        "name": "Miija Turunen",
+        "number": 13
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734852304031,
+      "x": 51.00054824561403,
+      "y": 43.031358885017426,
+      "player": {
+        "id": 34,
+        "name": "Ella Sorjonen",
+        "number": 34
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734852400313,
+      "x": 24.39236111111111,
+      "y": 25.087108013937282,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734852414575,
+      "x": 50.1233552631579,
+      "y": 18.81533101045296,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734852427664,
+      "x": 59.48008040935673,
+      "y": 29.965156794425084,
+      "player": {
+        "id": 12,
+        "name": "Mathilda Fernandez",
+        "number": 12
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734852461869,
+      "x": 53.924524853801174,
+      "y": 16.376306620209057,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734852482484,
+      "x": 10.649671052631579,
+      "y": 27.00348432055749,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734852533447,
+      "x": 81.99470029239765,
+      "y": 26.306620209059233,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734852628447,
+      "x": 6.263706140350878,
+      "y": 28.745644599303137,
+      "player": {
+        "id": 13,
+        "name": "Miija Turunen",
+        "number": 13
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734852647164,
+      "x": 22.19937865497076,
+      "y": 25.435540069686414,
+      "player": {
+        "id": 13,
+        "name": "Miija Turunen",
+        "number": 13
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734852666294,
+      "x": 45.88358918128655,
+      "y": 25.261324041811843,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734852832298,
+      "x": 81.26370614035088,
+      "y": 27.526132404181187,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734852862616,
+      "x": 54.36312134502924,
+      "y": 27.700348432055748,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734852901120,
+      "x": 27.754934210526315,
+      "y": 19.337979094076655,
+      "player": {
+        "id": 21,
+        "name": "Emilia Suurnäkki",
+        "number": 21
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734852978968,
+      "x": 25.41575292397661,
+      "y": 32.57839721254355,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734853015895,
+      "x": 43.54440789473684,
+      "y": 16.02787456445993,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "maali"
+    },
+    {
+      "id": 1734853073734,
+      "x": 58.456688596491226,
+      "y": 27.526132404181187,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734853105682,
+      "x": 33.01809210526316,
+      "y": 22.125435540069684,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734853338447,
+      "x": 43.83680555555556,
+      "y": 16.02787456445993,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734853411753,
+      "x": 64.3046418128655,
+      "y": 15.33101045296167,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "maali"
+    },
+    {
+      "id": 1734853487290,
+      "x": 45.88358918128655,
+      "y": 18.466898954703833,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "maali"
+    },
+    {
+      "id": 1734853631890,
+      "x": 77.46253654970761,
+      "y": 30.139372822299652,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734853697637,
+      "x": 62.84265350877193,
+      "y": 19.16376306620209,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734853759906,
+      "x": 56.40990497076024,
+      "y": 27.00348432055749,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734853771701,
+      "x": 40.62043128654971,
+      "y": 20.38327526132404,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "maali"
+    },
+    {
+      "id": 1734853896876,
+      "x": 62.25785818713451,
+      "y": 33.10104529616725,
+      "player": {
+        "id": 12,
+        "name": "Mathilda Fernandez",
+        "number": 12
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734853906782,
+      "x": 50.85434941520468,
+      "y": 18.118466898954704,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734854001816,
+      "x": 4.363121345029239,
+      "y": 25.087108013937282,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734854036537,
+      "x": 22.19937865497076,
+      "y": 18.466898954703833,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734854075369,
+      "x": 52.608735380116954,
+      "y": 14.634146341463413,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734854084284,
+      "x": 56.117507309941516,
+      "y": 17.073170731707318,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734854112517,
+      "x": 24.538559941520468,
+      "y": 16.02787456445993,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734854242843,
+      "x": 34.18768274853801,
+      "y": 34.3205574912892,
+      "player": {
+        "id": 21,
+        "name": "Emilia Suurnäkki",
+        "number": 21
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734854279136,
+      "x": 68.9830043859649,
+      "y": 42.508710801393725,
+      "player": {
+        "id": 34,
+        "name": "Ella Sorjonen",
+        "number": 34
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734854410722,
+      "x": 32.72569444444444,
+      "y": 32.57839721254355,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "maali"
+    },
+    {
+      "id": 1734854524965,
+      "x": 30.67891081871345,
+      "y": 24.738675958188153,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734854539513,
+      "x": 83.31048976608187,
+      "y": 18.641114982578397,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734854693566,
+      "x": 80.38651315789474,
+      "y": 24.21602787456446,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734854707953,
+      "x": 48.222770467836256,
+      "y": 17.247386759581882,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734854746949,
+      "x": 69.56779970760235,
+      "y": 36.23693379790941,
+      "player": {
+        "id": 12,
+        "name": "Mathilda Fernandez",
+        "number": 12
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734854780130,
+      "x": 82.43329678362574,
+      "y": 29.965156794425084,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734854813581,
+      "x": 77.75493421052632,
+      "y": 34.66898954703833,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734854835526,
+      "x": 43.25201023391813,
+      "y": 12.89198606271777,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734854846802,
+      "x": 42.082419590643276,
+      "y": 13.414634146341465,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734854852400,
+      "x": 57.57949561403509,
+      "y": 10.801393728222997,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734854888411,
+      "x": 77.46253654970761,
+      "y": 24.738675958188153,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734854903641,
+      "x": 42.95961257309941,
+      "y": 28.9198606271777,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734854923667,
+      "x": 59.33388157894737,
+      "y": 11.32404181184669,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734854933352,
+      "x": 43.25201023391813,
+      "y": 19.337979094076655,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734854954214,
+      "x": 62.25785818713451,
+      "y": 21.951219512195124,
+      "player": {
+        "id": 21,
+        "name": "Emilia Suurnäkki",
+        "number": 21
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734854965923,
+      "x": 6.11750730994152,
+      "y": 31.881533101045296,
+      "player": {
+        "id": 34,
+        "name": "Ella Sorjonen",
+        "number": 34
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734855015768,
+      "x": 83.60288742690058,
+      "y": 33.79790940766551,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734855060250,
+      "x": 61.67306286549707,
+      "y": 28.57142857142857,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734855112608,
+      "x": 30.386513157894733,
+      "y": 30.139372822299652,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734855135435,
+      "x": 66.6438230994152,
+      "y": 29.790940766550523,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734855172151,
+      "x": 58.456688596491226,
+      "y": 32.57839721254355,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734855211873,
+      "x": 47.053179824561404,
+      "y": 32.22996515679443,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734855325476,
+      "x": 28.92452485380117,
+      "y": 22.822299651567945,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734855329569,
+      "x": 30.386513157894733,
+      "y": 21.0801393728223,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734855354363,
+      "x": 14.597039473684212,
+      "y": 28.04878048780488,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734855404979,
+      "x": 55.532711988304094,
+      "y": 33.44947735191638,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734855418085,
+      "x": 21.32218567251462,
+      "y": 29.442508710801395,
+      "player": {
+        "id": 21,
+        "name": "Emilia Suurnäkki",
+        "number": 21
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734855507796,
+      "x": 9.918676900584796,
+      "y": 35.54006968641115,
+      "player": {
+        "id": 21,
+        "name": "Emilia Suurnäkki",
+        "number": 21
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734855533893,
+      "x": 47.34557748538012,
+      "y": 36.7595818815331,
+      "player": {
+        "id": 12,
+        "name": "Mathilda Fernandez",
+        "number": 12
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734855543768,
+      "x": 76.87774122807018,
+      "y": 32.926829268292686,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734855584570,
+      "x": 86.52686403508771,
+      "y": 28.745644599303137,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734855597330,
+      "x": 16.643823099415204,
+      "y": 42.33449477351917,
+      "player": {
+        "id": 13,
+        "name": "Miija Turunen",
+        "number": 13
+      },
+      "action": "maali"
+    },
+    {
+      "id": 1734855613415,
+      "x": 48.51516812865497,
+      "y": 19.686411149825783,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734855620628,
+      "x": 30.094115497076025,
+      "y": 32.752613240418114,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734855661356,
+      "x": 56.117507309941516,
+      "y": 19.337979094076655,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734855713890,
+      "x": 61.96546052631579,
+      "y": 40.59233449477352,
+      "player": {
+        "id": 12,
+        "name": "Mathilda Fernandez",
+        "number": 12
+      },
+      "action": "blokki"
+    }
+  ]
+}
