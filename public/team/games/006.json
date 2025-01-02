@@ -1,0 +1,291 @@
+{
+  "teamNames": "Saipa - SB Heinola 17.11.2024",
+  "events": [
+    {
+      "id": 1734798189354,
+      "x": 62.69645467836257,
+      "y": 16.550522648083625,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734798222923,
+      "x": 89.88943713450293,
+      "y": 24.912891986062718,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734798245230,
+      "x": 26.731542397660817,
+      "y": 23.86759581881533,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734798292034,
+      "x": 27.901133040935672,
+      "y": 21.254355400696863,
+      "player": {
+        "id": 80,
+        "name": "Sini Mikkola",
+        "number": 80
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734798475216,
+      "x": 63.28125,
+      "y": 20.73170731707317,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734798900294,
+      "x": 82.28709795321637,
+      "y": 35.714285714285715,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734799295458,
+      "x": 49.24616228070175,
+      "y": 37.63066202090592,
+      "player": {
+        "id": 68,
+        "name": "Sara Ihalainen",
+        "number": 68
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734799461875,
+      "x": 64.74323830409357,
+      "y": 15.33101045296167,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734799529106,
+      "x": 68.25201023391813,
+      "y": 30.48780487804878,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734799531993,
+      "x": 39.59703947368421,
+      "y": 29.965156794425084,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734799588365,
+      "x": 28.193530701754387,
+      "y": 36.23693379790941,
+      "player": {
+        "id": 80,
+        "name": "Sini Mikkola",
+        "number": 80
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734799598390,
+      "x": 55.38651315789473,
+      "y": 20.38327526132404,
+      "player": {
+        "id": 6,
+        "name": "Ronja Hämäläinen",
+        "number": 6
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734799666459,
+      "x": 85.35727339181285,
+      "y": 29.790940766550523,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734799693821,
+      "x": 12.257858187134502,
+      "y": 45.99303135888502,
+      "player": {
+        "id": 13,
+        "name": "Miija Turunen",
+        "number": 13
+      },
+      "action": "maali"
+    },
+    {
+      "id": 1734799821138,
+      "x": 62.25785818713451,
+      "y": 34.3205574912892,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734799895214,
+      "x": 61.96546052631579,
+      "y": 14.634146341463413,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734800143838,
+      "x": 46.468384502923975,
+      "y": 25.435540069686414,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734800284941,
+      "x": 84.48008040935673,
+      "y": 33.972125435540065,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734800483768,
+      "x": 6.702302631578948,
+      "y": 36.41114982578397,
+      "player": {
+        "id": 34,
+        "name": "Ella Sorjonen",
+        "number": 34
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734800487252,
+      "x": 55.532711988304094,
+      "y": 25.78397212543554,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734800577654,
+      "x": 32.43329678362573,
+      "y": 31.53310104529617,
+      "player": {
+        "id": 80,
+        "name": "Sini Mikkola",
+        "number": 80
+      },
+      "action": "ohi"
+    },
+    {
+      "id": 1734800755326,
+      "x": 41.79002192982456,
+      "y": 32.752613240418114,
+      "player": {
+        "id": 27,
+        "name": "Ella Räisänen",
+        "number": 27
+      },
+      "action": "blokki"
+    },
+    {
+      "id": 1734800888550,
+      "x": 81.26370614035088,
+      "y": 22.299651567944252,
+      "player": {
+        "id": 28,
+        "name": "Netta Viinanen",
+        "number": 28
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734800912698,
+      "x": 65.76663011695906,
+      "y": 28.57142857142857,
+      "player": {
+        "id": 21,
+        "name": "Emilia Suurnäkki",
+        "number": 21
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734800953624,
+      "x": 20.152595029239766,
+      "y": 25.958188153310104,
+      "player": {
+        "id": 24,
+        "name": "Jessica Aarrevuo",
+        "number": 24
+      },
+      "action": "torjunta"
+    },
+    {
+      "id": 1734800981219,
+      "x": 49.68475877192983,
+      "y": 49.65156794425087,
+      "player": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      },
+      "action": "torjunta"
+    }
+  ]
+}
