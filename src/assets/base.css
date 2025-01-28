@@ -83,7 +83,7 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: url('/SaipaSalibasndy-logo.png'); /* Korvaa tämä polku omalla kuvapolullasi */
+  /*background-image: url('/SaipaSalibandy-logo.png');  Korvaa tämä polku omalla kuvapolullasi 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

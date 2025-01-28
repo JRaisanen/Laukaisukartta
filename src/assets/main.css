@@ -2,8 +2,10 @@
 
 #app {
   max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  /*margin: 0 auto;  tämä vaikuttaa 
+  padding: 2rem;*/
+  margin: 0 auto; /* tämä vaikuttaa */
+  padding: 0.5rem;
   font-weight: normal;
 }
 

@@ -16,17 +16,7 @@
         <button class="scroll-button right" @click="scrollRight">›</button>
       </div>  
       <div v-if="teamNames" class="team-names-display">
-        <h3>{{ teamNames }}</h3>
-      </div>
-  
-      <div class="legend">
-        <ul>
-          <li class="maali">Maali: {{ countEvents('maali') }}</li>
-          <li class="torjunta">Torjunta: {{ countEvents('torjunta') }}</li>
-          <li class="blokki">Blokki: {{ countEvents('blokki') }}</li>
-          <li class="ohi">Ohi: {{ countEvents('ohi') }}</li>
-          <li class="kaikki">Yhteensä: {{ allEvents() }}</li>
-        </ul>
+        <h2>{{ teamNames }}</h2>
       </div>
   
       <div v-if="events.length > 0" class="stats-table">
@@ -56,6 +46,17 @@
           </tbody>
         </table>
       </div>
+
+      <div class="legend">
+        <ul>
+          <li class="maali">Maali: {{ countEvents('maali') }}</li>
+          <li class="torjunta">Torjunta: {{ countEvents('torjunta') }}</li>
+          <li class="blokki">Blokki: {{ countEvents('blokki') }}</li>
+          <li class="ohi">Ohi: {{ countEvents('ohi') }}</li>
+          <li class="kaikki">Yhteensä: {{ allEvents() }}</li>
+        </ul>
+      </div>
+
     </div>
   </template>
   
@@ -119,8 +120,8 @@
     },
     methods: {
         loadGames() {
-            console.log('Loading games...');
-            fetch('/team/games/index.json')
+            console.log('Loading games... beissi: '|| import.meta.env.VITE_BASE_URL);            
+            fetch('/Laukaisukartta/team/games/index.json')
                 .then(response => response.json())
                 .then(data => {
                     this.games = data.games || [];
@@ -133,7 +134,7 @@
     loadEvents(gameId) {
       console.log(`Loading events for game ID: ${gameId}`);
       this.selectedGameId = gameId;
-      fetch(`/team/games/${gameId}.json`)
+      fetch(`/Laukaisukartta/team/games/${gameId}.json`)
         .then(response => response.json())
         .then(data => {
           console.log('Events loaded:', data);
@@ -180,12 +181,16 @@
 };
 </script>
 
-<style>
+<style scoped>
 .container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 20px;
+  padding: 5px;
+}
+
+h1 {
+  margin: 0px 0; /* Vähennä marginaalia otsikon ympärillä */
 }
 
 .games-list-container {
@@ -193,14 +198,14 @@
   align-items: center;
   width: 100%;
   position: relative;
+  margin-bottom: 8px; /* Vähennä marginaalia alapuolella */
 }
 
 .games-list {
   display: flex;
   overflow: hidden;
-  margin-bottom: 20px;
-  margin-left: 20px;
-  margin-right: 20px;
+  padding: 0 5px;
+  margin: 0 8px; /* Vähennä marginaalia vasemmalla ja oikealla */
   flex-grow: 1;
   scrollbar-width: none; /* Piilota vierityspalkki Firefoxissa */
 }
@@ -210,10 +215,10 @@
 }
 
 .games-list button {
-  margin-right: 10px;
-  padding: 15px;
+  margin-right: 5px; /* Vähennä marginaalia oikealla */
+  padding: 10px; /* Vähennä pehmustetta */
   border: none;
-  background-color: #f0f0f0;
+  /*background-color: #f0f0f0;*/
   cursor: pointer;
   flex-shrink: 0;
   white-space: normal; /* Salli tekstin rivittyminen */
@@ -227,13 +232,13 @@
 
 .scroll-button {
   background-color: transparent;
-  color: Black;
+  color: black;
   border: none;
-  font-size: 2.5em;
-  padding: 0px;
+  font-size: 2em; /* Vähennä fonttikokoa */
+  padding: 0;
   cursor: pointer;
   position: absolute;
-  top: 30%;
+  top: 50%;
   transform: translateY(-50%);
   z-index: 1;
 }
@@ -246,64 +251,37 @@
   right: 0;
 }
 
-.image-containeri {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-  max-width: 342px; /* Kiinteä maksimi leveys */
-  height: auto; /* Automaattinen korkeus */
+.team-names-display {
+  margin-top: 10px; /* Vähennä marginaalia yläpuolella */
 }
 
-.image-containeri img {
-  width: 100%; /* Skaalaa kuva täyttämään kontti */
-  height: auto; /* Automaattinen korkeus */
-  object-fit: cover; /* Skaalaa kuva täyttämään kontti */
+.team-names-display h3 {
+  font-size: 1.5em;
+  color: #2c3e50;
 }
-
-.number {
-  position: absolute;
-  background-color: transparent; 
-  padding: 2px 1px;
-  border: none;
-  border-radius: 1px;
-  transform: translate(-50%, -50%);
-}
-
-.marker {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-}
-
-.marker.maali {
-  background-color: green;
-}
-
-.marker.torjunta {
-  background-color: blue;
-}
-
-.marker.blokki {
-  background-color: yellow;
-}
-
-.marker.ohi {
-  background-color: red;
+/*
+.legend {
+  margin-top: 10px; 
 }
 
 .legend ul {
   list-style-type: none;
   padding: 0;
 }
+*/
 
-.legend li {
-  display: inline-block;
-  margin-right: 10px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: white;
-}
+.legend ul {
+     list-style-type: none;
+     padding: 0;
+   }
+
+   .legend li {
+     display: inline-block;
+     margin-right: 10px;
+     padding: 5px 10px;
+     border-radius: 5px;
+     color: white;
+   }
 
 .legend .maali {
   background-color: green;
@@ -327,21 +305,8 @@
   color: black; /* Beige tausta, joten musta teksti */
 }
 
-.team-names-display {
-  margin-top: 20px;
-}
-
-.team-names-display h3 {
-  font-size: 1.5em;
-  color: #2c3e50;
-}
-
-.filter-container {
-  margin-top: 20px;
-}
-
 .stats-table {
-  margin-top: 20px;
+  margin-top: 10px; /* Vähennä marginaalia yläpuolella */
   width: 100%;
   overflow-x: auto;
 }
@@ -358,14 +323,14 @@
 }
 
 .stats-table th {
-  background-color: #f2f2f2;
+  /*background-color: #f2f2f2;*/
   font-weight: bold;
 }
 
 /* Media Queries for Responsiveness */
 @media (max-width: 768px) {
   .container {
-    padding: 10px;
+    padding: 0px;
   }
 
   .games-list button {
@@ -384,13 +349,21 @@
 }
 
 @media (max-width: 480px) {
-  .games-list {
+  .games-list-container {
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .games-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .games-list button {
     margin-bottom: 10px;
-    width: 100%;
+    width: auto; /* Salli painikkeiden laajentua sisällön mukaan */
+    flex: 1 1 auto; /* Salli painikkeiden kasvaa ja kutistua */
   }
 
   .legend li {
@@ -402,5 +375,21 @@
     padding: 4px;
     font-size: 0.7em;
   }
+
 }
+@media (prefers-color-scheme: dark) {
+    .scroll-button {
+        background-color: transparent;
+        color: white;
+        border: none;
+        font-size: 2em; /* Vähennä fonttikokoa */
+        padding: 0;
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;
+    }
+   }
+
 </style>

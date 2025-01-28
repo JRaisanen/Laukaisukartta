@@ -16,7 +16,7 @@
       </div>
   
       <div v-if="filteredEvents.length > 0" class="image-containeri">
-        <img src="/kuva.jpg" alt="Field" />
+        <img src="/public/kuva.jpg" alt="Field" />
         <div
           v-for="event in filteredEvents"
           :key="event.id"

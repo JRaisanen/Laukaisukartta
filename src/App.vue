@@ -1,17 +1,26 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import ActionBar from './components/ActionBar.vue'
 </script>
 
+<template>
+  <div id="app">
+    <ActionBar />
+    <main> 
+      <RouterView />
+    </main>
+  </div>
+</template>
+
+<!--
 <template>
   <div class="container">
     <header>
       <div class="wrapper">
         <nav>
-          <RouterLink to="/kliikki">Laukaisukartta</RouterLink>
-          <RouterLink to="/events">Tapahtumat</RouterLink>
-          <RouterLink to="/stats">Tilastot</RouterLink>
-          <RouterLink to="/gameview">Ottelusivu</RouterLink>
-          <RouterLink to="/statsview">Tilastot2</RouterLink>
+          <RouterLink to="/kliikki">Uusi ottelu</RouterLink>
+          <RouterLink to="/gameview">Laukaisukartta</RouterLink>
+          <RouterLink to="/statsview">Tilastot</RouterLink>
         </nav>
       </div>
     </header>
@@ -21,19 +30,32 @@ import { RouterLink, RouterView } from 'vue-router'
     </main>
   </div>
 </template>
+-->
 
 <style scoped>
+
+#app {
+  padding-top: 50px; /* Varmista, että sisältö ei mene toimintovalikon alle */
+  width: 100%;
+  margin-left: 0px;
+}
+
+main {
+  padding: 0;
+  align-items: center;
+
+}
 
 .container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: rgba(255, 255, 255, 0.8); /* Valkoinen tausta, jossa 80% läpinäkyvyys */
+  /*background-color: rgba(255, 255, 255, 0.8);  Valkoinen tausta, jossa 80% läpinäkyvyys */
 }
 
 header {
   line-height: 1.5;
-  background-color: #f8f9fa;
+  /*background-color: #f8f9fa;*/
   padding: 1rem 0;
 }
 
