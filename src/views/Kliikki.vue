@@ -12,11 +12,21 @@
         <div
         v-for="event in events"
         :key="event.id"
-        :class="['marker', event.action]"
+        :class="['marker', event.action, event.player.id < 100 ? 'circle' : 'square']"
         :style="{ top: event.y + '%', left: event.x + '%' }"
         :title="event.player.number + ' ' + event.player.name + ' ' + event.action"
       ></div>
-
+      <h3>Valitse maalivahti</h3>
+        <ul class="goalie-list">
+            <li
+              v-for="goalie in goalies"
+              :key="goalie.id"
+              @click="selectGoalie(goalie)"
+              :class="{ selected: selectedGoalie && selectedGoalie.id === goalie.id }"
+            >
+              {{ goalie.number + ' ' + goalie.name }}
+            </li>
+          </ul>
       </div>
     </div>
 
@@ -44,13 +54,25 @@
                 {{ action }}
                 </li>
             </ul>
+            <ul v-if="selectedPlayer && selectedPlayer.id >= 100 && selectedAction == 'blokki'" class="blocker-player-list">
+                <li
+                v-for="player in players"
+                :key="player.id"
+                @click="selectBlocker(player)"
+                :class="{ selected: selectedBlocker && selectedBlocker.id === player.id }"
+                >
+                {{ player.number + ' ' + player.name }}
+                </li>
+            </ul>
         </div>
     </div>
 </div>
     <h2>Tapahtumat</h2>
       <ul>
-        <li v-for="event in events" :key="event.id">
-          {{ event.player.name }} - {{ event.action }} @ ({{ event.x }}%, {{ event.y }}%)
+        <li v-for="event in reversedEvents" :key="event.id">
+          {{ event.player.name }} - {{ event.action }} @ ({{ event.x.toFixed(2) }}%, {{ event.y.toFixed(2) }}%)
+          <span v-if="event.goalie">: {{ event.goalie.name }}</span>
+          <span v-if="event.blocker">: {{ event.blocker.name }}</span>
           <button @click="deleteEvent(event.id)">X</button>
         </li>
       </ul>
@@ -77,15 +99,28 @@
         { id: 34, name: 'Ella Sorjonen', number: 34 },
         { id: 68, name: 'Sara Ihalainen', number: 68 },
         { id: 80, name: 'Sini Mikkola', number: 80 },
-        { id: 95, name: 'Saana Tohka', number: 95 }
+        { id: 95, name: 'Saana Tohka', number: 95 },
+        { id: 100, name: 'Vastustaja', number: 100 }
+      ],
+        goalies: [
+        { id: 0, name: 'Ei maalivahtia', number: 0 },
+        { id: 35, name: 'Heidi Lehtinen', number: 35 },
+        { id: 91, name: 'Elli Puumalainen', number: 91 }
       ],
         actions: ['maali', 'torjunta', 'blokki', 'ohi'],
         events: [],
         selectedPoint: null,
         selectedPlayer: null,
         selectedAction: null,
+        selectedBlocker: null,
+        selectedGoalie: null,
         teamNames: '',
       };
+    },
+    computed: {
+      reversedEvents() {
+        return this.events.slice().reverse();
+      }
     },
     methods: {
       handleClick(event) {
@@ -98,21 +133,58 @@
        this.selectedPlayer = player;
       },
         selectAction(action) {
-        this.selectedAction = action;
-        this.saveEvent();
+          this.selectedAction = action;
+          if (this.selectedPlayer.id >= 100 && (!this.selectedGoalie || this.selectedAction === 'torjunta' && this.selectedGoalie.id === 0))
+          {
+
+            alert('Valitse maalivahti');
+          }
+          else
+          {
+            if (this.selectedPlayer.id < 100 || this.selectedPlayer.id >= 100 && this.selectedAction !== 'blokki')
+            {
+              this.saveEvent();
+            }
+          }
         },
+        selectBlocker(player) {
+          this.selectedBlocker = player;
+          this.saveEvent();
+        },
+        selectGoalie(goalie) {
+          console.log(`Valittu veskari: ${goalie.number}`);
+          this.selectedGoalie = goalie;
+        },
+
       saveEvent() {
-        if (this.selectedPlayer && this.selectedAction) {
-          this.events.push({
+        if (this.selectedPlayer && this.selectedAction && this.selectedPoint) {
+          const event = {
+          id: Date.now(),
+          x: this.selectedPoint.x,
+          y: this.selectedPoint.y,
+          player: this.selectedPlayer,
+          action: this.selectedAction,
+          blocker: this.selectedBlocker,
+        };
+        if (this.selectedPlayer.id >= 100 && (this.selectedAction === 'torjunta' || this.selectedAction === 'maali')) {
+          event.goalie = this.selectedGoalie;
+        }
+        this.events.push(event);
+        /*
+        this.events.push({
             id: Date.now(),
             x: this.selectedPoint.x,
             y: this.selectedPoint.y,
             player: this.selectedPlayer,
             action: this.selectedAction,
+            blocker: this.selectedBlocker,
+            goalie: this.selectedGoalie
           });
+          */
           this.selectedPoint = null;
           this.selectedPlayer = null;
           this.selectedAction = null;
+          this.selectedBlocker = null;
         } else {
           alert('Valitse pelaaja ja toimenpide');
         }
@@ -204,9 +276,13 @@ li:hover {
   position: absolute;
   width: 5px;
   height: 5px;
-  border-radius: 50%;
   pointer-events: none; /* Estää klikkaustapahtumat */
 }
+
+.circle {
+  border-radius: 50%;
+}
+
 
 .number {
   position: absolute;
@@ -230,20 +306,32 @@ li:hover {
   background-color: red;
 }
 
-.player-list, .action-list {
+.square {
+  border-radius: 0%;
+}
+
+.player-list, .action-list, .blocker-player-list, .goalie-list {
   list-style-type: none;
   padding: 0;
 }
-.player-list {
+.player-list, .blocker-player-list {
   width: 200px; /* Voit säätää tätä arvoa tarpeen mukaan */
 }
-.player-list li, .action-list li {
+.player-list li, .action-list li, .blocker-player-list li, .goalie-list li {
   cursor: pointer;
   padding: 5px;
   border: 1px solid #ccc;
   margin: 5px 0;
 }
-.player-list li.selected, .action-list li.selected {
-  background-color: #ddd;
+.player-list li.selected, .action-list li.selected, .blocker-player-list li.selected, .goalie-list li.selected {
+  background-color: #bbb;
 }
+.goalie-list {
+  margin-top: 20px;
+}
+
+.goalie-list li:hover {
+  background: #e0e0e0;
+}
+
   </style>

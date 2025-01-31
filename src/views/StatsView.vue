@@ -30,7 +30,8 @@
               <th @click="sortBy('blokki')">Blokki</th>
               <th @click="sortBy('ohi')">Ohi</th>
               <th @click="sortBy('totaali')">Yhteensä</th>
-              <th @click="sortBy('laukaisuprosentti')">Laukaisu%</th>
+              <th @click="sortBy('laukaisuprosentti')">L-%</th>
+              <th @click="sortBy('blokatut')">Blokatut</th>
             </tr>
           </thead>
           <tbody>
@@ -42,19 +43,48 @@
               <td>{{ stats.ohi }}</td>
               <td>{{ stats.totaali }}</td>
               <td>{{ stats.laukaisuprosentti }}</td>
+              <td>{{ stats.blokatut }}</td>
+            </tr>
+            <tr class="summary-row">
+              <td>Kaikki yhteensä</td>
+              <td>{{ totalStats.maali }}</td>
+              <td>{{ totalStats.torjunta }}</td>
+              <td>{{ totalStats.blokki }}</td>
+              <td>{{ totalStats.ohi }}</td>
+              <td>{{ totalStats.totaali }}</td>
+              <td>{{ totalStats.laukaisuprosentti }}</td>
+              <td>{{ totalStats.blokatut }}</td>
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div class="legend">
-        <ul>
-          <li class="maali">Maali: {{ countEvents('maali') }}</li>
-          <li class="torjunta">Torjunta: {{ countEvents('torjunta') }}</li>
-          <li class="blokki">Blokki: {{ countEvents('blokki') }}</li>
-          <li class="ohi">Ohi: {{ countEvents('ohi') }}</li>
-          <li class="kaikki">Yhteensä: {{ allEvents() }}</li>
-        </ul>
+        <h2>Maalivahtitilastot</h2>
+        <table>
+          <thead>
+            <tr>
+              <th @click="sortGoaliesBy('player')">Maalivahti</th>
+              <th @click="sortGoaliesBy('torjunta')">Torjunta</th>
+              <th @click="sortGoaliesBy('maali')">Maali</th>
+              <th @click="sortGoaliesBy('totalShots')">Laukauksia yht</th>
+              <th @click="sortGoaliesBy('torjuntaprosentti')">Torjunta%</th>            
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(stats, player) in sortedGoalieStats" :key="player">
+              <td>{{ stats.player }}</td>
+              <td>{{ stats.torjunta }}</td>
+              <td>{{ stats.maali }}</td>
+              <td>{{ stats.totalShots }}</td>
+              <td>{{ stats.torjuntaprosentti }}</td>
+            </tr>
+            <tr class="summary-row">
+              <td>Kaikki yhteensä</td>
+              <td>{{ totalGoalieStats.torjunta }}</td>
+              <td>{{ totalGoalieStats.maali }}</td>
+              <td>{{ totalGoalieStats.totalShots }}</td>
+              <td>{{ totalGoalieStats.torjuntaprosentti }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
     </div>
@@ -71,6 +101,8 @@
         selectedGameId: null,
         sortKey: 'totaali',
         sortOrder: 'desc',
+        goalieSortKey: 'totaali',
+        goalieSortOrder: 'asc',
       };
     },
     computed: {
@@ -78,6 +110,27 @@
         const players = this.events.map(event => event.player.name);
         return Array.from(new Set(players));
       },
+      totalStats() {
+      const total = {
+        maali: 0,
+        torjunta: 0,
+        blokki: 0,
+        ohi: 0,
+        totaali: 0,
+        laukaisuprosentti: 0,
+        blokatut: 0,
+      };
+      Object.values(this.playerStats).forEach(stats => {
+        total.maali += stats.maali;
+        total.torjunta += stats.torjunta;
+        total.blokki += stats.blokki;
+        total.ohi += stats.ohi;
+        total.totaali += stats.maali + stats.torjunta + stats.blokki + stats.ohi;
+        total.blokatut += stats.blokatut;
+      });
+      total.laukaisuprosentti = total.totaali > 0 ? ((total.maali / total.totaali) * 100).toFixed(2) : 0;
+      return total;
+    },
       filteredEvents() {
         if (this.selectedPlayer) {
           return this.events.filter(event => event.player.name === this.selectedPlayer);
@@ -87,11 +140,21 @@
       playerStats() {
         const stats = {};
         this.events.forEach(event => {
-        const playerName = event.player.name;
-        if (!stats[playerName]) {
-            stats[playerName] = { maali: 0, torjunta: 0, blokki: 0, ohi: 0 };
-        }
-        stats[playerName][event.action]++;
+          const playerName = event.player.name;
+          if (!stats[playerName] && playerName !== 'Vastustaja') {
+              stats[playerName] = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, blokatut: 0 };
+          }
+          if (event.blocker && event.action === 'blokki') {
+            if (!stats[event.blocker.name]) {
+              stats[event.blocker.name] = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, blokatut: 0 };
+            }
+            stats[event.blocker.name]['blokatut']++;
+          }
+
+          if (playerName !== 'Vastustaja')
+          {
+            stats[playerName][event.action]++;
+          }
         });
         return stats;
     },
@@ -117,6 +180,59 @@
             return this.sortOrder === 'asc' ? result : -result;
         });
       },
+      totalGoalieStats() {
+      const total = {
+        maali: 0,
+        torjunta: 0,
+        totalShots: 0,
+        torjuntaprosentti: 0,
+      };
+      Object.values(this.goalieStats).forEach(stats => {
+        total.maali += stats.maali;
+        total.torjunta += stats.torjunta;
+        total.totalShots += stats.totalShots;
+      });
+      total.torjuntaprosentti = total.totalShots > 0 ? ((total.torjunta / total.totalShots) * 100).toFixed(2) : '0.00';
+      return total;
+    },
+    sortedGoalieStats() {
+      const statsArray = Object.entries(this.goalieStats).map(([player, stats]) => ({
+        player,
+        ...stats,
+      }));
+
+      return statsArray.sort((a, b) => {
+        let result = 0;
+        if (this.goalieSortKey === 'player') {
+          result = a.player.localeCompare(b.player);
+        } else {
+          result = a[this.goalieSortKey] - b[this.goalieSortKey];
+        }
+        return this.goalieSortOrder === 'asc' ? result : -result;
+      });
+    },
+    goalieStats() {
+      const stats = {};
+      this.events.forEach(event => {
+        if (event.goalie) {
+          const goalieName = event.goalie.name;
+          if (!stats[goalieName]) {
+            stats[goalieName] = { player: goalieName, maali: 0, torjunta: 0, torjuntaprosentti: 0 };
+          }
+          if (event.action === 'maali') {
+            stats[goalieName].maali += 1;
+          } else if (event.action === 'torjunta') {
+            stats[goalieName].torjunta += 1;
+          }
+        }
+      });
+      Object.values(stats).forEach(stat => {
+        const totalShots = stat.maali + stat.torjunta;
+        stat.totalShots = totalShots;
+        stat.torjuntaprosentti = totalShots > 0 ? ((stat.torjunta / totalShots) * 100).toFixed(2) : '0.00';
+      });
+      return stats;
+    },
     },
     methods: {
         loadGames() {
@@ -163,6 +279,14 @@
       } else {
         this.sortKey = key;
         this.sortOrder = 'desc';
+      }
+    },
+    sortGoaliesBy(key) {
+      if (this.goalieSortKey === key) {
+        this.goalieSortOrder = this.goalieSortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.goalieSortKey = key;
+        this.goalieSortOrder = 'asc';
       }
     },
     scrollLeft() {
@@ -259,16 +383,6 @@ h1 {
   font-size: 1.5em;
   color: #2c3e50;
 }
-/*
-.legend {
-  margin-top: 10px; 
-}
-
-.legend ul {
-  list-style-type: none;
-  padding: 0;
-}
-*/
 
 .legend ul {
      list-style-type: none;
@@ -324,6 +438,10 @@ h1 {
 
 .stats-table th {
   /*background-color: #f2f2f2;*/
+  font-weight: bold;
+}
+
+.summary-row td {
   font-weight: bold;
 }
 

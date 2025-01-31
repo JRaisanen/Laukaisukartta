@@ -1,5 +1,4 @@
 <!-- src/components/ActionBar.vue -->
-<!--
 <template>
     <div class="action-bar">
       <RouterLink to="/gameview">Laukaisukartta</RouterLink>
@@ -7,7 +6,7 @@
       <RouterLink to="/kliikki">Kliikki</RouterLink>
     </div>
   </template>
--->
+<!--
 <template>
     <div class="action-bar">
        
@@ -15,6 +14,7 @@
       <RouterLink to="/statsview">Tilastot</RouterLink>
     </div>
   </template>
+-->
 
 <script setup lang="ts">
   import { RouterLink } from 'vue-router'

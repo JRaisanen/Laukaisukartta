@@ -1,5 +1,5 @@
 {
-  "teamNames": "SaiPa - Rangers 19.01.2025",
+  "teamNames": "Rangers - SaiPa/Sudet 19.01.2025",
   "events": [
     {
       "id": 1737462941799,
@@ -748,6 +748,327 @@
         "number": 68
       },
       "action": "blokki"
+    },
+	    {
+      "id": 1738235136047,
+      "x": 45.90643274853801,
+      "y": 86.7595818815331,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738235274988,
+      "x": 87.42690058479532,
+      "y": 56.968641114982574,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "blokki",
+      "blocker": {
+        "id": 21,
+        "name": "Emilia Suurnäkki",
+        "number": 21
+      }
+    },
+    {
+      "id": 1738235546837,
+      "x": 84.7953216374269,
+      "y": 65.50522648083623,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738235608408,
+      "x": 51.16959064327485,
+      "y": 75.9581881533101,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "blokki",
+      "blocker": {
+        "id": 21,
+        "name": "Emilia Suurnäkki",
+        "number": 21
+      }
+    },
+    {
+      "id": 1738235633245,
+      "x": 6.140350877192982,
+      "y": 68.1184668989547,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "blokki",
+      "blocker": {
+        "id": 95,
+        "name": "Saana Tohka",
+        "number": 95
+      }
+    },
+    {
+      "id": 1738235791215,
+      "x": 73.9766081871345,
+      "y": 65.6794425087108,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "maali",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738236132867,
+      "x": 60.526315789473685,
+      "y": 73.34494773519164,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "ohi",
+      "blocker": null
+    },
+    {
+      "id": 1738236209084,
+      "x": 19.005847953216374,
+      "y": 73.17073170731707,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738236315106,
+      "x": 37.719298245614034,
+      "y": 84.3205574912892,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738236611593,
+      "x": 8.187134502923977,
+      "y": 64.45993031358886,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738236811354,
+      "x": 65.2046783625731,
+      "y": 80.13937282229965,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738236963643,
+      "x": 55.26315789473685,
+      "y": 70.03484320557492,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738237044838,
+      "x": 43.859649122807014,
+      "y": 81.8815331010453,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "maali",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738237244874,
+      "x": 62.57309941520468,
+      "y": 69.51219512195121,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "maali",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738237327941,
+      "x": 30.409356725146196,
+      "y": 82.40418118466899,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "blokki",
+      "blocker": {
+        "id": 31,
+        "name": "Silja Ilves",
+        "number": 31
+      }
+    },
+    {
+      "id": 1738237537760,
+      "x": 29.239766081871345,
+      "y": 40.069686411149824,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738237643405,
+      "x": 71.05263157894737,
+      "y": 57.14285714285714,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738237650390,
+      "x": 65.78947368421053,
+      "y": 66.2020905923345,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "torjunta",
+      "blocker": null,
+      "goalie": {
+        "id": 91,
+        "name": "Elli Puumalainen",
+        "number": 91
+      }
+    },
+    {
+      "id": 1738237678755,
+      "x": 93.85964912280701,
+      "y": 75.60975609756098,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "ohi",
+      "blocker": null
+    },
+    {
+      "id": 1738237706820,
+      "x": 66.08187134502924,
+      "y": 69.1637630662021,
+      "player": {
+        "id": 100,
+        "name": "Vastustaja",
+        "number": 100
+      },
+      "action": "ohi",
+      "blocker": null
     }
   ]
 }

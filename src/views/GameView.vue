@@ -21,7 +21,20 @@
     </div>
 
     <div v-if="events.length > 0" class="filter-container">
-      <label for="player-select">Valitse pelaaja:</label>
+      <label for="player-select">Näytä tapahtumat: </label>
+      <label>
+          <input type="checkbox" v-model="showHomeTeam" />
+          Oma joukkue
+      </label>
+      <label>
+          <input type="checkbox" v-model="showOpponentTeam" />
+          Vastustaja
+      </label>
+      </div>
+
+    <div v-if="events.length > 0" class="filter-container">
+
+      <label for="player-select">Valitse pelaaja: </label>
       <select id="player-select" v-model="selectedPlayer">
         <option value="">Kaikki pelaajat</option>
         <option v-for="player in uniquePlayers" :key="player" :value="player">
@@ -35,7 +48,7 @@
       <div
         v-for="event in filteredEvents"
         :key="event.id"
-        :class="['marker', event.action]"
+        :class="['marker', event.action, event.player.id < 100 ? 'circle' : 'square']"
         :style="{ top: event.y + '%', left: event.x + '%' }"
         :title="event.player.number + ' ' + event.player.name + ' ' + event.action"
       ></div>
@@ -44,14 +57,14 @@
         :key="event.id"
         class="number"
         :style="{ top: event.y + '%', left: event.x + 5 + '%' }"
-        :title="event.player.number + ' ' + event.player.name + ' ' + event.action"
+        :title="event.blocker ? event.action + ' '+ event.blocker.id + ' ' + event.blocker.name : event.player.number + ' ' + event.player.name + ' ' + event.action"
       >
-        {{ event.player.number }}
+        {{ event.player.id === 100 && event.action === 'blokki' ? event.blocker.number : event.player.id === 100 ? ' ' : event.player.number }}
       </div>
     </div>
 
     <div class="legend">
-      <h2>Selitteet</h2>
+      <h3>Selitteet/suodattimet (ympyrä = oma joukkue/neliö = vastustaja):</h3>
       <ul>
         <li
           class="maali"
@@ -84,6 +97,40 @@
         <li class="kaikki">Yhteensä: {{ allEvents() }}</li>
       </ul>
     </div>
+
+    <div v-if="events.length > 0" class="summary-table">
+      <h2>Laukausten yhteenveto</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Joukkue</th>
+            <th>Maali</th>
+            <th>Torjunta</th>
+            <th>Blokki</th>
+            <th>Ohi</th>
+            <th>Yhteensä</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Oma joukkue</td>
+            <td>{{ homeTeamStats.maali }}</td>
+            <td>{{ homeTeamStats.torjunta }}</td>
+            <td>{{ homeTeamStats.blokki }}</td>
+            <td>{{ homeTeamStats.ohi }}</td>
+            <td>{{ homeTeamStats.total }}</td>
+          </tr>
+          <tr>
+            <td>Vastustaja</td>
+            <td>{{ opponentTeamStats.maali }}</td>
+            <td>{{ opponentTeamStats.torjunta }}</td>
+            <td>{{ opponentTeamStats.blokki }}</td>
+            <td>{{ opponentTeamStats.ohi }}</td>
+            <td>{{ opponentTeamStats.total }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -98,6 +145,8 @@ export default {
       teamNames: '',
       selectedPlayer: '',
       selectedGameId: null,
+      showHomeTeam: true,
+      showOpponentTeam: true,
       sortKey: 'player',
       sortOrder: 'asc',
       visibleActions: ['maali', 'torjunta', 'blokki', 'ohi'],
@@ -105,16 +154,53 @@ export default {
   },
   computed: {
     uniquePlayers() {
-      const players = this.events.map(event => event.player.name);
+      const players = this.events.filter(event => event.player.id !== 100).map(event => event.player.name);
       return Array.from(new Set(players));
     },
     filteredEvents() {
-      return this.events.filter(event => {
-        return (
-          (!this.selectedPlayer || event.player.name === this.selectedPlayer) &&
-          this.visibleActions.includes(event.action)
-        );
+      let events = this.events;
+
+      if (this.selectedPlayer) {
+        events = events.filter(event => event.player && event.player.name === this.selectedPlayer);
+      }
+
+      if (!this.showHomeTeam) {
+        events = events.filter(event => event.player && event.player.id >= 100);
+      }
+
+      if (!this.showOpponentTeam) {
+        events = events.filter(event => event.player && event.player.id < 100);
+      }
+
+      return events.filter(event => this.visibleActions.includes(event.action));
+    },
+    homeTeamStats() {
+      const stats = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, total: 0 };
+      this.events.forEach(event => {
+        if (event.player && event.player.id < 100) {
+          stats[event.action]++;
+          stats.total++;
+        }
       });
+      return stats;
+    },
+    opponentTeamStats() {
+      const stats = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, total: 0 };
+      this.events.forEach(event => {
+        if (event.player && event.player.id >= 100) {
+          stats[event.action]++;
+          stats.total++;
+        }
+      });
+      return stats;
+    },
+  },
+  watch: {
+    showHomeTeam() {
+      this.filteredEvents;
+    },
+    showOpponentTeam() {
+      this.filteredEvents;
     },
   },
   methods: {
@@ -297,6 +383,14 @@ export default {
      border-radius: 50%;
    }
 
+   .circle {
+     border-radius: 50%;
+  }
+ 
+   .square {
+     border-radius: 0%;
+  }
+
    .marker.maali {
      background-color: green;
    }
@@ -362,6 +456,25 @@ export default {
      font-size: 24px;
      /*color: #2c3e50;*/
    }
+   .summary-table {
+  margin-top: 20px;
+}
+
+.summary-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.summary-table th, .summary-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.summary-table th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
+
 
    /* Media Queries for Responsiveness */
 @media (max-width: 768px) {
