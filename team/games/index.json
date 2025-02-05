@@ -2,39 +2,39 @@
   "games": [
     {
       "id": "001",
-      "name": "SaiPa-Rangers 0610"
+      "name": "SaSu-Rangers 0610"
     },
     {
       "id": "002",
-      "name": "SaiPa-SB Heinola 0610"
+      "name": "SaSu-SB Heinola 0610"
     },
     {
       "id": "003",
-      "name": "SaiPa-EräViikingit 2010"
+      "name": "EräViikingit-SaSu 2010"
     },
     {
       "id": "004",
-      "name": "SaiPa-Blackbirds 2010"
+      "name": "SaSu-Blackbirds 2010"
     }, 
     {
       "id": "005",
-      "name": "SaiPa-Rangers 1711"
+      "name": "Rangers-SaSu 1711"
     },
     {
       "id": "006",
-      "name": "SaiPa-SB Heinola 1711"
+      "name": "SB Heinola-SaSu 1711"
     },
     {
       "id": "007",
-      "name": "SaiPa-EräViikingit 0712"
+      "name": "SaSu-EräViikingit 0712"
     },
     {
       "id": "008",
-      "name": "SaiPa-SB Heinola 1901"
+      "name": "SB Heinola - SaSu 1901"
     },
 	{
       "id": "009",
-      "name": "SaiPa-Rangers 1901"
+      "name": "Rangers-SaSu 1901"
     },
     {
       "id": "100",
