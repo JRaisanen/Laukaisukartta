@@ -2,78 +2,96 @@
   <div class="container">
     <div class="top-section">
     <div class="app">
-      <h1>Laukaisukartta</h1>
+      <h2>Laukaisukartan syöttäminen</h2>
       <div class="team-names">
-      <h2>Joukkueet</h2>
+      <h3>Joukkueet</h3>
       <input type="text" v-model="teamNames" placeholder="Esim. SaiPa - EräViikingit" />
+      <input type="text" v-model="shortteamNames" placeholder="Esim. SaSu-ErVi" />
     </div>
       <div @click="handleClick" class="image-container">
-        <img src="/kuva.jpg" alt="Field" />
+        <img src="/kuva.png" alt="Field" />
         <div
         v-for="event in events"
         :key="event.id"
-        :class="['marker', event.action, event.player.id < 100 ? 'circle' : 'square']"
+        :class="['marker', event.action, event.player.playerId < 100 ? 'circle' : 'square']"
         :style="{ top: event.y + '%', left: event.x + '%' }"
         :title="event.player.number + ' ' + event.player.name + ' ' + event.action"
       ></div>
       <h3>Valitse maalivahti</h3>
-        <ul class="goalie-list">
-            <li
-              v-for="goalie in goalies"
-              :key="goalie.id"
-              @click="selectGoalie(goalie)"
-              :class="{ selected: selectedGoalie && selectedGoalie.id === goalie.id }"
-            >
-              {{ goalie.number + ' ' + goalie.name }}
-            </li>
-          </ul>
+      <v-list lines="one" class="player-list">
+            <v-list-item 
+                v-for="goalie in localGoalies"
+                @click="selectGoalie(goalie)"
+                density="compact"
+                :class="{ selected: selectedGoalie && selectedGoalie.playerId === goalie.playerId,
+                  'not-selected': !selectedGoalie || selectedGoalie.playerId !== goalie.playerId
+                 }">
+                  <v-card class="rounded-card">
+                {{ goalie.number + ' ' + goalie.name }}
+              </v-card>
+            </v-list-item>
+          </v-list>
       </div>
     </div>
 
     <div>
-        <h2>Valitse pelaaja ja toimenpide</h2>
-        <div class="selection-container">
-            <ul class="player-list">
-                <li
-                v-for="player in players"
-                :key="player.id"
+      <h2>Valitse pelaaja ja toimenpide</h2>
+      <div class="selection-container">
+        <v-list lines="one" class="player-list">
+            <v-list-item 
+                v-for="player in localPlayers"
                 @click="selectPlayer(player)"
-                :class="{ selected: selectedPlayer && selectedPlayer.id === player.id }"
-                >
+                density="compact"
+                :class="{
+                  selected: selectedPlayer && selectedPlayer.playerId === player.playerId,
+                  'not-selected': !selectedPlayer || selectedPlayer.playerId !== player.playerId
+                  }"
+                  :key="player.id">
+                  <v-card class="rounded-card">
                 {{ player.number + ' ' + player.name }}
-                </li>
-            </ul>
-            <ul class="action-list">
-                <li
-                v-for="action in actions"
+              </v-card>
+            </v-list-item>
+          </v-list>
+          <v-list lines="one" class="action-list">
+            <v-list-item 
+            v-for="action in actions"
                 :key="action"
                 @click="selectAction(action)"
-                :class="{ selected: selectedAction === action }"
-                :style="getActionStyle(action)"
+                :class="{ selected: selectedAction === action,
+                  'not-selected': !selectedAction || selectedAction !== action
+                }"
                 >
+                <v-card class="rounded-card-action" :style="getActionStyle(action)">
                 {{ action }}
-                </li>
-            </ul>
-            <ul v-if="selectedPlayer && selectedPlayer.id >= 100 && selectedAction == 'blokki'" class="blocker-player-list">
-                <li
-                v-for="player in players"
-                :key="player.id"
+              </v-card>
+
+            </v-list-item>
+          </v-list>
+          <v-list v-if="selectedPlayer && selectedPlayer.playerId >= 100 && selectedAction == 'blokki'" class="player-list" lines="one">
+            <v-list-item 
+                v-for="player in ownPlayers"
                 @click="selectBlocker(player)"
-                :class="{ selected: selectedBlocker && selectedBlocker.id === player.id }"
-                >
-                {{ player.number + ' ' + player.name }}
-                </li>
-            </ul>
+                density="compact"
+                :class="{ selected: selectedBlocker && selectedBlocker.id === player.playerId,
+                  'not-selected': !selectedBlocker || selectedBlocker.id !== player.playerId }"
+                :key="player.id">
+                <v-card class="rounded-card">
+                  {{ player.number + ' ' + player.name }}
+                </v-card>
+            </v-list-item>
+          </v-list>
+
         </div>
+
     </div>
 </div>
     <h2>Tapahtumat</h2>
       <ul>
-        <li v-for="event in reversedEvents" :key="event.id">
+        <li v-for="event in reversedEvents" :key="event.eventId">
           {{ event.player.name }} - {{ event.action }} @ ({{ event.x.toFixed(2) }}%, {{ event.y.toFixed(2) }}%)
           <span v-if="event.goalie">: {{ event.goalie.name }}</span>
           <span v-if="event.blocker">: {{ event.blocker.name }}</span>
-          <button @click="deleteEvent(event.id)">X</button>
+          <button @click="deleteEvent(event.eventId)">X</button>
         </li>
       </ul>
       <button @click="downloadEvents">Lataa tapahtumat</button>
@@ -82,45 +100,56 @@
   </template>
   
   <script>
+  import { useTeamStore } from '../stores/teamStore';
+  import { useAuthStore } from '../stores/authStore';
+
   export default {
     data() {
+      const teamStore = useTeamStore();
+      
+      teamStore.fetchTeams();
+      console.log('Kliikki - Joukkueet:', teamStore.teams);
+      console.log('Kliikki - Kaudet:', teamStore.teamSeasons);
+      console.log('Kliikki - Kausi' + teamStore.selectedTeamSeason);
+      //console.log('Kliikki - Joukkue' + teamId);
+  
       return {
-        players: [
-        { id: 6, name: 'Ronja Hämäläinen', number: 6 },
-        { id: 12, name: 'Mathilda Fernandez', number: 12 },
-        { id: 13, name: 'Miija Turunen', number: 13 },
-        { id: 18, name: 'Sini Luostarinen', number: 18 },
-        { id: 19, name: 'Amelia Ukkonen', number: 19 },
-        { id: 21, name: 'Emilia Suurnäkki', number: 21 },
-        { id: 24, name: 'Jessica Aarrevuo', number: 24 },
-        { id: 27, name: 'Ella Räisänen', number: 27 },
-        { id: 28, name: 'Netta Viinanen', number: 28 },
-        { id: 31, name: 'Silja Ilves', number: 31 },
-        { id: 34, name: 'Ella Sorjonen', number: 34 },
-        { id: 68, name: 'Sara Ihalainen', number: 68 },
-        { id: 80, name: 'Sini Mikkola', number: 80 },
-        { id: 95, name: 'Saana Tohka', number: 95 },
-        { id: 100, name: 'Vastustaja', number: 100 }
-      ],
-        goalies: [
-        { id: 0, name: 'Ei maalivahtia', number: 0 },
-        { id: 35, name: 'Heidi Lehtinen', number: 35 },
-        { id: 91, name: 'Elli Puumalainen', number: 91 }
-      ],
-        actions: ['maali', 'torjunta', 'blokki', 'ohi'],
-        events: [],
-        selectedPoint: null,
-        selectedPlayer: null,
-        selectedAction: null,
-        selectedBlocker: null,
-        selectedGoalie: null,
-        teamNames: '',
+      teamStore,
+      actions: ['maali', 'torjunta', 'blokki', 'ohi'],
+      events: [],
+      selectedPoint: null,
+      selectedPlayer: null,
+      selectedAction: null,
+      selectedBlocker: null,
+      selectedGoalie: null,
+      teamNames: '',
+      shortteamNames: '',
       };
     },
+
     computed: {
       reversedEvents() {
         return this.events.slice().reverse();
-      }
+      },
+      localPlayers() {
+        const teamStore = useTeamStore();
+        const players = teamStore.players;
+        console.log('Pelaajasdfsdfs dfsdf sdf sdft:', players);
+        players.push({ playerId: 100, name: 'Vastustaja', number: 100 });
+        return players.filter(player => player.active === 1 || player.playerId === 100);
+      },
+      ownPlayers() {
+        const teamStore = useTeamStore();
+        return teamStore.players.filter(player => player.playerId !== 100 && player.active === 1);
+      },
+      localGoalies() {
+        const teamStore = useTeamStore();
+        const goalies = teamStore.goalies;
+        console.log('Mokkesdfsdfs dfsdf sdf sdft:', goalies);
+        goalies.push({ playerId: 0, name: 'Ei maalivahtia', number: 0 });
+        return goalies.filter(goalie => goalie.active === 1 || goalie.playerId === 0);
+      },
+
     },
     methods: {
       handleClick(event) {
@@ -134,14 +163,14 @@
       },
         selectAction(action) {
           this.selectedAction = action;
-          if (this.selectedPlayer.id >= 100 && (!this.selectedGoalie || this.selectedAction === 'torjunta' && this.selectedGoalie.id === 0))
+          if (this.selectedPlayer.playerId >= 100 && (!this.selectedGoalie || this.selectedAction === 'torjunta' && this.selectedGoalie.playerId === 0))
           {
 
             alert('Valitse maalivahti');
           }
           else
           {
-            if (this.selectedPlayer.id < 100 || this.selectedPlayer.id >= 100 && this.selectedAction !== 'blokki')
+            if (this.selectedPlayer.playerId < 100 || this.selectedPlayer.playerId >= 100 && this.selectedAction !== 'blokki')
             {
               this.saveEvent();
             }
@@ -159,14 +188,14 @@
       saveEvent() {
         if (this.selectedPlayer && this.selectedAction && this.selectedPoint) {
           const event = {
-          id: Date.now(),
+          eventId: Date.now(),
           x: this.selectedPoint.x,
           y: this.selectedPoint.y,
           player: this.selectedPlayer,
           action: this.selectedAction,
           blocker: this.selectedBlocker,
         };
-        if (this.selectedPlayer.id >= 100 && (this.selectedAction === 'torjunta' || this.selectedAction === 'maali')) {
+        if (this.selectedPlayer.playerId >= 100 && (this.selectedAction === 'torjunta' || this.selectedAction === 'maali')) {
           event.goalie = this.selectedGoalie;
         }
         this.events.push(event);
@@ -190,40 +219,97 @@
         }
       },
       deleteEvent(eventId) {
-      this.events = this.events.filter(event => event.id !== eventId);
+      this.events = this.events.filter(event => event.eventId !== eventId);
       },
-      downloadEvents() {
-        const data = JSON.stringify({ teamNames: this.teamNames, events: this.events }, null, 2);
-        console.log('Data to be saved:', data); // Debugging log
-        const blob = new Blob([data], { type: 'application/json' });        
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'events.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      async downloadEvents() {
+        // luodaan ensin ottelu
+        const authStore = useAuthStore(); // Hae authStore
+        const API_KEY = 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8'; // Korvaa tämä omalla API-avaimellasi
+        const newGame = {
+          name: this.teamNames,
+          shortname: this.shortteamNames,
+          teamId: this.teamStore.selectedTeam.teamId,
+          seasonId: this.teamStore.selectedTeamSeason.seasonId
+        };
+        let gameId;
+        console.log('Adding new game:', newGame);
+        try {
+          const response = await fetch('http://localhost:3000/games', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8',
+              'Authorization': `Bearer ${authStore.token}` // Lisää token otsikoihin
+            },
+            body: JSON.stringify(newGame)
+          });
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const data = await response.json();
+          gameId = data.gameId;
+          console.log('Added new game:', data);
+        } catch (error) {
+          console.error('Error adding game:', error);
+        }
+
+        const eventsToSave = this.events.map(event => ({
+        eventId: null,
+        xCoordinate: event.x,
+        yCoordinate: event.y,
+        playerId: event.player.playerId,
+        playerName: event.player.name,
+        playerNumber: event.player.number,
+        action: event.action,
+        blockerId: event.blocker ? event.blocker.playerId : null,
+        blockerName: event.blocker ? event.blocker.name : null,
+        blockerNumber: event.blocker ? event.blocker.number : null,
+        goalieId: event.goalie ? event.goalie.playerId : null,
+        goalieName: event.goalie ? event.goalie.name : null,
+        goalieNumber: event.goalie ? event.goalie.number : null,
+        gameId: gameId
+      }));
+
+      console.log('Events to be saved:', eventsToSave);
+      // Lähetä kaikki eventit backendille
+      try {
+          const response = await fetch('http://localhost:3000/gameevent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8',  // Korvaa omalla API-avaimellasi
+            'Authorization': `Bearer ${authStore.token}` // Lisää token otsikoihin
+          },
+          body: JSON.stringify(eventsToSave)
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const responseData = await response.json();
+        console.log('Events saved to backend:', responseData);
+        } catch (error) {
+        console.error('Error saving events to backend:', error);
+      }
       },
       getActionStyle(action) {
-      switch (action) {
-        case 'maali':
-          return { backgroundColor: 'green', color: 'white' };
-        case 'torjunta':
-          return { backgroundColor: 'blue', color: 'white' };
-        case 'blokki':
-          return { backgroundColor: 'yellow' };
-        case 'ohi':
-          return { backgroundColor: 'red', color: 'white' };
-        default:
-          return {};
-      }
+        switch (action) {
+          case 'maali':
+            return { backgroundColor: 'lightgreen', color: 'black' };
+          case 'torjunta':
+            return { backgroundColor: 'darkblue', color: 'white' };
+          case 'blokki':
+            return { backgroundColor: 'yellow' };
+          case 'ohi':
+            return { backgroundColor: 'red', color: 'white' };
+          default:
+            return {};
+        }
     }
     
     },
   };
   </script>
-  
+
   <style>
 
  .container {
@@ -240,7 +326,7 @@
 
  .selection-container {
   display: flex;
-  gap: 20px;
+  gap: 10px;
 }
 
  .image-container {
@@ -255,9 +341,10 @@
   object-fit: cover; /* Skaalaa kuva täyttämään kontti */
 }
 
-  .player-list {
+.goalie-list {
   max-width: 200px; /* Voit säätää leveyttä tarpeen mukaan */
 }
+
 
 li {
   padding: 8px;
@@ -294,10 +381,10 @@ li:hover {
 }
 
 .marker.maali {
-  background-color: green;
+  background-color: lightgreen;
 }
 .marker.torjunta {
-  background-color: blue;
+  background-color: darkblue;
 }
 .marker.blokki {
   background-color: yellow;
@@ -312,26 +399,66 @@ li:hover {
 
 .player-list, .action-list, .blocker-player-list, .goalie-list {
   list-style-type: none;
-  padding: 0;
+  padding: 10;
 }
-.player-list, .blocker-player-list {
+.player-list {
+  width: 240px; /* Voit säätää tätä arvoa tarpeen mukaan */
+}
+
+.action-list {
+  width: 110px; /* Voit säätää tätä arvoa tarpeen mukaan */
+}
+
+.blocker-player-list {
   width: 200px; /* Voit säätää tätä arvoa tarpeen mukaan */
 }
 .player-list li, .action-list li, .blocker-player-list li, .goalie-list li {
   cursor: pointer;
   padding: 5px;
   border: 1px solid #ccc;
-  margin: 5px 0;
+  margin: 4px 0;
 }
 .player-list li.selected, .action-list li.selected, .blocker-player-list li.selected, .goalie-list li.selected {
   background-color: #bbb;
 }
+
+.selected {
+  background-color: #bbb;
+  color: white;
+}
+
+.not-selected {
+  background-color: whitesmoke;
+  color: black;
+}
+
+
 .goalie-list {
   margin-top: 20px;
 }
 
 .goalie-list li:hover {
   background: #e0e0e0;
+}
+
+.rounded-card {
+    border-radius: 10px;
+    border: black;
+    border-style: none;
+    height: 30px;
+    width: 200px;
+    padding-left: 15%;
+    padding-right: 5%;
+    padding-top: 2px;
+}
+
+.rounded-card-action {
+  border-radius: 20px;
+    height: 30px;
+    width: 75px;
+    padding-left: 15%;
+    padding-right: 5%;
+
 }
 
   </style>

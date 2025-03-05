@@ -1,52 +1,49 @@
 <template>
-    <div class="container">
-      <h1>Valitse ottelu:</h1>
-      <div class="games-list-container">
-        <button class="scroll-button left" @click="scrollLeft">‹</button>
-        <div class="games-list">
-            <button
-            v-for="game in games"
-            :key="game.id"
-            @click="loadEvents(game.id)"
-            :class="{ active: selectedGameId === game.id }"
-            >
-            {{ game.name }}
-            </button>
-        </div>
-        <button class="scroll-button right" @click="scrollRight">›</button>
-      </div>  
-      <div v-if="teamNames" class="team-names-display">
-        <h2>{{ teamNames }}</h2>
-      </div>
+  <div class="container">
+    <v-divider :thickness="10"></v-divider>
+
+    <v-sheet class="responsive-sheet mx-auto">
+      <v-slide-group show-arrows>
+        <v-slide-group-item 
+          v-for="game in games"
+          :key="game.gameId"
+          v-slot="{ isSelected, toggle }"
+        >
+          <v-btn 
+            :color="isSelected ? 'primary' : undefined"
+            :class="{ 'selected-btn': selectedGameId === game.gameId,
+                      'ma-2': selectedGameId !== game.gameId }"
+            rounded
+            @click="loadEvents(game.gameId)"
+          >
+            {{ game.shortname }}
+          </v-btn>
+        </v-slide-group-item>
+      </v-slide-group>
+    </v-sheet>
+
+    <v-divider :thickness="10"></v-divider>
+
+    <div v-if="teamNames" class="team-names-display">
+      <v-card-title class="text-h7">{{ teamNames }}</v-card-title>
+    </div>
+
+    <v-divider :thickness="10"></v-divider>
   
-      <div v-if="events.length > 0" class="stats-table">
-        <h2>Pelaajatilastot</h2>
-        <table>
-          <thead>
-            <tr>
-              <th @click="sortBy('player')">Pelaaja</th>
-              <th @click="sortBy('maali')">Maali</th>
-              <th @click="sortBy('torjunta')">Torjunta</th>
-              <th @click="sortBy('blokki')">Blokki</th>
-              <th @click="sortBy('ohi')">Ohi</th>
-              <th @click="sortBy('totaali')">Yhteensä</th>
-              <th @click="sortBy('laukaisuprosentti')">L-%</th>
-              <th @click="sortBy('blokatut')">Blokatut</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(stats, player) in sortedPlayerStats" :key="player">
-              <td>{{ stats.player }}</td>
-              <td>{{ stats.maali }}</td>
-              <td>{{ stats.torjunta }}</td>
-              <td>{{ stats.blokki }}</td>
-              <td>{{ stats.ohi }}</td>
-              <td>{{ stats.totaali }}</td>
-              <td>{{ stats.laukaisuprosentti }}</td>
-              <td>{{ stats.blokatut }}</td>
-            </tr>
-            <tr class="summary-row">
-              <td>Kaikki yhteensä</td>
+    <div v-if="events.length > 0" class="stats-table">
+      <h4>Pelaajatilastot</h4>
+      <v-data-table         
+        :headers="headers"
+        :hide-default-header="false"
+        :items="sortedPlayerStats"
+        :no-data-text="no_results_text"
+        :items-per-page="-1"
+        :hide-default-footer="true"
+        density="compact"
+        class="responsive-table">
+        <template v-slot:body.append>
+            <tr class="summary-row2">
+              <td class="summit">Kaikki yhteensä</td>
               <td>{{ totalStats.maali }}</td>
               <td>{{ totalStats.torjunta }}</td>
               <td>{{ totalStats.blokki }}</td>
@@ -55,42 +52,40 @@
               <td>{{ totalStats.laukaisuprosentti }}</td>
               <td>{{ totalStats.blokatut }}</td>
             </tr>
-          </tbody>
-        </table>
-        <h2>Maalivahtitilastot</h2>
-        <table>
-          <thead>
-            <tr>
-              <th @click="sortGoaliesBy('player')">Maalivahti</th>
-              <th @click="sortGoaliesBy('torjunta')">Torjunta</th>
-              <th @click="sortGoaliesBy('maali')">Maali</th>
-              <th @click="sortGoaliesBy('totalShots')">Laukauksia yht</th>
-              <th @click="sortGoaliesBy('torjuntaprosentti')">Torjunta%</th>            
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(stats, player) in sortedGoalieStats" :key="player">
-              <td>{{ stats.player }}</td>
-              <td>{{ stats.torjunta }}</td>
-              <td>{{ stats.maali }}</td>
-              <td>{{ stats.totalShots }}</td>
-              <td>{{ stats.torjuntaprosentti }}</td>
-            </tr>
-            <tr class="summary-row">
-              <td>Kaikki yhteensä</td>
-              <td>{{ totalGoalieStats.torjunta }}</td>
-              <td>{{ totalGoalieStats.maali }}</td>
-              <td>{{ totalGoalieStats.totalShots }}</td>
-              <td>{{ totalGoalieStats.torjuntaprosentti }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        </template>
 
-    </div>
-  </template>
+      </v-data-table>
+      <v-divider :thickness="10"></v-divider>
+
+      <h4>Maalivahtitilastot</h4>
+      <v-data-table         
+          :headers="goalieHeaders"
+          :hide-default-header="false"
+          :items="sortedGoalieStats"
+          :no-data-text="no_results_text"
+          :items-per-page="-1"
+          density="compact"
+          class="responsive-table"
+          :hide-default-footer="true">
+          <template v-slot:body.append>
+              <tr class="summary-row2">
+                <td class="summit">Kaikki yhteensä</td>
+                <td>{{ totalGoalieStats.torjunta }}</td>
+                <td>{{ totalGoalieStats.maali }}</td>
+                <td>{{ totalGoalieStats.totalShots }}</td>
+                <td>{{ totalGoalieStats.torjuntaprosentti }}</td>
+              </tr>
+          </template>
+
+        </v-data-table>
+      </div>
+  </div>
+</template>
   
   <script>
+  import { useTeamStore } from '../stores/teamStore';
+  import config from '../../config.js'; // Tuo konfiguraatiotiedosto
+  
   export default {
     data() {
       return {
@@ -103,11 +98,39 @@
         sortOrder: 'desc',
         goalieSortKey: 'totaali',
         goalieSortOrder: 'asc',
+        fields: [
+        { key: 'player', label: 'Pelaaja', sortable: false },
+        { key: 'maali', label: 'Maali', sortable: true },
+        { key: 'torjunta', label: 'Torjunta', sortable: true },
+        { key: 'blokki', label: 'Blokki', sortable: true },
+        { key: 'ohi', label: 'Ohi', sortable: true },
+        { key: 'totaali', label: 'Yhteensä', sortable: true },
+        { key: 'laukaisuprosentti', label: 'L-%', sortable: true },
+        { key: 'blokatut', label: 'Blokatut', sortable: true },
+        ],
+        headers: [
+          { title: 'Pelaaja', value: 'player', sortable: false },
+          { title: 'Maali', value: 'maali', sortable: true},
+          { title: 'Torjunta', value: 'torjunta', sortable: true },
+          { title: 'Blokki', value: 'blokki', sortable: true },
+          { title: 'Ohi', value: 'ohi', sortable: true },
+          { title: 'Yhteensä', value: 'totaali', sortable: true },
+          { title: 'L-%', value: 'laukaisuprosentti', sortable: true },
+          { title: 'Blokit', value: 'blokatut', sortable: true },
+        ],
+        goalieHeaders: [
+          { title: 'Maalivahti', value: 'player', width: '20%', sortable: false },
+          { title: 'Torjunta', value: 'torjunta', width: '20%', sortable: true },
+          { title: 'Maali', value: 'maali', width: '20%', sortable: true },
+          { title: 'Laukauksia yht', value: 'totalShots', width: '20%', sortable: true },
+          { title: 'Torjunta%', value: 'torjuntaprosentti', width: '20%', sortable: true },
+        ],
+        no_results_text: "Ei valittua ottelua"
       };
     },
     computed: {
       uniquePlayers() {
-        const players = this.events.map(event => event.player.name);
+        const players = this.events.map(event => event.playerName);
         return Array.from(new Set(players));
       },
       totalStats() {
@@ -133,22 +156,22 @@
     },
       filteredEvents() {
         if (this.selectedPlayer) {
-          return this.events.filter(event => event.player.name === this.selectedPlayer);
+          return this.events.filter(event => event.playerName === this.selectedPlayer);
         }
         return this.events;
       },
       playerStats() {
         const stats = {};
         this.events.forEach(event => {
-          const playerName = event.player.name;
+          const playerName = event.playerName;
           if (!stats[playerName] && playerName !== 'Vastustaja') {
               stats[playerName] = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, blokatut: 0 };
           }
-          if (event.blocker && event.action === 'blokki') {
-            if (!stats[event.blocker.name]) {
-              stats[event.blocker.name] = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, blokatut: 0 };
+          if (event.blockerId && event.action === 'blokki') {
+            if (!stats[event.blockerName]) {
+              stats[event.blockerName] = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, blokatut: 0 };
             }
-            stats[event.blocker.name]['blokatut']++;
+            stats[event.blockerName]['blokatut']++;
           }
 
           if (playerName !== 'Vastustaja')
@@ -214,8 +237,8 @@
     goalieStats() {
       const stats = {};
       this.events.forEach(event => {
-        if (event.goalie) {
-          const goalieName = event.goalie.name;
+        if (event.goalieId) {
+          const goalieName = event.goalieName;
           if (!stats[goalieName]) {
             stats[goalieName] = { player: goalieName, maali: 0, torjunta: 0, torjuntaprosentti: 0 };
           }
@@ -235,6 +258,52 @@
     },
     },
     methods: {
+      loadGames(seasonId) {
+        console.log('Loading games...' + seasonId);
+        fetch(`${config.apiUrl}/games/season/${seasonId}`)
+          .then(response => response.json())
+          .then(data => {
+            this.games = data || [];
+            // Lisää "Kaikki ottelut" -vaihtoehto
+            this.games.push({ gameId: 0, shortname: 'Kaikki ottelut' });
+            console.log('Games loaded: ' + this.games);
+          })
+          .catch(error => {
+            console.error('Error loading games:', error);
+            alert('Virhe ladattaessa otteluita.');
+          });
+      },
+      loadEvents(gameId) {
+        this.selectedGameId = gameId;
+        console.log('Loading events...' + gameId);
+        if (gameId === 0) {
+            const teamStore = useTeamStore();
+            const seasonId = teamStore.selectedTeamSeason.seasonId;
+
+            fetch(`${config.apiUrl}/season/${seasonId}/gameevents/`)
+              .then(response => response.json())
+              .then(data => {
+                this.events = data || [];
+            })
+            .catch(error => {
+              console.error('Error loading events:', error);
+              alert('Virhe ladattaessa tapahtumia.');
+          });
+        } 
+        else {
+            fetch(`${config.apiUrl}/gameevents/${gameId}`)
+              .then(response => response.json())
+              .then(data => {
+                this.events = data || [];
+              })
+              .catch(error => {
+                console.error('Error loading events:', error);
+                alert('Virhe ladattaessa tapahtumia.');
+              });
+          }
+          this.teamNames = this.games.find(game => game.gameId === gameId).name;
+      },
+      /*
         loadGames() {
             console.log('Loading games... beissi: '|| import.meta.env.VITE_BASE_URL);            
             fetch('/Laukaisukartta/team/games/index.json')
@@ -261,7 +330,7 @@
           console.error('Error loading events:', error);
           alert('Virhe ladattaessa tiedostoa. Varmista, että tiedosto on oikeassa muodossa.');
         });
-    },
+    },*/
     countEvents(action) {
       const count = this.filteredEvents.filter(event => event.action === action).length;
       console.log(`Count for action "${action}": ${count}`);
@@ -299,19 +368,48 @@
     },
 },
     created() {
-        console.log('Component created, loading games...');
-        this.loadGames();
+      const teamStore = useTeamStore();
+      if (teamStore.selectedTeamSeason) {
+        console.log('Opening page statsview...' + teamStore.selectedTeamSeason.seasonId);
+        this.loadGames(teamStore.selectedTeamSeason.seasonId);
+      }
   },
 };
 </script>
 
 <style scoped>
+
+.v-table td {
+    min-width: 20px;
+    width: 200px;
+  }
+
+  .v-data-table header {
+    min-width: 20px;
+    width: 200px;
+  }
+
+.v-slide-group__next, .v-slide-group__prev {
+    display: flex;
+}
+
+.v-slide-group__content {
+  justify-content: center;
+}
+
+.selected-btn {
+    background-color: #1976d2;
+    color: white;
+    margin-top: 9px;
+  }
+
 .container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   padding: 5px;
 }
+
 
 h1 {
   margin: 0px 0; /* Vähennä marginaalia otsikon ympärillä */
@@ -402,7 +500,7 @@ h1 {
 }
 
 .legend .torjunta {
-  background-color: blue;
+  background-color: cyan;
 }
 
 .legend .blokki {
@@ -419,31 +517,7 @@ h1 {
   color: black; /* Beige tausta, joten musta teksti */
 }
 
-.stats-table {
-  margin-top: 10px; /* Vähennä marginaalia yläpuolella */
-  width: 100%;
-  overflow-x: auto;
-}
 
-.stats-table table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.stats-table th, .stats-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-}
-
-.stats-table th {
-  /*background-color: #f2f2f2;*/
-  font-weight: bold;
-}
-
-.summary-row td {
-  font-weight: bold;
-}
 
 /* Media Queries for Responsiveness */
 @media (max-width: 768px) {
@@ -460,10 +534,6 @@ h1 {
     font-size: 1.2em;
   }
 
-  .stats-table th, .stats-table td {
-    padding: 6px;
-    font-size: 0.8em;
-  }
 }
 
 @media (max-width: 480px) {
@@ -489,12 +559,8 @@ h1 {
     margin-bottom: 10px;
   }
 
-  .stats-table th, .stats-table td {
-    padding: 4px;
-    font-size: 0.7em;
-  }
-
 }
+
 @media (prefers-color-scheme: dark) {
     .scroll-button {
         background-color: transparent;
@@ -509,5 +575,6 @@ h1 {
         z-index: 1;
     }
    }
+ 
 
 </style>
