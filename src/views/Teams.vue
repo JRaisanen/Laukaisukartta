@@ -34,6 +34,14 @@
                 variant="flat"
                 :disabled="!authStore.isAuthenticated" 
               ></v-btn>
+              <v-btn
+                color="error"
+                text="Poista joukkue"
+                variant="flat"
+                class="ml-2"
+                :disabled="!authStore.isAuthenticated || !teamStore.selectedTeam"
+                @click="deleteTeam"
+              ></v-btn>            
             </template>
 
             <v-card>
@@ -105,6 +113,14 @@
               variant="flat"
               :disabled="!authStore.isAuthenticated"
             ></v-btn>
+            <v-btn
+              color="error"
+              text="Poista kausi"
+              variant="flat"
+              class="ml-2"
+              :disabled="!authStore.isAuthenticated || !teamStore.selectedTeamSeason"
+              @click="deleteSeason"
+            ></v-btn>            
           </template>
 
           <v-card>
@@ -342,9 +358,14 @@
       const fetchTeamSeasons = async (teamId) => {
         await teamStore.fetchTeamSeasons(teamId);
         console.log('Valittu joukkue nyt:', teamId);
+        // Hae pelaajat valitulle joukkueelle ja kaudelle (voi olla tyhjä)
+        if (teamStore.selectedTeam && teamStore.selectedTeamSeason) {
+          await fetchPlayers(teamStore.selectedTeam.teamId, teamStore.selectedTeamSeason.seasonId);
+        }
+
         //console.log('Pelaajat:', teamStore.players);
         //console.log('Maalivahdit:', teamStore.goalies);
-        };
+      };
 
       const saveTeam = async () => {
         if (valid.value) {
@@ -352,6 +373,12 @@
           teamdialog.value = false;
           newTeam.value.name = '';
           newTeam.value.weburl = '';
+          // Hae uuden joukkueen kaudet (yleensä yksi uusi kausi luodaan samalla)
+          await teamStore.fetchTeamSeasons(teamStore.selectedTeam.teamId);
+          // Hae pelaajat valitulle joukkueelle ja kaudelle (voi olla tyhjä)
+          if (teamStore.selectedTeam && teamStore.selectedTeamSeason) {
+            await fetchPlayers(teamStore.selectedTeam.teamId, teamStore.selectedTeamSeason.seasonId);
+          }
         }
       };
 
@@ -365,6 +392,38 @@
           teamseasondialog.value = false;
           newTeamSeason.value.name = '';
           newTeamSeason.value.weburl = '';
+          // Hae päivitetyt kaudet
+          await teamStore.fetchTeamSeasons(teamStore.selectedTeam.teamId);
+          // Hae pelaajat valitulle joukkueelle ja uudelle kaudelle (voi olla tyhjä)
+          if (teamStore.selectedTeam && teamStore.selectedTeamSeason) {
+            await fetchPlayers(teamStore.selectedTeam.teamId, teamStore.selectedTeamSeason.seasonId);
+          }
+        }
+      };
+
+      const deleteSeason = async () => {
+        if (!teamStore.selectedTeamSeason) return;
+        if (!confirm('Haluatko varmasti poistaa valitun kauden?')) return;
+        try {
+          await teamStore.deleteTeamSeason(teamStore.selectedTeamSeason.seasonId);
+
+          alert('Kausi poistettu!');
+        } catch (e) {
+          alert('Kauden poisto epäonnistui.');
+          console.error(e);
+        }
+      };
+
+      const deleteTeam = async () => {
+        if (!teamStore.selectedTeam) return;
+        if (!confirm('Haluatko varmasti poistaa valitun joukkueen?')) return;
+        try {
+          await teamStore.deleteTeam(teamStore.selectedTeam.teamId);
+
+          alert('Joukkue poistettu!');
+        } catch (e) {
+          alert('Joukkueen poisto epäonnistui.');
+          console.error(e);
         }
       };
 
@@ -460,7 +519,9 @@
         newPlayer,
         newGoalie,
         saveTeam,
+        deleteTeam,
         saveTeamSeason,
+        deleteSeason,
         savePlayer,
         saveGoalie,
         editPlayer,

@@ -1,15 +1,14 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
-import MainView from '../views/MainView.vue'
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import GameView from '../views/GameView.vue'
 import StatsView from '../views/StatsView.vue'
 import Kliikki from '../views/Kliikki.vue'
-import Settings from '../views/Settings.vue';
 import Teams from '../views/Teams.vue';
-import Players from '../views/Players.vue';
 import Login from '../views/Login.vue';
+import GamesView from '../views/GamesView.vue';
 import { useTeamStore } from '../stores/teamStore'
 
 const router = createRouter({ history: createWebHashHistory('/Laukaisukartta/'),
+//const router = createRouter({ history: createWebHistory('/Laukaisukartta/'),
       routes: [
         {
           path: '/',
@@ -40,6 +39,11 @@ const router = createRouter({ history: createWebHashHistory('/Laukaisukartta/'),
           name: 'Teams', 
           component: Teams
         },
+        {
+          path: '/gamesview',
+          name: 'GamesView',
+          component: GamesView
+        },
       ],
   }
 ) 
@@ -48,7 +52,7 @@ router.beforeEach((to, from, next) => {
   const teamStore = useTeamStore()
   const savedTeamId = localStorage.getItem('selectedTeamId')
   const savedSeasonId = localStorage.getItem('selectedSeasonId')
-  console.log('Ladataan joukkueet ja kaudet' + savedTeamId + ' ' + savedSeasonId);
+  
   teamStore.fetchTeams();
   if (savedTeamId){
     teamStore.fetchTeamSeasons(parseInt(savedTeamId)); 

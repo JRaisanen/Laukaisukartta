@@ -66,7 +66,7 @@
         <v-tabs-window v-model="tab">
           <v-tabs-window-item value="one">
             <div v-if="filteredEvents.length > 0" class="image-containeri">
-              <img src="/kuva.png" alt="Field" />
+              <img src="/kenttasektoreilla.png" alt="Field" />
               <div
                 v-for="event in filteredEvents"
                 :key="event.eventId"
@@ -88,8 +88,8 @@
           </v-tabs-window-item>
 
           <v-tabs-window-item value="two">
-            <div class="centered-text">Laukauksia</div>
-            <div class="centered-text">Osuus kaikista</div>
+            <div class="centered-text">Laukauksia sektorista</div>
+            <div class="centered-text">Osuus kaikista laukauksista</div>
             <div v-if="filteredEvents.length > 0" class="image-containeri">
               <img src="/kuva_pohja.png" alt="Field" />
                 <svg class="overlay" viewBox="0 0 342 574">
@@ -105,7 +105,7 @@
                     :x="getAreaCenter(area.points).x"
                     :y="getAreaCenter(area.points).y < 287 ? getAreaCenter(area.points).y - 10 : getAreaCenter(area.points).y + 0"
                     fill="black"
-                    font-size="10"
+                    font-size="11"
                     text-anchor="middle"
                     alignment-baseline="middle"
                   >
@@ -123,7 +123,7 @@
                     :x="getAreaCenter(area.points).x"
                     :y="getAreaCenter(area.points).y < 287 ? getAreaCenter(area.points).y : getAreaCenter(area.points).y + 10"
                     fill="black"
-                    font-size="9"
+                    font-size="10"
                     text-anchor="middle"
                     alignment-baseline="middle"
                   >
@@ -135,8 +135,8 @@
           </v-tabs-window-item>
 
           <v-tabs-window-item value="three">
-            <div class="centered-text">Laukaisuprosentti</div>
-            <div class="centered-text">Osuus maaleista</div>
+            <div class="centered-text">Laukaisuprosentti sektorista</div>
+            <div class="centered-text">Osuus tehdyistä maaleista (kpl)</div>
 
             <div v-if="filteredEvents.length > 0" class="image-containeri">
               <img src="/kuva_pohja.png" alt="Field" />
@@ -153,7 +153,7 @@
                   :x="getAreaCenter(area.points).x"
                   :y="getAreaCenter(area.points).y < 287 ? getAreaCenter(area.points).y - 10 : getAreaCenter(area.points).y + 0"
                   fill="black"
-                  font-size="10"
+                  font-size="11"
                   text-anchor="middle"
                   alignment-baseline="middle"
                 >
@@ -171,11 +171,11 @@
                   :x="getAreaCenter(area.points).x"
                   :y="getAreaCenter(area.points).y < 287 ? getAreaCenter(area.points).y : getAreaCenter(area.points).y + 10"
                   fill="black"
-                  font-size="9"
+                  font-size="10"
                   text-anchor="middle"
                   alignment-baseline="middle"
                 >
-                {{ getPercentageOfGoals(area) }}
+                {{ getPercentageOfGoals(area) }} ({{ getGoalCount(area) }})
                 </text>
               </svg>              
             </div>
@@ -255,8 +255,17 @@ export default {
   },
   computed: {
     uniquePlayers() {
+      /*
       const players = this.events.filter(event => event.playerId !== 100).map(event => event.playerName);
       return Array.from(new Set(players));
+      */
+      const players = this.events.filter(event => event.playerId !== 100).map(event => ({ name: event.playerName, number: event.playerNumber }));
+
+      // Poista duplikaatit pelaajan nimen perusteella
+      const uniquePlayers = Array.from(new Map(players.map(player => [player.name, player])).values());
+
+      // Järjestä pelaajat numeron mukaan
+      return uniquePlayers.sort((a, b) => a.number - b.number).map(player => player.name);
     },
     allPlayers() {
       const plyers = [ 'Kaikki pelaajat' , ...this.uniquePlayers];
@@ -330,6 +339,9 @@ export default {
     showOpponentTeam() {
       this.filteredEvents;
     },
+    selectedPlayer() {
+      this.calculateAreaEvents();
+    }
   },
   methods: {
     loadGames(seasonId) {
@@ -404,7 +416,7 @@ export default {
       },
       async loadAreas() {
         try {
-          const response = await axios.get('/alueet.json');
+          const response = await axios.get('/Laukaisukartta/alueet2.json');
           const areas = response.data.alueet || [];
           this.areas = areas.map(area => {
             const points = this.calculatePoints(area.d);
@@ -484,7 +496,7 @@ export default {
             }
           };
         }
-        for (const event of this.events) {
+        for (const event of this.filteredEvents) {
           const x = (event.xCoordinate / 100) * 342;
           const y = (event.yCoordinate / 100) * 574;
           const areaId = this.findAreaContainingPoint(x, y);
@@ -503,6 +515,43 @@ export default {
             return area.id;
           }
         }
+        console.log('Area not found for point:', x, y);
+
+        for (const area of this.areas) {
+          if (this.isPointInPath(x+0.2, y-0.2, area.points)) {
+            return area.id;
+          }
+        }
+        console.log('Attempt1: Area not found for point:', x+0.2, y-0.2);
+
+        for (const area of this.areas) {
+          if (this.isPointInPath(x+0.2, y-0.2, area.points)) {
+            return area.id;
+          }
+        }
+        console.log('Attempt2: Area not found for point:', x+0.2, y-0.2);
+
+        for (const area of this.areas) {
+          if (this.isPointInPath(x+0.5, y-0.5, area.points)) {
+            return area.id;
+          }
+        }
+        console.log('Attempt3: Area not found for point:', x+0.5, y-0.5);
+
+        for (const area of this.areas) {
+          if (this.isPointInPath(x+2, y-2, area.points)) {
+            return area.id;
+          }
+        }
+        console.log('Attempt4: Area not found for point:', x+2, y-2);
+
+        for (const area of this.areas) {
+          if (this.isPointInPath(x-2, y+2, area.points)) {
+            return area.id;
+          }
+        }
+        console.log('Failed and final: Area not found for point:', x-2, y+2);
+
         return null;
       },
       getAreaCenter(points) {
@@ -524,38 +573,72 @@ export default {
           return '0';
         }
         const centerY = this.getAreaCenter(area.points).y;
+
+        if (this.selectedPlayer && this.selectedPlayer !== 'Kaikki pelaajat') {
+          return this.areaEvents[area.id].home.yhteensä;
+        }
+
         return centerY < 287 ? this.areaEvents[area.id].home.yhteensä : this.areaEvents[area.id].away.yhteensä;
       },
       getEventPercentage(area) {
         if (!this.areaEvents[area.id]) {
-          return '0 %';
+          return '0.0 %';
         }
+        if (this.selectedPlayer && this.selectedPlayer !== 'Kaikki pelaajat') {
+          return ((this.areaEvents[area.id].home.yhteensä / this.allEvents()) * 100).toFixed(1) + ' %';
+        }
+
         const centerY = this.getAreaCenter(area.points).y;
-        return centerY < 287 ? ((this.areaEvents[area.id].home.yhteensä / this.homeTeamStats.total) * 100).toFixed(2) + ' %' : ((this.areaEvents[area.id].away.yhteensä / this.opponentTeamStats.total) * 100).toFixed(2) + ' %';
+        return centerY < 287 ? ((this.areaEvents[area.id].home.yhteensä / this.homeTeamStats.total) * 100).toFixed(1) + ' %' : ((this.areaEvents[area.id].away.yhteensä / this.opponentTeamStats.total) * 100).toFixed(1) + ' %';
       },
       getShootingPercentage(area) {
         if (!this.areaEvents[area.id]) {
-          return '0 %';
+          return '0.0 %';
         }
         const centerY = this.getAreaCenter(area.points).y;
         if (centerY < 287) {
           if (this.areaEvents[area.id].home.maali === 0) {
-            return '0.00 %';
+            return '0.0 %';
           }          
         }
         else {
           if (this.areaEvents[area.id].away.maali === 0) {
-            return '0.00 %';
+            return '0.0 %';
           }
         }
-        return centerY < 287 ? ((this.areaEvents[area.id].home.maali / this.areaEvents[area.id].home.yhteensä) * 100).toFixed(2) + ' %' : ((this.areaEvents[area.id].away.maali / this.areaEvents[area.id].away.yhteensä) * 100).toFixed(2) + ' %';
+
+        if (this.selectedPlayer && this.selectedPlayer !== 'Kaikki pelaajat') {
+          return ((this.areaEvents[area.id].home.maali / this.areaEvents[area.id].home.yhteensä) * 100).toFixed(1) + ' %';
+        }
+
+        return centerY < 287 ? ((this.areaEvents[area.id].home.maali / this.areaEvents[area.id].home.yhteensä) * 100).toFixed(1) + ' %' : ((this.areaEvents[area.id].away.maali / this.areaEvents[area.id].away.yhteensä) * 100).toFixed(1) + ' %';
       },
       getPercentageOfGoals(area) {
         if (!this.areaEvents[area.id]) {
-          return '0 %';
+          return '0.0 %';
+        }
+
+        if (this.selectedPlayer && this.selectedPlayer !== 'Kaikki pelaajat') {
+          if (this.filteredEvents.filter(event => event.action === 'maali').length == 0) {
+            return '0.0 %';
+          }
+          return ((this.areaEvents[area.id].home.maali / this.filteredEvents.filter(event => event.action === 'maali').length) * 100).toFixed(1) + ' %';
+        }
+
+        const centerY = this.getAreaCenter(area.points).y;
+        return centerY < 287 ? ((this.areaEvents[area.id].home.maali / this.homeTeamStats.maali) * 100).toFixed(1) + ' %' : ((this.areaEvents[area.id].away.maali / this.opponentTeamStats.maali) * 100).toFixed(1) + ' %';
+      },
+      getGoalCount(area) {
+        if (!this.areaEvents[area.id]) {
+          return '0';
         }
         const centerY = this.getAreaCenter(area.points).y;
-        return centerY < 287 ? ((this.areaEvents[area.id].home.maali / this.homeTeamStats.maali) * 100).toFixed(2) + ' %' : ((this.areaEvents[area.id].away.maali / this.opponentTeamStats.maali) * 100).toFixed(2) + ' %';
+
+        if (this.selectedPlayer && this.selectedPlayer !== 'Kaikki pelaajat') {
+          return this.areaEvents[area.id].home.maali;
+        }
+
+        return centerY < 287 ? this.areaEvents[area.id].home.maali : this.areaEvents[area.id].away.maali;
       }
     },
     created() {

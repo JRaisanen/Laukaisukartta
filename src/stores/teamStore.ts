@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import config from '../../config.js'; // Tuo konfiguraatiotiedosto
+import config from '../../config'; // Tuo konfiguraatiotiedosto
 import { useAuthStore } from './authStore'; // Tuo authStore
 
 const API_KEY = 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8'; // Korvaa tämä omalla API-avaimellasi
@@ -17,9 +17,10 @@ export const useTeamStore = defineStore('team', {
   actions: {
     async fetchTeams() {
       try {
+        console.log(config.apiUrl);
         const response = await fetch(`${config.apiUrl}/teams`, {
           headers: {
-            'x-api-key': API_KEY
+            'x-api-key': config.apiKey
           }
         });
         if (!response.ok) {
@@ -55,7 +56,7 @@ export const useTeamStore = defineStore('team', {
       try {
         const response = await fetch(`${config.apiUrl}/teamseasons/${teamId}`, {
           headers: {
-            'x-api-key': API_KEY
+            'x-api-key': config.apiKey
           }
         });
         if (!response.ok) {
@@ -83,7 +84,7 @@ export const useTeamStore = defineStore('team', {
                     await this.fetchPlayers(teamId, this.selectedTeamSeason.seasonId);
                 }
             }
-            console.log('Fetched teams seasons:', this.selectedTeamSeason.name); // Lisätty selkeämpi loggaus
+            //console.log('Fetched teams seasons:', this.selectedTeamSeason.name); // Lisätty selkeämpi loggaus
         }
 
       } catch (error) {
@@ -97,7 +98,7 @@ export const useTeamStore = defineStore('team', {
 
           const response = await fetch(`${config.apiUrl}/players/${seasonId}`, {
             headers: {
-              'x-api-key': API_KEY
+              'x-api-key': config.apiKey
             }
           });
           if (!response.ok) {
@@ -109,7 +110,7 @@ export const useTeamStore = defineStore('team', {
           
           const responseG = await fetch(`${config.apiUrl}/goalies/${seasonId}`, {
             headers: {
-              'x-api-key': API_KEY
+              'x-api-key': config.apiKey
             }
           });
           if (!responseG.ok) {
@@ -195,7 +196,7 @@ export const useTeamStore = defineStore('team', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': API_KEY,
+            'x-api-key': config.apiKey,
             'Authorization': `Bearer ${authStore.token}` // Lisää token otsikoihin
           },
           body: JSON.stringify(newPlayer)
@@ -305,9 +306,68 @@ export const useTeamStore = defineStore('team', {
         console.error('Error updating player:', error);
       }
     },
-    selectTeam(team: { id: string }) {
+    async deleteTeamSeason(seasonId: number) {
+      const authStore = useAuthStore();
+      if (authStore.isTokenExpired()) {
+        console.error('Token has expired');
+        return;
+      }
+      try {
+        // 1. Poista kausi
+        const seasonRes = await fetch(`${config.apiUrl}/teamseasons/${seasonId}`, {
+          method: 'DELETE',
+          headers: {
+            'x-api-key': config.apiKey,
+            'Authorization': `Bearer ${authStore.token}`
+          }
+        });
+        if (!seasonRes.ok) throw new Error('Kauden poisto epäonnistui');
+
+        // Päivitä tilat
+        this.teamSeasons = this.teamSeasons.filter(season => season.seasonId !== seasonId);
+        if (this.selectedTeamSeason?.seasonId === seasonId) {
+          this.selectedTeamSeason = null;
+          this.players = [];
+          this.goalies = [];
+        }
+        console.log('Kausi ja siihen liittyvät ottelut sekä tapahtumat poistettu.');
+      } catch (error) {
+        console.error('Error deleting team season:', error);
+      }
+    },
+    async deleteTeam(teamId: number) {
+      const authStore = useAuthStore();
+      if (authStore.isTokenExpired()) {
+        console.error('Token has expired');
+        return;
+      }
+      try {
+        const response = await fetch(`${config.apiUrl}/teams/${teamId}`, {
+          method: 'DELETE',
+          headers: {
+            'x-api-key': config.apiKey,
+            'Authorization': `Bearer ${authStore.token}`
+          }
+        });
+        if (!response.ok) throw new Error('Joukkueen poisto epäonnistui');
+
+        // Päivitä tilat
+        this.teams = this.teams.filter(team => team.teamId !== teamId);
+        if (this.selectedTeam?.teamId === teamId) {
+          this.selectedTeam = null;
+          this.selectedTeamSeason = null;
+          this.teamSeasons = [];
+          this.players = [];
+          this.goalies = [];
+        }
+        console.log('Joukkue ja kaikki siihen liittyvät tiedot poistettu.');
+      } catch (error) {
+        console.error('Error deleting team:', error);
+      }
+    },
+    selectTeam(team: { teamId: number; name: string }) {
       this.selectedTeam = team;
-      localStorage.setItem('selectedTeamId', team.id); // Tallenna valittu joukkue
-    }
+      localStorage.setItem('selectedTeamId', team.teamId.toString()); // Tallenna valittu joukkue
+    },
   }
 });

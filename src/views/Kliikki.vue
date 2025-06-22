@@ -4,19 +4,65 @@
     <div class="app">
       <h2>Laukaisukartan syöttäminen</h2>
       <div class="team-names">
-      <h3>Joukkueet</h3>
-      <input type="text" v-model="teamNames" placeholder="Esim. SaiPa - EräViikingit" />
-      <input type="text" v-model="shortteamNames" placeholder="Esim. SaSu-ErVi" />
-    </div>
+        <h3>{{ teamNames }}</h3>
+      </div>  
+
+      <div>
+          <v-dialog v-model="gamedialog" max-width="500">
+            <template v-slot:activator="{ props: activatorProps }">
+              <v-btn
+                v-bind="activatorProps"
+                v-on="on"
+                color="surface-variant"
+                text="Uusi ottelu"
+                variant="flat"
+                :disabled="gameId" 
+              ></v-btn>
+            </template>
+
+            <v-card>
+              <v-card-title>
+                <span class="headline">Uusi ottelu</span>
+              </v-card-title>
+              <v-card-text>
+                <v-form ref="form" v-model="valid">
+                  <v-text-field
+                    v-model="newGame.teamNames"
+                    label="Ottelun pitkä nimi"
+                    :rules="[v => !!v || 'Nimi on pakollinen']"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="newGame.shortteamNames"
+                    label="Ottelun lyhyt nimi"
+                  ></v-text-field>
+                </v-form>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text="Tallenna"
+                  @click="saveGame"
+                ></v-btn>
+                <v-spacer></v-spacer>
+                <v-btn
+                  text="Peruuta"
+                  @click="gamedialog = false"
+                ></v-btn>
+              </v-card-actions>
+            </v-card>
+        </v-dialog>
+      </div>
+
       <div @click="handleClick" class="image-container">
         <img src="/kuva.png" alt="Field" />
         <div
-        v-for="event in events"
-        :key="event.id"
-        :class="['marker', event.action, event.player.playerId < 100 ? 'circle' : 'square']"
-        :style="{ top: event.y + '%', left: event.x + '%' }"
-        :title="event.player.number + ' ' + event.player.name + ' ' + event.action"
-      ></div>
+          v-for="event in events"
+          :key="event.id"
+          :class="['marker', event.action, event.player.playerId < 100 ? 'circle' : 'square']"
+          :style="{ top: event.y + '%', left: event.x + '%' }"
+          :title="event.player.number + ' ' + event.player.name + ' ' + event.action"
+        >
+      </div>
       <h3>Valitse maalivahti</h3>
       <v-list lines="one" class="player-list">
             <v-list-item 
@@ -35,7 +81,7 @@
     </div>
 
     <div>
-      <h2>Valitse pelaaja ja toimenpide</h2>
+      <h2>Valitse pelaaja ja tapahtuma</h2>
       <div class="selection-container">
         <v-list lines="one" class="player-list">
             <v-list-item 
@@ -86,6 +132,15 @@
     </div>
 </div>
     <h2>Tapahtumat</h2>
+    <v-btn
+        color="surface-variant"
+        @click="saveEvents"
+        text="Tallenna tapahtumat"
+        variant="flat"
+        class="mt-1"
+        :disabled="events.length === 0">        
+      </v-btn>
+
       <ul>
         <li v-for="event in reversedEvents" :key="event.eventId">
           {{ event.player.name }} - {{ event.action }} @ ({{ event.x.toFixed(2) }}%, {{ event.y.toFixed(2) }}%)
@@ -94,36 +149,91 @@
           <button @click="deleteEvent(event.eventId)">X</button>
         </li>
       </ul>
-      <button @click="downloadEvents">Lataa tapahtumat</button>
   </div>
 
   </template>
   
   <script>
+  import { ref } from 'vue';
   import { useTeamStore } from '../stores/teamStore';
   import { useAuthStore } from '../stores/authStore';
-
+  import config from '../../config'; // Tuo konfiguraatiotiedosto
+  
   export default {
     data() {
       const teamStore = useTeamStore();
-      
+      const authStore = useAuthStore();
+      const newGame = ref({ teamNames: '', shortteamNames: '', weburl: '', teamId: null, seasonId: null });
+      const gamedialog = ref(false);
+
+      this.checkToken();
+      //let gameId;
       teamStore.fetchTeams();
       console.log('Kliikki - Joukkueet:', teamStore.teams);
       console.log('Kliikki - Kaudet:', teamStore.teamSeasons);
       console.log('Kliikki - Kausi' + teamStore.selectedTeamSeason);
       //console.log('Kliikki - Joukkue' + teamId);
   
+      const saveGame = async () => {
+        try {
+          console.log('Tallennetaan uusi ottelu:', newGame.value);
+          //const authStore = useAuthStore();
+          const uusiGame = {
+            name: newGame.value.teamNames,
+            shortname: newGame.value.shortteamNames,
+            weburl: '',
+            teamId: this.teamStore.selectedTeam.teamId,
+            seasonId: this.teamStore.selectedTeamSeason.seasonId
+          };
+
+          console.log('Tallennetaan uusi ottelu:', uusiGame);
+          const response = await fetch(`${config.apiUrl}/games`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8',
+              'Authorization': `Bearer ${authStore.token}`,
+            },
+            body: JSON.stringify(uusiGame),
+          });
+          if (!response.ok) {
+            throw new Error('Ottelun luominen epäonnistui');
+          }
+          const data = await response.json();
+          this.gameId = data.gameId;
+
+          console.log('Luotu ottelu:', data);
+
+          gamedialog.value = false;
+          // Päivitä ottelun tiedot käyttöliittymässä
+          this.teamNames = data.name;
+          this.shortteamNames = data.shortname;
+          this.teamStore.selectedTeam.teamId = data.teamId;
+          this.teamStore.selectedTeamSeason.seasonId = data.seasonId;
+          newGame.value.teamNames = '';
+          newGame.value.shortteamNames = '';
+        } catch (error) {
+          console.error('Virhe ottelun luomisessa:', error);
+        }      
+      };
+
       return {
-      teamStore,
-      actions: ['maali', 'torjunta', 'blokki', 'ohi'],
-      events: [],
-      selectedPoint: null,
-      selectedPlayer: null,
-      selectedAction: null,
-      selectedBlocker: null,
-      selectedGoalie: null,
-      teamNames: '',
-      shortteamNames: '',
+        teamStore,
+        authStore,
+        newGame,
+        gamedialog,
+        saveGame,
+        actions: ['maali', 'torjunta', 'blokki', 'ohi'],
+        events: [],
+        gameId: null,
+        selectedPoint: null,
+        selectedPlayer: null,
+        selectedAction: null,
+        selectedBlocker: null,
+        selectedGoalie: null,
+        teamNames: '',
+        shortteamNames: '',
+        isGameModalOpen: false, // Modaalin tila
       };
     },
 
@@ -134,7 +244,6 @@
       localPlayers() {
         const teamStore = useTeamStore();
         const players = teamStore.players;
-        console.log('Pelaajasdfsdfs dfsdf sdf sdft:', players);
         players.push({ playerId: 100, name: 'Vastustaja', number: 100 });
         return players.filter(player => player.active === 1 || player.playerId === 100);
       },
@@ -145,23 +254,26 @@
       localGoalies() {
         const teamStore = useTeamStore();
         const goalies = teamStore.goalies;
-        console.log('Mokkesdfsdfs dfsdf sdf sdft:', goalies);
         goalies.push({ playerId: 0, name: 'Ei maalivahtia', number: 0 });
         return goalies.filter(goalie => goalie.active === 1 || goalie.playerId === 0);
       },
 
     },
     methods: {
+      openGameModal() {
+        console.log('Avaa pelimodaali');
+        this.isGameModalOpen = true;
+      },
       handleClick(event) {
         const rect = event.target.getBoundingClientRect();
         const x = ((event.clientX - rect.left) / rect.width) * 100;
         const y = ((event.clientY - rect.top) / rect.height) * 100;
         this.selectedPoint = { x, y };
       },
-       selectPlayer(player) {
+      selectPlayer(player) {
        this.selectedPlayer = player;
       },
-        selectAction(action) {
+      selectAction(action) {
           this.selectedAction = action;
           if (this.selectedPlayer.playerId >= 100 && (!this.selectedGoalie || this.selectedAction === 'torjunta' && this.selectedGoalie.playerId === 0))
           {
@@ -172,20 +284,19 @@
           {
             if (this.selectedPlayer.playerId < 100 || this.selectedPlayer.playerId >= 100 && this.selectedAction !== 'blokki')
             {
-              this.saveEvent();
+              this.addEvent();
             }
           }
-        },
-        selectBlocker(player) {
+      },
+      selectBlocker(player) {
           this.selectedBlocker = player;
-          this.saveEvent();
+          this.addEvent();
         },
-        selectGoalie(goalie) {
+      selectGoalie(goalie) {
           console.log(`Valittu veskari: ${goalie.number}`);
           this.selectedGoalie = goalie;
         },
-
-      saveEvent() {
+      addEvent() {
         if (this.selectedPlayer && this.selectedAction && this.selectedPoint) {
           const event = {
           eventId: Date.now(),
@@ -219,39 +330,12 @@
         }
       },
       deleteEvent(eventId) {
-      this.events = this.events.filter(event => event.eventId !== eventId);
+        this.events = this.events.filter(event => event.eventId !== eventId);
       },
-      async downloadEvents() {
+      async saveEvents() {
         // luodaan ensin ottelu
         const authStore = useAuthStore(); // Hae authStore
         const API_KEY = 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8'; // Korvaa tämä omalla API-avaimellasi
-        const newGame = {
-          name: this.teamNames,
-          shortname: this.shortteamNames,
-          teamId: this.teamStore.selectedTeam.teamId,
-          seasonId: this.teamStore.selectedTeamSeason.seasonId
-        };
-        let gameId;
-        console.log('Adding new game:', newGame);
-        try {
-          const response = await fetch('http://localhost:3000/games', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8',
-              'Authorization': `Bearer ${authStore.token}` // Lisää token otsikoihin
-            },
-            body: JSON.stringify(newGame)
-          });
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          const data = await response.json();
-          gameId = data.gameId;
-          console.log('Added new game:', data);
-        } catch (error) {
-          console.error('Error adding game:', error);
-        }
 
         const eventsToSave = this.events.map(event => ({
         eventId: null,
@@ -267,13 +351,13 @@
         goalieId: event.goalie ? event.goalie.playerId : null,
         goalieName: event.goalie ? event.goalie.name : null,
         goalieNumber: event.goalie ? event.goalie.number : null,
-        gameId: gameId
+        gameId: this.gameId
       }));
 
       console.log('Events to be saved:', eventsToSave);
       // Lähetä kaikki eventit backendille
       try {
-          const response = await fetch('http://localhost:3000/gameevent', {
+          const response = await fetch(`${config.apiUrl}/gameevent`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -290,7 +374,7 @@
         } catch (error) {
         console.error('Error saving events to backend:', error);
       }
-      },
+    },
       getActionStyle(action) {
         switch (action) {
           case 'maali':
@@ -304,8 +388,17 @@
           default:
             return {};
         }
-    }
-    
+      },
+      checkToken() {
+        const authStore = useAuthStore();
+
+        if (authStore.isTokenExpired()) {
+          console.log('Token on vanhentunut. Kirjaa käyttäjä ulos.');
+          authStore.logout(); // Kirjaa käyttäjä ulos tai uudista token
+        } else {
+          console.log('Token on voimassa.');
+        }
+      },
     },
   };
   </script>
