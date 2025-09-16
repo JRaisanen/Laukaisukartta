@@ -28,21 +28,23 @@ const logout = () => {
       {{ teamStore.selectedTeamSeason?.name || 'Valitse kausi' }}
     </v-toolbar-title>
       <v-btn :disabled="!teamStore.selectedTeam" @click="$router.push('/gameview')">Laukaisukartta</v-btn>
-      <v-btn :disabled="!teamStore.selectedTeam" @click="$router.push('/statsview')">Tilastot</v-btn>
+      <v-btn :disabled="!teamStore.selectedTeam" @click="$router.push('/statsgameview')">Tilastot</v-btn>
+      <v-btn :disabled="!teamStore.selectedTeam" @click="$router.push('/statsview')">Tilastot (old)</v-btn>
       <!--<v-btn text @click="$router.push('/kliikki')">Uusi ottelu</v-btn>-->
     </v-app-bar>
       <v-navigation-drawer v-model="drawer" app>
       <v-list>
-        <v-list-item to="/teams" title="Joukkueet" prepend-icon="mdi-tools"></v-list-item>
+        <v-list-item to="/teams" title="Joukkueet" prepend-icon="mdi-tools" @click="drawer = false"></v-list-item>
         <v-list-item 
           :disabled="!teamStore.selectedTeam || !authStore.isAuthenticated" 
           to="/gamesview" 
           title="Otteluiden ylläpito" 
-          prepend-icon="mdi-database">
+          prepend-icon="mdi-database"
+          @click="drawer = false">
         </v-list-item>
-        <v-list-item :disabled="!teamStore.selectedTeam || !authStore.isAuthenticated" to="/kliikki" title="Uusi ottelu" prepend-icon="mdi-settings"></v-list-item>
+        <v-list-item :disabled="!teamStore.selectedTeam || !authStore.isAuthenticated" to="/kliikki" title="Uusi ottelu" prepend-icon="mdi-settings" @click="drawer = false"></v-list-item>
         <v-list-item v-if="authStore.isAuthenticated" @click="logout" title="Kirjaudu ulos" prepend-icon="mdi-logout"></v-list-item>
-        <v-list-item v-else to="/login" title="Kirjaudu" prepend-icon="mdi-login"></v-list-item>
+        <v-list-item v-else to="/login" title="Kirjaudu" prepend-icon="mdi-login" @click="drawer = false"></v-list-item>
       </v-list>
     </v-navigation-drawer>
     <v-main class="main-content">

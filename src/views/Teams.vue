@@ -25,7 +25,7 @@
 
         <div>
           <v-dialog v-model="teamdialog" max-width="500">
-            <template v-slot:activator="{ props: activatorProps }">
+            <template v-slot:activator="{ props: activatorProps }" v-if="authStore.isAuthenticated">
               <v-btn
                 v-bind="activatorProps"
                 v-on="on"
@@ -104,7 +104,7 @@
 
       <div>
         <v-dialog v-model="teamseasondialog" max-width="500">
-          <template v-slot:activator="{ props: activatorPropsit }">
+          <template v-slot:activator="{ props: activatorPropsit }" v-if="authStore.isAuthenticated">
             <v-btn
               v-bind="activatorPropsit"
               v-on="on2"
@@ -175,6 +175,9 @@
               </v-btn>            
             </div> 
           </template>
+            <template v-slot:item.active="{ item }">
+              {{ item.active === 1 ? 'Kyllä' : 'Ei' }}
+            </template>
         </v-data-table>
 
         <div>
@@ -256,6 +259,9 @@
               </v-btn>
             </div>
           </template>
+            <template v-slot:item.active="{ item }">
+              {{ item.active === 1 ? 'Kyllä' : 'Ei' }}
+            </template>
         </v-data-table>
 
         <div>
@@ -317,7 +323,22 @@
       </div>
 
       </div>
-
+      <div v-if="authStore.isAuthenticated">
+        <v-btn
+          color="primary"
+          class="mt-4 mb-2"
+          @click="exportGameEvents"
+        >
+          Vie tapahtumat tiedostoon
+        </v-btn>
+        <v-btn
+          color="primary"
+          class="mt-4 mb-2"
+          @click="trainModel"
+        >
+          Kouluta malli
+        </v-btn>
+      </div>
     </div>
   </template>
   
@@ -325,6 +346,7 @@
   import { ref } from 'vue';
   import { useTeamStore } from '../stores/teamStore';
   import { useAuthStore } from '../stores/authStore'; // Tuo authStore
+  import config from '../../config'; // Tuo konfiguraatiotiedosto
 
   export default {
     name: 'Teams',
@@ -500,6 +522,38 @@
         await fetchPlayers(teamStore.selectedTeam.teamId, teamStore.selectedTeamSeason.seasonId);
       };
 
+      const exportGameEvents = async () => {
+        try {
+          const response = await fetch(`${config.apiUrl}/export-gameevents`, {
+            method: 'POST',
+            headers: {
+              'x-api-key': config.apiKey,
+              'Authorization': `Bearer ${authStore.token}`
+            }
+          });
+          if (!response.ok) throw new Error('Vienti epäonnistui');
+        } catch (e) {
+          alert('Vienti epäonnistui.');
+          console.error(e);
+        }
+      };
+
+      const trainModel = async () => {
+        try {
+          const response = await fetch(`${config.apiUrl}/train-model`, {
+            method: 'POST',
+            headers: {
+              'x-api-key': config.apiKey,
+              'Authorization': `Bearer ${authStore.token}`
+            }
+          });
+          if (!response.ok) throw new Error('Koulutus epäonnistui');
+          console.log('Koulutus onnistui');
+        } catch (e) {
+          alert('Koulutus epäonnistui.');
+          console.error(e);
+        }
+      };
 
       return {
         teamStore,
@@ -528,15 +582,19 @@
         editGoalie,
         deletePlayer,
         deleteGoalie,
+        exportGameEvents,
+        trainModel,
         headers: [
           { title: 'Numero', value: 'number', sortable: true},
           { title: 'Pelaaja', value: 'name', sortable: false },
+          { title: 'Aktiivinen', value: 'active', sortable: true },
           //{ title: 'Weburl', value: 'weburl', sortable: true },
           { title: 'Toiminnot', value: 'action', sortable: false }
         ],
         goalieHeaders: [
           { title: 'Numero', value: 'number', sortable: true},
           { title: 'Pelaaja', value: 'name', sortable: false },
+          { title: 'Aktiivinen', value: 'active', sortable: true },
           //{ title: 'Weburl', value: 'weburl', sortable: true },
           { title: 'Toiminnot', value: 'action', sortable: false }
         ],

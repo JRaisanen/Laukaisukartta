@@ -65,7 +65,12 @@
       <v-card-text>
         <v-tabs-window v-model="tab">
           <v-tabs-window-item value="one">
+            <div style="text-align:center; margin-bottom: 4px;">
+              <strong>Oma joukkue xG:</strong> {{ filteredHomeXg.toFixed(2) }}
+            </div>
+
             <div v-if="filteredEvents.length > 0" class="image-containeri">
+
               <img src="/kenttasektoreilla.png" alt="Field" />
               <div
                 v-for="event in filteredEvents"
@@ -84,6 +89,9 @@
               >
                 {{ event.playerId === 100 && event.action === 'blokki' ? event.blockerNumber : event.playerId === 100 ? ' ' : event.playerNumber }}
               </div>
+            </div>
+            <div style="text-align:center; margin-top: 4px;">
+              <strong>Vastustaja xG:</strong> {{ filteredOpponentXg.toFixed(2) }}
             </div>
           </v-tabs-window-item>
 
@@ -200,6 +208,43 @@
       </v-list-item>
     </v-list>
 
+    <span style="margin-right: 10px;">Erä/kenttätilanne (klikkaa valituksi/pois):</span>
+    <div style="margin: 5px 0; display: flex; align-items: center;">
+      <v-list style="display: flex; flex-direction: row; padding: 0;" class="period-list">
+          <v-list-item
+            v-for="period in periodOptions"
+            :key="period.value"
+            :class="{ selected: selectedPeriod === period.value,
+              'not-selected': !selectedPeriod || selectedPeriod !== period.value
+              }"
+            @click="selectedPeriod = (selectedPeriod === period.value ? null : period.value)"
+            style="width: 90px; justify-content: center; cursor: pointer;"
+          >
+            <v-card :color="selectedPeriod === period.value ? 'primary' : ''" class="rounded-card-period" style="text-align: center;">
+              {{ period.title }}
+            </v-card>
+          </v-list-item>
+        </v-list>      
+      </div>
+            <div style="margin: 5px 0; display: flex; align-items: center;">
+      <v-list style="display: flex; flex-direction: row; padding: 0;" class="period-list">
+          <v-list-item
+            v-for="situation in situationOptions"
+            :key="situation.value"
+            :class="{ selected: selectedSituation === situation.value,
+              'not-selected': !selectedSituation || selectedSituation !== situation.value
+              }"
+            @click="selectedSituation = (selectedSituation === situation.value ? null : situation.value)"
+            style="width: 90px; justify-content: center; cursor: pointer;"
+          >
+            <v-card :color="selectedSituation === situation.value ? 'primary' : ''" class="rounded-card-period" style="text-align: center;">
+              {{ situation.title }}
+            </v-card>
+          </v-list-item>
+        </v-list>      
+      </div>
+
+
     <v-divider :thickness="10"></v-divider>
 
     <div class="stats-table">
@@ -220,6 +265,7 @@
 <script>
 import axios from 'axios';
 import { useTeamStore } from '../stores/teamStore';
+import { useAuthStore } from '../stores/authStore';
 import config from '../../config.js'; // Tuo konfiguraatiotiedosto
 import { parseSVG } from 'svg-path-parser';
 import pointInPolygon from 'point-in-polygon';
@@ -249,9 +295,24 @@ export default {
         { title: 'Torjunta', value: 'torjunta', width: '10%' },
         { title: 'Blokki', value: 'blokki', width: '10%' },
         { title: 'Ohi', value: 'ohi', width: '10%' },
+        { title: 'xG', value: 'xg', width: '10%' },
         { title: 'Yhteensä', value: 'total', width: '10%' }
-      ]
-    };
+      ],
+      selectedPeriod: null,
+      selectedSituation: null,
+      periodOptions: [
+        { value: 1, title: 'I' },
+        { value: 2, title: 'II' },
+        { value: 3, title: 'III' },
+        { value: 4, title: 'JA' }
+      ],
+      situationOptions: [
+        { value: 1, title: '5v5' },
+        { value: 2, title: 'Yv' },
+        { value: 3, title: 'Av' },
+        { value: 4, title: 'Tv' },
+      ],
+      };
   },
   computed: {
     uniquePlayers() {
@@ -273,6 +334,7 @@ export default {
       return plyers;
       /*return [{ id: 0, name: 'Kaikki pelaajat' }, ...this.uniquePlayers];*/
     },
+    /*
     filteredEvents() {
       let events = this.events;
       console.log(this.selectedPlayer);
@@ -291,22 +353,51 @@ export default {
 
       return events.filter(event => this.visibleActions.includes(event.action));
     },
+    */
+    filteredEvents() {
+      let events = this.events;
+
+      if (this.selectedPlayer && this.selectedPlayer !== 'Kaikki pelaajat') {
+        events = events.filter(event => event.playerName === this.selectedPlayer);
+      }
+      if (!this.showHomeTeam) {
+        events = events.filter(event => event.playerId >= 100);
+      }
+      if (!this.showOpponentTeam) {
+        events = events.filter(event => event.playerId && event.playerId < 100);
+      }
+      // Suodata erän mukaan
+      if (this.selectedPeriod) {
+        events = events.filter(event => event.period == this.selectedPeriod);
+      }
+      // Suodata kenttätilanteen mukaan
+      if (this.selectedSituation) {
+        events = events.filter(event => event.situation === this.selectedSituation);
+      }
+
+      return events.filter(event => this.visibleActions.includes(event.action));
+    },
     homeTeamStats() {
-      const stats = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, total: 0 };
+      const stats = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, total: 0, xg: 0 };
+      const shotActions = ['maali', 'torjunta', 'blokki', 'ohi'];
       this.events.forEach(event => {
-        if (event.playerId < 100) {
+        if (event.playerId < 100 && shotActions.includes(event.action)) {
           stats[event.action]++;
           stats.total++;
+          stats.xg += event.xg || 0;
+          //console.log('Event:', event, 'Stats:', stats);
         }
       });
       return stats;
     },
     opponentTeamStats() {
-      const stats = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, total: 0 };
+      const stats = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, total: 0, xg: 0 };
+      const shotActions = ['maali', 'torjunta', 'blokki', 'ohi'];
       this.events.forEach(event => {
-        if (event.playerId >= 100) {
+        if (event.playerId >= 100 && shotActions.includes(event.action)) {
           stats[event.action]++;
           stats.total++;
+          stats.xg += event.xg || 0;
         }
       });
       return stats;
@@ -319,7 +410,8 @@ export default {
           torjunta: this.homeTeamStats.torjunta,
           blokki: this.homeTeamStats.blokki,
           ohi: this.homeTeamStats.ohi,
-          total: this.homeTeamStats.total
+          total: this.homeTeamStats.total,
+          xg: this.homeTeamStats.xg.toFixed(2),
         },
         {
           team: 'Vastustaja',
@@ -327,10 +419,21 @@ export default {
           torjunta: this.opponentTeamStats.torjunta,
           blokki: this.opponentTeamStats.blokki,
           ohi: this.opponentTeamStats.ohi,
-          total: this.opponentTeamStats.total
+          total: this.opponentTeamStats.total,
+          xg: this.opponentTeamStats.xg.toFixed(2),
         }
       ];
-    }
+    },
+    filteredHomeXg() {
+      return this.filteredEvents
+        .filter(e => e.playerId < 100)
+        .reduce((sum, e) => sum + (e.xg || 0), 0);
+    },
+    filteredOpponentXg() {
+      return this.filteredEvents
+        .filter(e => e.playerId >= 100)
+        .reduce((sum, e) => sum + (e.xg || 0), 0);
+    },
   },
   watch: {
     showHomeTeam() {
@@ -359,7 +462,7 @@ export default {
           alert('Virhe ladattaessa otteluita.');
         });
     },
-    loadEvents(gameId) {
+    async loadEvents(gameId) {
        this.selectedGameId = gameId;
        console.log('Loading events...' + gameId);
        if (gameId === 0) {
@@ -368,8 +471,10 @@ export default {
 
           fetch(`${config.apiUrl}/season/${seasonId}/gameevents/`)
             .then(response => response.json())
-            .then(data => {
+            .then(async data => {
               this.events = data || [];
+              // Laske xG jokaiselle laukaus-/maalitapahtumalle
+              console.log('Events loaded: ', this.events);
               this.calculateAreaEvents();
           })
           .catch(error => {
@@ -380,7 +485,7 @@ export default {
        else {
           fetch(`${config.apiUrl}/gameevents/${gameId}`)
             .then(response => response.json())
-            .then(data => {
+            .then(async data => {
               this.events = data || [];
               this.calculateAreaEvents();
             })
@@ -391,8 +496,8 @@ export default {
         }
       this.selectedPlayer = 'Kaikki pelaajat';
       this.teamNames = this.games.find(game => game.gameId === gameId).name;
-     },
-     countEvents(action) {
+    },
+    countEvents(action) {
        return this.filteredEvents.filter(event => event.action === action).length;
      },
      allEvents() {
@@ -639,10 +744,60 @@ export default {
         }
 
         return centerY < 287 ? this.areaEvents[area.id].home.maali : this.areaEvents[area.id].away.maali;
-      }
+      },
+      async getPredictedXG(x, y) {
+        const authStore = useAuthStore(); 
+        // Muunna prosentit metreiksi
+        const imgWidthPx = 342;
+        const imgHeightPx = 574;
+        const fieldWidthM = 20;
+        const fieldHeightM = 40;
+        const goalXPercent = 50;
+        const goalYPercent = 10.453;
+
+        const shotXPx = (x / 100) * imgWidthPx;
+        const shotYPx = (y / 100) * imgHeightPx;
+        const goalXPx = (goalXPercent / 100) * imgWidthPx;
+        const goalYPx = (goalYPercent / 100) * imgHeightPx;
+
+        const pxToM_X = fieldWidthM / imgWidthPx;
+        const pxToM_Y = fieldHeightM / imgHeightPx;
+
+        const shotXM = shotXPx * pxToM_X;
+        const shotYM = shotYPx * pxToM_Y;
+        const goalXM = goalXPx * pxToM_X;
+        const goalYM = goalYPx * pxToM_Y;
+
+        const dx = shotXM - goalXM;
+        const dy = shotYM - goalYM;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const angleRad = Math.atan2(dx, dy);
+        const angleDeg = angleRad * (180 / Math.PI);
+
+        try {
+          const response = await fetch(`${config.apiUrl}/predict-goal`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8',
+                'Authorization': `Bearer ${authStore.token}`
+            },
+            body: JSON.stringify({ distance, angle: angleDeg })
+          });
+          if (!response.ok) throw new Error('xG ennusteen haku epäonnistui');
+          
+          const data = await response.json();
+          console.log('xG ennuste:', data);
+          return data.probability ?? 0.05;
+        } catch (e) {
+          console.error('Virhe xG ennusteessa:', e);
+          return 0.05;
+        }
+      },
     },
     created() {
       const teamStore = useTeamStore();
+      const authStore = useAuthStore();
       this.loadAreas();
       console.log('Opening page...' + teamStore.selectedTeamSeason.seasonId);
       this.loadGames(teamStore.selectedTeamSeason.seasonId);
@@ -696,6 +851,23 @@ export default {
     width: 100%;
     margin: 0;
   }
+
+  .period-list {
+    list-style-type: none;
+    padding: 10;
+  }
+
+  .period-list li {
+    cursor: pointer;
+    padding: 5px;
+    border: 1px solid #ccc;
+    margin: 4px 0;
+  }
+  .period-list li.selected {
+    background-color: #007bff;
+    color: white;
+  }
+
 
    .games-list-container {
         display: flex;

@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import GameView from '../views/GameView.vue'
 import StatsView from '../views/StatsView.vue'
+import StatsGameView from '../views/StatsGameView.vue'
 import Kliikki from '../views/Kliikki.vue'
 import Teams from '../views/Teams.vue';
 import Login from '../views/Login.vue';
@@ -33,6 +34,11 @@ const router = createRouter({ history: createWebHashHistory('/Laukaisukartta/'),
           path: '/statsview', 
           name: 'StatsView', 
           component: StatsView, 
+        },
+        { 
+          path: '/statsgameview', 
+          name: 'StatsGameView', 
+          component: StatsGameView, 
         },
         {
           path: '/teams', 
