@@ -42,6 +42,7 @@
         :headers="playerHeaders"
         :sort-by="['goal']"
         :sort-desc="[true]"
+        :items-per-page="-1"
         :hide-default-footer="true"
         density="compact"
         class="responsive-table"

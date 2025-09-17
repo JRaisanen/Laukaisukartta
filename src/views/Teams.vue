@@ -525,13 +525,15 @@
       const exportGameEvents = async () => {
         try {
           const response = await fetch(`${config.apiUrl}/export-gameevents`, {
-            method: 'POST',
-            headers: {
-              'x-api-key': config.apiKey,
-              'Authorization': `Bearer ${authStore.token}`
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8',
+                'Authorization': `Bearer ${authStore.token}`
             }
           });
           if (!response.ok) throw new Error('Vienti epäonnistui');
+          alert('Pelitapahtumat viety!');
         } catch (e) {
           alert('Vienti epäonnistui.');
           console.error(e);
@@ -548,6 +550,7 @@
             }
           });
           if (!response.ok) throw new Error('Koulutus epäonnistui');
+          alert('Malli koulutettu!');
           console.log('Koulutus onnistui');
         } catch (e) {
           alert('Koulutus epäonnistui.');

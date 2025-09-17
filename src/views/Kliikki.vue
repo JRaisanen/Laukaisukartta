@@ -351,6 +351,7 @@
 
     <v-data-table :items="playerGameStats" 
       :headers="playerStatsHeaders"
+      :items-per-page="-1"
       :hide-default-footer="true">
       <template #item.xg="{ item }">
         {{ item.xg.toFixed(2) }}
