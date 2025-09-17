@@ -381,7 +381,7 @@
 
       <ul>
         <li v-for="event in reversedEvents" :key="event.eventId">
-          {{ event.player.name }} - {{ event.action }} @ ({{ event.x.toFixed(2) }}%, {{ event.y.toFixed(2) }}%)
+          {{ event.eventId }} - {{ event.player.name }} - {{ event.action }} @ ({{ event.x.toFixed(2) }}%, {{ event.y.toFixed(2) }}%)
           <span v-if="event.goalie">: {{ event.goalie.name }}</span>
           <span v-if="event.blocker">: {{ event.blocker.name }}</span>
           <button @click="deleteEvent(event.eventId)">X</button>
@@ -1365,14 +1365,14 @@
     },
     async confirmXgDialog() {
       if (this.pendingEvent) {
-        this.pendingEvent.xg = Number(this.xgValue.toFixed(2));
+        this.pendingEvent.xg = Number(this.xgValue.toFixed(3));
         const eventid = await this.saveSingleEvent(this.pendingEvent); // jos haluat tallentaa heti
         //this.saveSingleEvent(this.pendingEvent); // jos haluat tallentaa heti
-        this.pendingEvent.eventid = eventid;
+        this.pendingEvent.eventId = eventid;
         this.events.push(this.pendingEvent);
 
         if (this.pendingGoalEvent) {
-          this.pendingGoalEvent.eventId = this.pendingEvent.eventid;
+          this.pendingGoalEvent.eventId = this.pendingEvent.eventId;
           
           //console.log('Tallennetaan maali tapahtuma xG jälkeen:', this.pendingGoalEvent);
           

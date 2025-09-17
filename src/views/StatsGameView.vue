@@ -2,7 +2,7 @@
   <div class="container">
     <v-divider :thickness="10"></v-divider>
 
-    <v-sheet class="responsive-sheet">
+    <v-sheet class="responsive-sheet" style="text-align: left;">
       <v-slide-group show-arrows>
         <v-slide-group-item 
           v-for="game in games"
@@ -37,31 +37,60 @@
 
     <div v-else class="stats-table">
       <h3>Pelaajatilastot</h3>
+      <div style="overflow-x: auto; width: 75%; text-align: left;">
       <v-data-table
         :items="playerStatsWithSum"
         :headers="playerHeaders"
-        :sort-by="['goal']"
-        :sort-desc="[true]"
+        :hide-default-header="false"
         :items-per-page="-1"
         :hide-default-footer="true"
         density="compact"
         class="responsive-table"
       >
         <template #item.xg="{ item }">
-            {{ (item.xg ?? 0).toFixed(2) }}
+          {{ (item.xg ?? 0).toFixed(2) }}
         </template>
         <template #item.shot_pct="{ item }">
           {{ item.shot_pct ? item.shot_pct.toFixed(2) : '0.00' }}
         </template>
-      </v-data-table>
+        <template #item.efficiency="{ item }">
+          {{ item.efficiency ? item.efficiency.toFixed(2) : '-' }}
+        </template>        
 
+      <template #body.append>
+          <tr>
+            <td>{{ totalStats.playerName }}</td>
+            <td>{{ totalStats.goal }}</td>
+            <td>{{ totalStats.assist }}</td>
+            <td>{{ totalStats.point }}</td>
+            <td>{{ totalStats.shot_goal }}</td>
+            <td>{{ totalStats.shot_saved }}</td>
+            <td>{{ totalStats.shot_blocked }}</td>
+            <td>{{ totalStats.shot_missed }}</td>
+            <td>{{ totalStats.total_shots }}</td>
+            <td>{{ totalStats.shot_pct ? totalStats.shot_pct.toFixed(2) : '0.00' }}</td>
+            <td>{{ totalStats.xg ? totalStats.xg.toFixed(2) : '0.00' }}</td>
+            <td>{{ totalStats.efficiency ? totalStats.efficiency.toFixed(2) : '0.00' }}</td>
+            <td>{{ totalStats.blocked_shot }}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>{{ totalStats.penalty_2m }}</td>
+            <td>{{ totalStats.penalty_10m }}</td>
+            <td>{{ totalStats.penalty_20m }}</td>
+            <td>{{ totalStats.powerplaygoal }}</td>
+            <td>{{ totalStats.shorthandedgoal }}</td>
+            <td>{{ totalStats.penaltyshotgoal }}</td>
+            <td>{{ totalStats.penaltyshotattempt }}</td>  
+          </tr>
+        </template>
+      </v-data-table>
+    </div>
       <h3>Maalivahtitilastot</h3>
       <v-data-table
         :items="goalieStatsWithSum"
         :headers="goalieHeaders"
         :hide-default-footer="true"
-        :sort-by="['saves']"
-        :sort-desc="[true]"
         density="compact"
         style="min-width: 0; max-width: 1000px;"
         class="responsive-table goalie-table"
@@ -72,6 +101,24 @@
         <template #item.save_pct="{ item }">
           {{ item.save_pct ? item.save_pct.toFixed(2) : '-' }}
         </template>        
+        <template #item.goalperxg="{ item }">
+          {{ item.goalperxg ? item.goalperxg.toFixed(2) : '-' }}
+        </template>
+
+        <template #body.append>
+        <tr>
+          <td>{{ totalGoalieStats.playerName }}</td>
+          <td>{{ totalGoalieStats.saves }}</td>
+          <td>{{ totalGoalieStats.goals_against }}</td>
+          <td>{{ totalGoalieStats.save_pct ? totalGoalieStats.save_pct.toFixed(2) : '0.00' }}</td>
+          <td>{{ totalGoalieStats.xg_against ? totalGoalieStats.xg_against.toFixed(2) : '0.00' }}</td>
+          <td>{{ totalGoalieStats.goalperxg ? totalGoalieStats.goalperxg.toFixed(2) : '0.00' }}</td>
+          <td>{{ totalGoalieStats.assist }}</td>
+          <td>{{ totalGoalieStats.penalty_2m }}</td>
+          <td>{{ totalGoalieStats.penalty_10m }}</td>
+          <td>{{ totalGoalieStats.penalty_20m }}</td>
+        </tr>
+      </template>
       </v-data-table>
     </div>
   </div>
@@ -98,7 +145,7 @@ export default {
     const seasonId = teamStore.selectedTeamSeason?.seasonId || 1;
 
     const playerHeaders = [
-      { title: 'Nimi', value: 'playerName' },
+      { title: 'Nimi', value: 'playerName', sortable: true },
       { title: 'Maalit', value: 'goal', sortable: true },
       { title: 'Syötöt', value: 'assist', sortable: true },
       { title: 'Pisteet', value: 'point', sortable: true },
@@ -109,6 +156,7 @@ export default {
       { title: 'Lauk kaikki', value: 'total_shots', sortable: true },
       { title: 'Lauk %', value: 'shot_pct', sortable: true },
       { title: 'xG', value: 'xg', sortable: true },
+      { title: 'Maalit/xG', value: 'efficiency', sortable: true },
       { title: 'Blokit', value: 'blocked_shot', sortable: true },
       { title: '+', value: 'plus_goal', sortable: true },
       { title: '-', value: 'minus_goal', sortable: true },
@@ -128,11 +176,69 @@ export default {
       { title: 'Päästetyt maalit', value: 'goals_against', sortable: true  },
       { title: 'Torjunta-%', value: 'save_pct', sortable: true },
       { title: 'xG vastaan', value: 'xg_against', sortable: true },
+      { title: 'Maalit/xG', value: 'goalperxg', sortable: true },
       { title: 'Syötöt', value: 'assist', sortable: true },
       { title: '2min', value: 'penalty_2m', sortable: true },
       { title: '10min', value: 'penalty_10m', sortable: true },
       { title: '20min', value: 'penalty_20m', sortable: true },
     ];
+
+    const totalStats = computed(() => {
+      const stats = {};
+      if (!summedPlayerStats.value.length) return stats;
+
+      // Alusta kaikki kentät nollaksi tai tyhjäksi
+      Object.keys(summedPlayerStats.value[0]).forEach(key => {
+        stats[key] = typeof summedPlayerStats.value[0][key] === 'number' ? 0 : '';
+      });
+
+      // Summaa kaikki numeeriset kentät
+      summedPlayerStats.value.forEach(p => {
+        Object.keys(p).forEach(key => {
+          if (typeof p[key] === 'number') {
+            stats[key] += p[key] || 0;
+          }
+        });
+      });
+
+      // Laske laukaisuprosentti ja total_shots
+      stats.total_shots = (stats.shot_goal || 0) + (stats.shot_saved || 0) + (stats.shot_blocked || 0) + (stats.shot_missed || 0);
+      stats.shot_pct = stats.total_shots > 0 ? (100 * (stats.shot_goal || 0) / stats.total_shots) : 0;
+      stats.efficiency = (stats.xg && stats.xg > 0) ? (stats.shot_goal || 0) / stats.xg : 0;
+
+      // Anna nimikenttään "Yhteensä"
+      stats.playerName = 'Yhteensä';
+
+      return stats;
+    });
+
+    const totalGoalieStats = computed(() => {
+      const stats = {};
+      if (!summedGoalieStats.value.length) return stats;
+
+      // Alusta kaikki kentät nollaksi tai tyhjäksi
+      Object.keys(summedGoalieStats.value[0]).forEach(key => {
+        stats[key] = typeof summedGoalieStats.value[0][key] === 'number' ? 0 : '';
+      });
+
+      // Summaa kaikki numeeriset kentät
+      summedGoalieStats.value.forEach(g => {
+        Object.keys(g).forEach(key => {
+          if (typeof g[key] === 'number') {
+            stats[key] += g[key] || 0;
+          }
+        });
+      });
+
+      // Laske torjuntaprosentti
+      const totalFaced = (stats.saves || 0) + (stats.goals_against || 0);
+      stats.save_pct = totalFaced > 0 ? (100 * (stats.saves || 0) / totalFaced) : 0;
+
+      // Anna nimikenttään "Yhteensä"
+      stats.playerName = 'Yhteensä';
+
+      return stats;
+    });
 
     const summedPlayerStats = computed(() => {
         const statsByPlayer = {};
@@ -157,6 +263,7 @@ export default {
           const totalShots = (p.shot_goal || 0) + (p.shot_saved || 0) + (p.shot_blocked || 0) + (p.shot_missed || 0);
           p.total_shots = totalShots;
           p.shot_pct = totalShots > 0 ? (100 * (p.shot_goal || 0) / totalShots) : 0;
+          p.efficiency = (p.xg && p.xg > 0) ? (p.shot_goal || 0) / p.xg : 0;
         });
 
         // Palauta summatut tilastot listana
@@ -188,22 +295,24 @@ export default {
           goalies.forEach(g => {
             const totalFaced = (g.saves || 0) + (g.goals_against || 0);
             g.save_pct = totalFaced > 0 ? (100 * (g.saves || 0) / totalFaced) : 0;
+            g.goalperxg = (g.xg_against && g.xg_against > 0) ? (g.goals_against || 0) / g.xg_against : 0;
           });
 
           return goalies;
     });
 
+    
     const playerStatsWithSum = computed(() => {
       const stats = summedPlayerStats.value;
       console.log('Summed Player Stats:', stats);
-      return [...stats, getPlayerStatsSum(stats)];
+      return [...stats];
     });
 
     const goalieStatsWithSum = computed(() => {
       const stats = summedGoalieStats.value;
-      return [...stats, getGoalieStatsSum(stats)];
+      return [...stats];
     });
-
+    
     const teamNames = ref('');
 
     const selectGame = (game) => {
@@ -342,6 +451,8 @@ export default {
       summedGoalieStats,
       playerStatsWithSum,
       goalieStatsWithSum,
+      totalStats,
+      totalGoalieStats,
     };
   },
 };
@@ -369,6 +480,7 @@ export default {
 }
 
 .responsive-table.v-data-table {
+  min-width: 900px; /* tai haluamasi minimi */
   font-size: 0.92em;
 }
 .goalie-table .v-table td,
