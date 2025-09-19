@@ -2,6 +2,113 @@
   <div class="container">
     <v-divider :thickness="10"></v-divider>
 
+<v-dialog v-model="showGoalDialog" max-width="480" @update:modelValue="val => { if (!val) closeGoalDialog(); }">
+  <v-card v-if="selectedGoalEvent">
+    <v-card-title class="headline d-flex align-center" style="background: #1976d2; color: white;">
+      <v-icon left class="mr-2">mdi-soccer</v-icon>
+      Maalin tiedot
+    </v-card-title>
+    <v-card-text>
+      <v-row dense>
+        <v-col cols="12" sm="6">
+          <v-list-item>
+            <v-list-item-icon><v-icon color="primary">mdi-account</v-icon> Maalintekijä</v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle>#{{ selectedGoalEvent.scorerNumber }} {{ selectedGoalEvent.scorerName }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-col>
+        <v-col cols="12" sm="6" v-if="selectedGoalEvent.assistName">
+          <v-list-item>
+            <v-list-item-icon><v-icon color="primary">mdi-account-multiple</v-icon> Syöttäjä</v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle>#{{ selectedGoalEvent.assistNumber }} {{ selectedGoalEvent.assistName }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-list-item>
+            <v-list-item-icon><v-icon color="primary">mdi-target-variant</v-icon> Tyyppi</v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle>
+                {{
+                  selectedGoalEvent.scoringtype
+                    ? (goalTypeOptions.find(opt => opt.value === selectedGoalEvent.scoringtype)?.title || selectedGoalEvent.scoringtype)
+                    : '-'
+                }}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-list-item>
+            <v-list-item-icon><v-icon color="primary">mdi-lightbulb-outline</v-icon> Taktinen tilanne</v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle>
+                {{
+                  selectedGoalEvent.tacticalsituation
+                    ? (tacticalSituationOptions.find(opt => opt.value === selectedGoalEvent.tacticalsituation)?.title || selectedGoalEvent.tacticalsituation)
+                    : '-'
+                }}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-list-item>
+            <v-list-item-icon><v-icon color="primary">mdi-timer-outline</v-icon> Erä</v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle>{{ selectedGoalEvent.period }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-col>
+
+        <v-col cols="12" sm="6">
+          <v-list-item>
+            <v-list-item-icon><v-icon color="primary">mdi-account-group</v-icon> Kenttätilanne</v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle>{{ goalSituationText }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-col>        
+        <v-col cols="12" sm="6">
+          <v-list-item>
+            <v-list-item-icon><v-icon color="primary">mdi-target</v-icon> Rangaistuslaukaus</v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle>{{ selectedGoalEvent.penaltyshot ? 'Kyllä' : 'Ei' }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-list-item>
+            <v-list-item-icon><v-icon color="primary">mdi-alert-circle-outline</v-icon> Oma maali</v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle>{{ selectedGoalEvent.owngoal ? 'Kyllä' : 'Ei' }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-col>
+        <v-col cols="12">
+          <v-list-item>
+            <v-list-item-icon><v-icon color="primary">mdi-account-multiple-outline</v-icon> Pelaajat kentällä</v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle>
+                {{ selectedGoalEvent.ownplayersinfield }}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-col>
+      </v-row>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer />
+      <v-btn color="primary" variant="flat" @click="closeGoalDialog">
+        <v-icon left>mdi-close</v-icon>
+        Sulje
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
     <v-sheet class="responsive-sheet mx-auto">
       <v-slide-group show-arrows>
         <v-slide-group-item 
@@ -52,6 +159,7 @@
       </v-container>
     </div>
 
+    <div class="map-and-eventlist">
     <v-card>
       <v-tabs
         v-model="tab"
@@ -69,13 +177,18 @@
               <strong>Oma joukkue xG:</strong> {{ filteredHomeXg.toFixed(2) }}
             </div>
 
-            <div v-if="filteredEvents.length > 0" class="image-containeri">
+            <div class="image-containeri">
 
               <img src="/kenttasektoreilla.png" alt="Field" />
               <div
                 v-for="event in filteredEvents"
                 :key="event.eventId"
-                :class="['marker', event.action, event.playerId < 100 ? 'circle' : 'square']"
+                :class="[
+                  'marker',
+                  event.action,
+                  event.playerId < 100 ? 'circle' : 'square',
+                  { 'highlighted-marker': selectedEventId === event.eventId || hoveredEventId === event.eventId }
+                ]"
                 :style="{ top: event.yCoordinate + '%', left: event.xCoordinate + '%' }"
                 :title="event.playerNumber + ' ' + event.playerName + ' ' + event.action"
               ></div>
@@ -192,6 +305,38 @@
         </v-tabs-window>
       </v-card-text>
   </v-card>
+    <div v-if="tab === 'one'"class="event-list-side">
+      <div style="display: flex; align-items: center; margin-bottom: 8px;">
+        <h3 style="margin: 0;">Tapahtumat</h3>
+        <v-btn
+          icon
+          size="small"
+          @click="showEventList = !showEventList"
+          style="margin-left: 8px;"
+          :title="showEventList ? 'Piilota tapahtumat' : 'Näytä tapahtumat'"
+          variant="text"
+        >
+          <v-icon>{{ showEventList ? 'mdi-eye-off-outline' : 'mdi-eye-outline' }}</v-icon>
+        </v-btn>
+      </div>
+      <v-list v-if="showEventList" dense>
+        <v-list-item
+          v-for="event in filteredEvents"
+          :key="event.eventId"
+          :value="event.eventId"
+          @click="handleEventClick(event)"
+          @mouseenter="hoveredEventId = event.eventId"
+          @mouseleave="hoveredEventId = null"
+          :class="{ 'selected-event': selectedEventId === event.eventId }"
+          style="cursor: pointer;"
+        >
+          <v-list-item-title>
+            {{ event.playerName }} – {{ event.action }} -  xG: {{ event.xg.toFixed(2) }}
+          </v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </div>
+  </div>
 
     <h5>Selitteet/suodattimet (ympyrä = oma joukkue/neliö = vastustaja):</h5>
 
@@ -226,8 +371,9 @@
           </v-list-item>
         </v-list>      
       </div>
-            <div style="margin: 5px 0; display: flex; align-items: center;">
-      <v-list style="display: flex; flex-direction: row; padding: 0;" class="period-list">
+      
+      <div style="margin: 5px 0; display: flex; align-items: center;">
+        <v-list style="display: flex; flex-direction: row; padding: 0;" class="period-list">
           <v-list-item
             v-for="situation in situationOptions"
             :key="situation.value"
@@ -243,7 +389,6 @@
           </v-list-item>
         </v-list>      
       </div>
-
 
     <v-divider :thickness="10"></v-divider>
 
@@ -275,6 +420,7 @@ export default {
     return {
       games: [],
       events: [],
+      goalevents: [],
       areas: [],
       areaEvents: {},
       teamNames: '',
@@ -312,7 +458,26 @@ export default {
         { value: 3, title: 'Av' },
         { value: 4, title: 'Tv' },
       ],
-      };
+      selectedEventId: null,
+      hoveredEventId: null,
+      showGoalDialog: false,
+      selectedGoalEvent: null,
+      goalTypeOptions: [
+          { value: 'kuljetus', title: 'Laukaus kuljetuksesta/läpiajosta' },
+          { value: 'laukauspaikaltaan', title: 'Laukaus paikaltaan' },
+          { value: 'suoraansyotosta', title: 'Laukaus suoraan syötöstä' },
+          { value: 'rebound', title: 'Rebound' },
+          //{ value: 'rangaistuslaukaus', title: 'Rangaistuslaukaus' },
+          { value: 'omamaali', title: 'Oma maali' },
+          // Lisää muita vaihtoehtoja tarpeen mukaan
+        ],
+      tacticalSituationOptions: [
+          { value: 'organisoitu', title: 'Organisoitu hyökkäys' },
+          { value: 'kaanto', title: 'Kääntö' },
+          { value: 'kaannonkaanto', title: 'Käännön kääntö' },
+        ],
+      showEventList: true,
+    };
   },
   computed: {
     uniquePlayers() {
@@ -434,6 +599,13 @@ export default {
         .filter(e => e.playerId >= 100)
         .reduce((sum, e) => sum + (e.xg || 0), 0);
     },
+    goalSituationText() {
+      if (!this.selectedGoalEvent) return '-';
+      if (this.selectedGoalEvent.evenstrength) return 'Tasaviisikoin';
+      if (this.selectedGoalEvent.powerplay) return 'Ylivoima';
+      if (this.selectedGoalEvent.shorthanded) return 'Alivoima';
+      return '-';
+    },
   },
   watch: {
     showHomeTeam() {
@@ -494,8 +666,63 @@ export default {
               alert('Virhe ladattaessa tapahtumia.');
             });
         }
+        // haetaan goaleventit
+        if (gameId === 0) {
+          const teamStore = useTeamStore();
+          const seasonId = teamStore.selectedTeamSeason.seasonId;
+
+          fetch(`${config.apiUrl}/season/${seasonId}/goalevents/`)
+            .then(response => response.json())
+            .then(async data => {
+              this.goalevents = data || [];
+              // Laske xG jokaiselle laukaus-/maalitapahtumalle
+              console.log('Events loaded: ', this.goalevents);
+          })
+          .catch(error => {
+            console.error('Error loading goal events:', error);
+            alert('Virhe ladattaessa tapahtumia.');
+         });
+       } 
+       else {
+          fetch(`${config.apiUrl}/goalevents/${gameId}`)
+            .then(response => response.json())
+            .then(async data => {
+              this.goalevents = data || [];
+            })
+            .catch(error => {
+              console.error('Error loading goal events:', error);
+              alert('Virhe ladattaessa tapahtumia.');
+            });
+        }
+
       this.selectedPlayer = 'Kaikki pelaajat';
       this.teamNames = this.games.find(game => game.gameId === gameId).name;
+    },
+    handleEventClick(event) {
+      // Jos klikattu rivi on jo valittuna, poista valinta
+      if (this.selectedEventId === event.eventId) {
+        this.selectedEventId = null;
+        this.selectedGoalEvent = null;
+        this.showGoalDialog = false;
+        return;
+      }
+      this.selectedEventId = event.eventId;
+
+      // Tarkista löytyykö goalevent samalla eventId:llä
+      const goal = this.goalevents.find(g => g.eventId === event.eventId);
+      if (goal) {
+        this.selectedGoalEvent = goal;
+        this.showGoalDialog = true;
+        console.log('Selected goal event:', this.selectedGoalEvent);
+      } else {
+        this.selectedGoalEvent = null;
+        this.showGoalDialog = false;
+      }
+    },
+    closeGoalDialog() {
+      this.showGoalDialog = false;
+      this.selectedGoalEvent = null;
+      this.selectedEventId = null;
     },
     countEvents(action) {
        return this.filteredEvents.filter(event => event.action === action).length;
@@ -962,9 +1189,17 @@ export default {
      border-radius: 50%;
    }
 
+   .highlighted-marker {
+      box-shadow: 0 0 0 2px gold, 0 0 4px 4px orange;
+      z-index: 2;
+      width: 12px !important;
+      height: 12px !important;
+      border: 2px solid orange;
+    }
+
    .circle {
      border-radius: 50%;
-  }
+    }
  
    .square {
      border-radius: 0%;
@@ -1167,6 +1402,28 @@ export default {
 
 }
 
+.map-and-eventlist {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .map-and-eventlist {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 32px;
+  }
+  .image-containeri {
+    flex-shrink: 0;
+  }
+  .event-list-side {
+    max-height: 674px;
+    overflow-y: auto;
+    min-width: 220px;
+    width: 320px;
+  }
+}
 
    @media (prefers-color-scheme: dark) {
     .scroll-button {
