@@ -12,89 +12,73 @@
       <v-row dense>
         <v-col cols="12" sm="6">
           <v-list-item>
-            <v-list-item-icon><v-icon color="primary">mdi-account</v-icon> Maalintekijä</v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-subtitle>#{{ selectedGoalEvent.scorerNumber }} {{ selectedGoalEvent.scorerName }}</v-list-item-subtitle>
-            </v-list-item-content>
+            <v-icon color="primary">mdi-account</v-icon> Maalintekijä
+            <v-list-item-subtitle v-if="selectedGoalEvent.scorerNumber !== 100">#{{ selectedGoalEvent.scorerNumber }} {{ selectedGoalEvent.scorerName }}</v-list-item-subtitle>
+            <v-list-item-subtitle v-else>{{ selectedGoalEvent.scorerName }}</v-list-item-subtitle>
           </v-list-item>
         </v-col>
         <v-col cols="12" sm="6" v-if="selectedGoalEvent.assistName">
           <v-list-item>
-            <v-list-item-icon><v-icon color="primary">mdi-account-multiple</v-icon> Syöttäjä</v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-subtitle>#{{ selectedGoalEvent.assistNumber }} {{ selectedGoalEvent.assistName }}</v-list-item-subtitle>
-            </v-list-item-content>
+            <v-icon color="primary">mdi-account-multiple</v-icon> Syöttäjä
+            <v-list-item-subtitle v-if="selectedGoalEvent.assistNumber !== 100">#{{ selectedGoalEvent.assistNumber }} {{ selectedGoalEvent.assistName }}</v-list-item-subtitle>
+            <v-list-item-subtitle v-else>{{ selectedGoalEvent.assistName }}</v-list-item-subtitle>
           </v-list-item>
         </v-col>
         <v-col cols="12" sm="6">
           <v-list-item>
-            <v-list-item-icon><v-icon color="primary">mdi-target-variant</v-icon> Tyyppi</v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-subtitle>
-                {{
-                  selectedGoalEvent.scoringtype
-                    ? (goalTypeOptions.find(opt => opt.value === selectedGoalEvent.scoringtype)?.title || selectedGoalEvent.scoringtype)
-                    : '-'
-                }}
-              </v-list-item-subtitle>
-            </v-list-item-content>
+            <v-icon color="primary">mdi-target-variant</v-icon> Tyyppi
+            <v-list-item-subtitle>
+              {{
+                selectedGoalEvent.scoringtype
+                  ? (goalTypeOptions.find(opt => opt.value === selectedGoalEvent.scoringtype)?.title || selectedGoalEvent.scoringtype)
+                  : '-'
+              }}
+            </v-list-item-subtitle>
           </v-list-item>
         </v-col>
         <v-col cols="12" sm="6">
           <v-list-item>
-            <v-list-item-icon><v-icon color="primary">mdi-lightbulb-outline</v-icon> Taktinen tilanne</v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-subtitle>
-                {{
-                  selectedGoalEvent.tacticalsituation
-                    ? (tacticalSituationOptions.find(opt => opt.value === selectedGoalEvent.tacticalsituation)?.title || selectedGoalEvent.tacticalsituation)
-                    : '-'
-                }}
-              </v-list-item-subtitle>
-            </v-list-item-content>
+            <v-icon color="primary">mdi-lightbulb-outline</v-icon> Taktinen tilanne
+            <v-list-item-subtitle>
+              {{
+                selectedGoalEvent.tacticalsituation
+                  ? (tacticalSituationOptions.find(opt => opt.value === selectedGoalEvent.tacticalsituation)?.title || selectedGoalEvent.tacticalsituation)
+                  : '-'
+              }}
+            </v-list-item-subtitle>
           </v-list-item>
         </v-col>
         <v-col cols="12" sm="6">
           <v-list-item>
-            <v-list-item-icon><v-icon color="primary">mdi-timer-outline</v-icon> Erä</v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-subtitle>{{ selectedGoalEvent.period }}</v-list-item-subtitle>
-            </v-list-item-content>
+            <v-icon color="primary">mdi-timer-outline</v-icon> Erä
+            <v-list-item-subtitle>{{ selectedGoalEvent.period }}</v-list-item-subtitle>
           </v-list-item>
         </v-col>
 
         <v-col cols="12" sm="6">
           <v-list-item>
-            <v-list-item-icon><v-icon color="primary">mdi-account-group</v-icon> Kenttätilanne</v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-subtitle>{{ goalSituationText }}</v-list-item-subtitle>
-            </v-list-item-content>
+            <v-icon color="primary">mdi-account-group</v-icon> Kenttätilanne
+            <v-list-item-subtitle>{{ goalSituationText }}</v-list-item-subtitle>
           </v-list-item>
         </v-col>        
         <v-col cols="12" sm="6">
           <v-list-item>
-            <v-list-item-icon><v-icon color="primary">mdi-target</v-icon> Rangaistuslaukaus</v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-subtitle>{{ selectedGoalEvent.penaltyshot ? 'Kyllä' : 'Ei' }}</v-list-item-subtitle>
-            </v-list-item-content>
+            <v-icon color="primary">mdi-target</v-icon> Rangaistuslaukaus
+            <v-list-item-subtitle>{{ selectedGoalEvent.penaltyshot ? 'Kyllä' : 'Ei' }}</v-list-item-subtitle>
           </v-list-item>
         </v-col>
         <v-col cols="12" sm="6">
           <v-list-item>
-            <v-list-item-icon><v-icon color="primary">mdi-alert-circle-outline</v-icon> Oma maali</v-list-item-icon>
-            <v-list-item-content>
+            <v-icon color="primary">mdi-alert-circle-outline</v-icon> Oma maali
               <v-list-item-subtitle>{{ selectedGoalEvent.owngoal ? 'Kyllä' : 'Ei' }}</v-list-item-subtitle>
-            </v-list-item-content>
           </v-list-item>
         </v-col>
         <v-col cols="12">
           <v-list-item>
-            <v-list-item-icon><v-icon color="primary">mdi-account-multiple-outline</v-icon> Pelaajat kentällä</v-list-item-icon>
-            <v-list-item-content>
+            <v-icon color="primary">mdi-account-multiple-outline</v-icon> Pelaajat kentällä
               <v-list-item-subtitle>
                 {{ selectedGoalEvent.ownplayersinfield }}
               </v-list-item-subtitle>
-            </v-list-item-content>
           </v-list-item>
         </v-col>
       </v-row>
@@ -305,7 +289,7 @@
         </v-tabs-window>
       </v-card-text>
   </v-card>
-    <div v-if="tab === 'one'"class="event-list-side">
+    <div v-if="tab === 'one'" class="event-list-side">
       <div style="display: flex; align-items: center; margin-bottom: 8px;">
         <h3 style="margin: 0;">Tapahtumat</h3>
         <v-btn
@@ -336,6 +320,7 @@
         </v-list-item>
       </v-list>
     </div>
+
   </div>
 
     <h5>Selitteet/suodattimet (ympyrä = oma joukkue/neliö = vastustaja):</h5>
@@ -414,6 +399,7 @@ import { useAuthStore } from '../stores/authStore';
 import config from '../../config.js'; // Tuo konfiguraatiotiedosto
 import { parseSVG } from 'svg-path-parser';
 import pointInPolygon from 'point-in-polygon';
+import PieChart from '../components/PieChart.vue';
 
 export default {
   data() {
@@ -467,6 +453,7 @@ export default {
           { value: 'laukauspaikaltaan', title: 'Laukaus paikaltaan' },
           { value: 'suoraansyotosta', title: 'Laukaus suoraan syötöstä' },
           { value: 'rebound', title: 'Rebound' },
+          { value: 'vapari', title: 'Vapaalyönti/kuvio' },
           //{ value: 'rangaistuslaukaus', title: 'Rangaistuslaukaus' },
           { value: 'omamaali', title: 'Oma maali' },
           // Lisää muita vaihtoehtoja tarpeen mukaan
@@ -606,6 +593,56 @@ export default {
       if (this.selectedGoalEvent.shorthanded) return 'Alivoima';
       return '-';
     },
+    homeGoalTypePie() {
+      // Kotijoukkueen maalit
+      const data = {};
+      this.goalTypeOptions.forEach(opt => data[opt.title] = 0);
+      this.goalevents.filter(g => g.ownteam === 1).forEach(g => {
+        const opt = this.goalTypeOptions.find(opt => opt.value === g.scoringtype);
+        if (opt) data[opt.title]++;
+      });
+      return {
+        labels: Object.keys(data),
+        values: Object.values(data)
+      };
+    },
+    awayGoalTypePie() {
+      // Vierasjoukkueen maalit
+      const data = {};
+      this.goalTypeOptions.forEach(opt => data[opt.title] = 0);
+      this.goalevents.filter(g => g.ownteam === 0).forEach(g => {
+        const opt = this.goalTypeOptions.find(opt => opt.value === g.scoringtype);
+        if (opt) data[opt.title]++;
+      });
+      return {
+        labels: Object.keys(data),
+        values: Object.values(data)
+      };
+    },
+    homeTacticalPie() {
+      const data = {};
+      this.tacticalSituationOptions.forEach(opt => data[opt.title] = 0);
+      this.goalevents.filter(g => g.ownteam === 1).forEach(g => {
+        const opt = this.tacticalSituationOptions.find(opt => opt.value === g.tacticalsituation);
+        if (opt) data[opt.title]++;
+      });
+      return {
+        labels: Object.keys(data),
+        values: Object.values(data)
+      };
+    },
+    awayTacticalPie() {
+      const data = {};
+      this.tacticalSituationOptions.forEach(opt => data[opt.title] = 0);
+      this.goalevents.filter(g => g.ownteam === 0).forEach(g => {
+        const opt = this.tacticalSituationOptions.find(opt => opt.value === g.tacticalsituation);
+        if (opt) data[opt.title]++;
+      });
+      return {
+        labels: Object.keys(data),
+        values: Object.values(data)
+      };
+    }
   },
   watch: {
     showHomeTeam() {
@@ -1144,6 +1181,19 @@ export default {
      width: 342px; /* Kiinteä leveys */
      height: 574px; /* Kiinteä korkeus */
    }
+
+   .pie-charts-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+
+  .pie-charts-row > div {
+    flex: 1 1 320px;
+    min-width: 280px;
+    max-width: 400px;
+  }
 
    .image-containeri img {
      width: 342px; /* Kiinteä leveys */

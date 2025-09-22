@@ -66,6 +66,7 @@
                 clearable
               />
               <v-select
+                v-if="goalData.scoringPlayer && goalData.scoringPlayer.playerId !== 100"
                 v-model="goalData.scoringPlayer"
                 :items="localPlayers"
                 :return-object="true"
@@ -74,7 +75,15 @@
                 label="Maalintekijä"
                 clearable
               />
+              <!-- Jos valittu maalintekijä on vastustaja, näytä tekstikenttä -->
+              <v-text-field
+                v-if="goalData.scoringPlayer && goalData.scoringPlayer.playerId === 100"
+                v-model="opponentScorerName"
+                label="Syötä maalintekijä"
+                required
+              />
               <v-select
+                v-if="goalData.scoringPlayer && goalData.scoringPlayer.playerId !== 100"
                 v-model="goalData.assistingPlayer"
                 :items="assistCandidates"
                 :return-object="true"
@@ -82,6 +91,12 @@
                 item-value="playerId"
                 label="Syöttäjä"
                 clearable
+              />
+              <!-- Jos valittu syöttäjä on vastustaja, näytä tekstikenttä -->
+              <v-text-field
+                v-if="goalData.scoringPlayer && goalData.scoringPlayer.playerId === 100"
+                v-model="opponentAssistName"
+                label="Syöttäjä"                
               />
               <v-checkbox
                 v-model="goalData.shortHanded"
@@ -99,7 +114,7 @@
                 v-model="goalData.onField"
                 :items="ownPlayers"
                 item-title="name"
-                item-value="playerId"
+                item-value="number"
                 label="Kentällä olleet pelaajat"
                 multiple
                 clearable
@@ -528,6 +543,7 @@
           { value: 'laukauspaikaltaan', title: 'Laukaus paikaltaan' },
           { value: 'suoraansyotosta', title: 'Laukaus suoraan syötöstä' },
           { value: 'rebound', title: 'Rebound' },
+          { value: 'vapari', title: 'Vapaalyönti/kuvio' },
           //{ value: 'rangaistuslaukaus', title: 'Rangaistuslaukaus' },
           { value: 'omamaali', title: 'Oma maali' },
           // Lisää muita vaihtoehtoja tarpeen mukaan
@@ -580,6 +596,8 @@
           { title: '10min', value: 'penalty_10m' },
           { title: '20min', value: 'penalty_20m' },
         ],
+        opponentScorerName: '',
+        opponentAssistName: '',
       };
     },
 
@@ -1167,16 +1185,34 @@
         const penaltyshot = this.goalData.type === 'rangaistuslaukaus' ? 1 : 0;
         const owngoal = this.goalData.type === 'omamaali' ? 1 : 0;
 
-          const goalEvent = {
+        // Jos maalintekijä on vastustaja, käytä syötettyä nimeä
+        let scorerName = this.goalData.scoringPlayer.name;
+        let scorerNumber = this.goalData.scoringPlayer.number;
+        if (this.goalData.scoringPlayer.playerId === 100 && this.opponentScorerName) {
+          scorerName = this.opponentScorerName;
+          scorerNumber = 100;
+        }
+
+        // Jos syöttäjä on vastustaja, käytä syötettyä nimeä
+        let assistId = this.goalData.assistingPlayer ? this.goalData.assistingPlayer.playerId : null;
+        let assistName = this.goalData.assistingPlayer ? this.goalData.assistingPlayer.name : null;
+        let assistNumber = this.goalData.assistingPlayer ? this.goalData.assistingPlayer.number : null;
+        if (this.opponentAssistName) {
+          assistId = 100;          
+          assistName = this.opponentAssistName;
+          assistNumber = 100;
+        }
+
+        const goalEvent = {
             eventId: this.goalData.eventId,
             gameId: this.gameId,
             ownteam: this.goalData.goalScoringTeam,
             scorerId: this.goalData.scoringPlayer.playerId,
-            scorerName: this.goalData.scoringPlayer.name,
-            scorerNumber: this.goalData.scoringPlayer.number,
-            assistId: this.goalData.assistingPlayer ? this.goalData.assistingPlayer.playerId : null,
-            assistName: this.goalData.assistingPlayer ? this.goalData.assistingPlayer.name : null,
-            assistNumber: this.goalData.assistingPlayer ? this.goalData.assistingPlayer.number : null,
+            scorerName: scorerName,
+            scorerNumber: scorerNumber,
+            assistId: assistId,
+            assistName: assistName,
+            assistNumber: assistNumber,
             evenstrength: this.goalData.evenStrength,
             shorthanded: this.goalData.shortHanded,
             powerplay: this.goalData.powerPlay,
@@ -1220,6 +1256,8 @@
           ownPlayersInField: 0,
           owngoal: 0
         };
+        this.opponentAssistName = null;
+        this.opponentScorerName = null;
         this.penaltyshotResult = null;
       },
       deleteEvent(eventId) {
