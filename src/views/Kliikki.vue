@@ -719,7 +719,7 @@
                 } else {
                   field = g.ownplayersinfield;
                 }
-                if (Array.isArray(field) && field.includes(player.playerId)) {
+                if (Array.isArray(field) && field.includes(player.number)) {
                   if (g.ownteam === 1) plus_goal++;
                   if (g.ownteam === 0) minus_goal++;
                 }
@@ -738,7 +738,7 @@
                 } else {
                   field = g.ownplayersinfield;
                 }
-                if (Array.isArray(field) && field.includes(player.playerId)) {
+                if (Array.isArray(field) && field.includes(player.number)) {
                   if (g.ownteam === 0) minus_goal++;
                 }
               }
@@ -755,7 +755,7 @@
                 } else {
                   field = g.ownplayersinfield;
                 }
-                if (Array.isArray(field) && field.includes(player.playerId)) {
+                if (Array.isArray(field) && field.includes(player.number)) {
                   if (g.ownteam === 1) plus_goal++;
                 }
               }
@@ -1124,7 +1124,8 @@
               this.xgLoading = true;
             }
             try {
-              const response = await fetch(`${config.apiUrl}/predict-goal`, {
+              //const response = await fetch(`${config.apiUrl}/predict-goal`, {
+              const response = await fetch(`${config.apiUrl}/predict-goal-azure`, {              
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -1136,7 +1137,7 @@
               if (!response.ok) throw new Error('xG ennusteen haku epäonnistui');
               const data = await response.json();
               console.log('xG ennuste:', data);
-              this.xgValue = data.probability ?? 0.05; // Oletusarvo jos ei tule arvoa
+              this.xgValue = data.goal_probability ?? 0.05; // Oletusarvo jos ei tule arvoa
             } catch (e) {
               console.error('Virhe xG ennusteessa:', e);
               this.xgValue = 0.05;

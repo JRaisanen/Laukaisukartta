@@ -389,6 +389,27 @@
         density="compact">
         </v-data-table>
     </div>
+
+    <div class="pie-charts-row">
+  <div>
+    <h4>Kotijoukkue: Maalin syntytavat</h4>
+    <PieChart :labels="homeGoalTypePie.labels" :values="homeGoalTypePie.values" title="Kotijoukkue: Maalin syntytavat" />
+  </div>
+  <div>
+    <h4>Vierasjoukkue: Maalin syntytavat</h4>
+    <PieChart :labels="awayGoalTypePie.labels" :values="awayGoalTypePie.values" title="Vierasjoukkue: Maalin syntytavat" />
+  </div>
+</div>
+<div class="pie-charts-row">
+  <div>
+    <h4>Kotijoukkue: Taktinen tilanne</h4>
+    <PieChart :labels="homeTacticalPie.labels" :values="homeTacticalPie.values" title="Kotijoukkue: Taktinen tilanne" />
+  </div>
+  <div>
+    <h4>Vierasjoukkue: Taktinen tilanne</h4>
+    <PieChart :labels="awayTacticalPie.labels" :values="awayTacticalPie.values" title="Vierasjoukkue: Taktinen tilanne" />
+  </div>
+</div>
   </div>
 </template>
 
@@ -465,6 +486,10 @@ export default {
         ],
       showEventList: true,
     };
+  },
+  components: {
+    PieChart,
+    // muut komponentit
   },
   computed: {
     uniquePlayers() {

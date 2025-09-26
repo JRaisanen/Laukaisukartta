@@ -542,7 +542,7 @@
 
       const trainModel = async () => {
         try {
-          const response = await fetch(`${config.apiUrl}/train-model`, {
+          const response = await fetch(`${config.apiUrl}/send-csv-to-function`, {
             method: 'POST',
             headers: {
               'x-api-key': config.apiKey,
@@ -558,6 +558,7 @@
         }
       };
 
+      
       return {
         teamStore,
         authStore,
