@@ -121,6 +121,13 @@
       </template>
       </v-data-table>
     </div>
+    <v-btn
+      color="primary"
+      @click="editGame"
+      prepend-icon="mdi-pencil"
+    >
+      Editoi ottelua
+    </v-btn>
   </div>
 </template>
 
@@ -377,6 +384,7 @@ export default {
       return sum;
     }
 
+
     // Hae ottelut
     onMounted(async () => {
         //const seasonId = teamStore.selectedSeasonId || 1; // tai muu oletus
@@ -455,6 +463,17 @@ export default {
       totalGoalieStats,
     };
   },
+  methods: {
+    editGame() {
+      console.log('Starting to navigate to edit game with ID:', this.selectedGameId);
+      if (this.selectedGameId && this.selectedGameId !== 0) {
+        console.log('Navigating to edit game with ID:', this.selectedGameId);
+        this.$router.push(`/kliikki/${this.selectedGameId}`);
+      } else {
+        alert('Valitse ensin ottelu editoitavaksi');
+      }
+    }
+  }
 };
 </script>
 

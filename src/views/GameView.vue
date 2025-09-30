@@ -392,22 +392,22 @@
 
     <div class="pie-charts-row">
   <div>
-    <h4>Kotijoukkue: Maalin syntytavat</h4>
-    <PieChart :labels="homeGoalTypePie.labels" :values="homeGoalTypePie.values" title="Kotijoukkue: Maalin syntytavat" />
+    <h4>Oma joukkue: Maalin syntytavat</h4>
+    <PieChart :labels="homeGoalTypePie.labels" :values="homeGoalTypePie.values" title="Oma joukkue: Maalin syntytavat" />
   </div>
   <div>
-    <h4>Vierasjoukkue: Maalin syntytavat</h4>
-    <PieChart :labels="awayGoalTypePie.labels" :values="awayGoalTypePie.values" title="Vierasjoukkue: Maalin syntytavat" />
+    <h4>Vastustaja: Maalin syntytavat</h4>
+    <PieChart :labels="awayGoalTypePie.labels" :values="awayGoalTypePie.values" title="Vastustaja: Maalin syntytavat" />
   </div>
 </div>
 <div class="pie-charts-row">
   <div>
-    <h4>Kotijoukkue: Taktinen tilanne</h4>
-    <PieChart :labels="homeTacticalPie.labels" :values="homeTacticalPie.values" title="Kotijoukkue: Taktinen tilanne" />
+    <h4>Oma joukkue: Taktinen tilanne</h4>
+    <PieChart :labels="homeTacticalPie.labels" :values="homeTacticalPie.values" title="Oma joukkue: Taktinen tilanne" />
   </div>
   <div>
-    <h4>Vierasjoukkue: Taktinen tilanne</h4>
-    <PieChart :labels="awayTacticalPie.labels" :values="awayTacticalPie.values" title="Vierasjoukkue: Taktinen tilanne" />
+    <h4>Vastustaja: Taktinen tilanne</h4>
+    <PieChart :labels="awayTacticalPie.labels" :values="awayTacticalPie.values" title="Vastustaja: Taktinen tilanne" />
   </div>
 </div>
   </div>
@@ -484,7 +484,7 @@ export default {
           { value: 'kaanto', title: 'Kääntö' },
           { value: 'kaannonkaanto', title: 'Käännön kääntö' },
         ],
-      showEventList: true,
+      showEventList: window.innerWidth >= 900,
     };
   },
   components: {

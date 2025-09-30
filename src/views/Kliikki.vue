@@ -2,56 +2,67 @@
   <div class="container">
     <div class="top-section">
     <div class="app">
-      <h2>Laukaisukartan syöttäminen</h2>
-      <div class="team-names">
-        <h3>{{ teamNames }}</h3>
-      </div>  
+        <h2>
+          {{ isEditMode ? 'Ottelun editointi' : 'Laukaisukartan syöttäminen' }}
+          <span v-if="isEditMode" style="color: #666; font-size: 0.8em;">
+            ({{ teamNames }})
+          </span>
+        </h2>
+        
+        <!-- Näytä "Uusi ottelu" -nappi vain jos ei ole editointitilassa -->
+        <v-dialog v-model="gamedialog" max-width="500" v-if="!currentGameId && !isEditMode">
+          <template v-slot:activator="{ props: activatorProps }">
+            <v-btn
+              v-bind="activatorProps"
+              color="surface-variant"
+              text="Uusi ottelu"
+              variant="flat"
+            ></v-btn>
+          </template>
+
+          <v-card>
+            <v-card-title>
+              <span class="headline">Uusi ottelu</span>
+            </v-card-title>
+            <v-card-text>
+              <v-form ref="form" v-model="valid">
+                <v-text-field
+                  v-model="newGame.teamNames"
+                  label="Ottelun nimi: (esim. SaiPa/Sudet - EräViikingit 02.11.2024)"
+                  :rules="[v => !!v || 'Nimi on pakollinen']"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="newGame.shortteamNames"
+                  label="Ottelun lyhyt nimi (esim. SaSu-ErVi 0211)"
+                ></v-text-field>
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                text="Tallenna"
+                @click="saveGame"
+              ></v-btn>
+              <v-spacer></v-spacer>
+              <v-btn
+                text="Peruuta"
+                @click="gamedialog = false"
+              ></v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <!-- Jos editointitilassa, näytä ottelun tiedot -->
+        <div v-if="isEditMode" class="edit-mode-info">
+          <p><strong>Editoidaan ottelua:</strong> {{ teamNames }}</p>
+          <p><strong>Tapahtumia:</strong> {{ events.length }}</p>
+          <p><strong>Maaleja:</strong> {{ goalevents.length }}</p>
+        </div>
+
 
       <div>
         <!-- Dialogitemplaatit -->
-          <v-dialog v-model="gamedialog" max-width="500">
-            <template v-slot:activator="{ props: activatorProps }" v-if="!gameId">
-              <v-btn
-                v-bind="activatorProps"
-                v-on="on"
-                color="surface-variant"
-                text="Uusi ottelu"
-                variant="flat"
-                :disabled="gameId" 
-              ></v-btn>
-            </template>
 
-            <v-card>
-              <v-card-title>
-                <span class="headline">Uusi ottelu</span>
-              </v-card-title>
-              <v-card-text>
-                <v-form ref="form" v-model="valid">
-                  <v-text-field
-                    v-model="newGame.teamNames"
-                    label="Ottelun nimi: (esim. SaiPa/Sudet - EräViikingit 02.11.2024)"
-                    :rules="[v => !!v || 'Nimi on pakollinen']"
-                    required
-                  ></v-text-field>
-                  <v-text-field
-                    v-model="newGame.shortteamNames"
-                    label="Ottelun lyhyt nimi (esim. SaSu-ErVi 0211)"
-                  ></v-text-field>
-                </v-form>
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text="Tallenna"
-                  @click="saveGame"
-                ></v-btn>
-                <v-spacer></v-spacer>
-                <v-btn
-                  text="Peruuta"
-                  @click="gamedialog = false"
-                ></v-btn>
-              </v-card-actions>
-            </v-card>
-        </v-dialog>
         <!-- Maalitietojen dialogi -->
         <v-dialog v-model="goalDialog" max-width="500">
           <v-card>
@@ -296,7 +307,7 @@
                 v-for="goalie in localGoalies"
                 @click="selectGoalie(goalie)"
                 density="compact"
-                :disabled="!gameId"
+                :disabled="!currentGameId"
                 :class="{ selected: selectedGoalie && selectedGoalie.playerId === goalie.playerId,
                   'not-selected': !selectedGoalie || selectedGoalie.playerId !== goalie.playerId
                  }">
@@ -316,7 +327,7 @@
                 v-for="player in localPlayersWithGoalie"
                 @click="selectPlayer(player)"
                 density="compact"
-                :disabled="!gameId"
+                :disabled="!currentGameId"
                 :class="{
                   selected: selectedPlayer && selectedPlayer.playerId === player.playerId,
                   'not-selected': !selectedPlayer || selectedPlayer.playerId !== player.playerId
@@ -331,7 +342,7 @@
             <v-list-item 
             v-for="action in actions"
                 :key="action"
-                :disabled="!gameId"
+                :disabled="!currentGameId"
                 density="compact"
                 @click="selectAction(action)"
                 :class="{ selected: selectedAction === action,
@@ -414,6 +425,12 @@
   import config from '../../config'; // Tuo konfiguraatiotiedosto
   
   export default {
+    props: {
+      gameId: {
+        type: [String, Number],
+        default: null
+      }
+    },
     data() {
       const teamStore = useTeamStore();
       const authStore = useAuthStore();
@@ -456,7 +473,7 @@
             throw new Error('Ottelun luominen epäonnistui');
           }
           const data = await response.json();
-          this.gameId = data.gameId;
+          this.currentGameId = data.gameId;
 
           console.log('Luotu ottelu:', data);
 
@@ -493,7 +510,8 @@
         ],
         events: [],
         goalevents: [],
-        gameId: null,
+        //gameId: null,
+        currentGameId: null,
         selectedPoint: null,
         selectedPlayer: null,
         selectedAction: null,
@@ -562,6 +580,7 @@
         penaltyLength: null,
         penaltyshotResult: null,
         penaltyshotDialog: false,
+        isEditMode: false,
         playerStatsHeaders: [
           { title: 'Nro', value: 'playerNumber' },
           { title: 'Nimi', value: 'playerName' },
@@ -600,7 +619,16 @@
         opponentAssistName: '',
       };
     },
-
+    async mounted() {
+      console.log('Mounted Kliikki.vue, gameId prop:', this.gameId);
+      // Jos gameId on annettu, lataa olemassa oleva ottelu
+      if (this.gameId) {
+        console.log('Edit mode for gameId:', this.gameId);
+        this.isEditMode = true;
+        this.currentGameId = this.gameId;
+        await this.loadExistingGame(this.gameId);
+      }
+    },
     computed: {
       reversedEvents() {
         return this.events.slice().reverse();
@@ -794,7 +822,7 @@
             console.log(`Tilastot pelaajalle ${player.name}: Maalit=${goal}, Syötöt=${assist}, Pisteet=${point}, YV-maalit=${powerplaygoal}, AV-maalit=${shorthandedgoal}, Lauk. maalit=${shot_goal}, Torj. lauk.=${shot_saved}, Blokatut lauk.=${shot_blocked}, Ohi lauk.=${shot_missed}, xG=${xg.toFixed(2)}, Blokatut=${blocked_shot}, +=${plus_goal}, -=${minus_goal}, +/-=${plusminus}, 2min=${penalty_2m}, 10min=${penalty_10m}, 20min=${penalty_20m}`);
 
             return {
-              gameId: this.gameId,
+              gameId: this.currentGameId,
               playerId: player.playerId,
               playerName: player.name,
               playerNumber: player.number,
@@ -1206,7 +1234,7 @@
 
         const goalEvent = {
             eventId: this.goalData.eventId,
-            gameId: this.gameId,
+            gameId: this.currentGameId,
             ownteam: this.goalData.goalScoringTeam,
             scorerId: this.goalData.scoringPlayer.playerId,
             scorerName: scorerName,
@@ -1289,7 +1317,7 @@
         goalieNumber: event.goalie ? event.goalie.number : null,
         period: event.period,
         situation: event.situation,
-        gameId: this.gameId
+        gameId: this.currentGameId
       }));
 
       console.log('Events to be saved:', eventsToSave);
@@ -1335,7 +1363,7 @@
         penalty2m: event.penaltyLength === 2 ? 1 : (event.penaltyLength === 4 ? 2 : null),
         penalty10m: event.penaltyLength === 10 ? 1 : null,
         penalty20m: event.penaltyLength === 20 ? 1 : null,
-        gameId: this.gameId,
+        gameId: this.currentGameId,
         penaltyshot: event.penaltyshot,
       };
       try {
@@ -1463,7 +1491,7 @@
 
           const goalEvent = {
             eventId: eventid,
-            gameId: this.gameId,
+            gameId: this.currentGameId,
             ownteam: this.goalData.goalScoringTeam,
             scorerId: this.goalData.scoringPlayer.playerId,
             scorerName: this.goalData.scoringPlayer.name,
@@ -1532,35 +1560,43 @@
         penalty_20m: player.penalty_20m
       }));
       
-      console.log('Saving game players to backend:', gamePlayers);
+      console.log('Saving game players to backend:', gamePlayers, this.isEditMode ? 'PUT' : 'POST');
       try {
-        const response = await fetch(`${config.apiUrl}/gameplayer`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': API_KEY,
-            'Authorization': `Bearer ${authStore.token}`
-          },
-          body: JSON.stringify(gamePlayers)
-        });
-        if (!response.ok) {
-          throw new Error('GamePlayer-tallennus epäonnistui');
-        }
-        const data = await response.json();
-        console.log('GamePlayers saved to backend:', data);
-        alert('Pelaajatilastot tallennettu!');
-      } catch (error) {
-        console.error('Virhe GamePlayer-tallennuksessa:', error);
-        alert('Virhe pelaajatilastojen tallennuksessa!');
-      }
-    },
+          // Käytä PUT-metodia editointitilassa, POST uudessa ottelussa
+          const method = this.isEditMode ? 'PUT' : 'POST';
+          const url = this.isEditMode 
+            ? `${config.apiUrl}/gameplayer/${this.currentGameId}` 
+            : `${config.apiUrl}/gameplayer`;
+          
+          const response = await fetch(url, {
+            method: method,
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': API_KEY,
+              'Authorization': `Bearer ${authStore.token}`
+            },
+            body: JSON.stringify(gamePlayers)
+          });
+          
+          if (!response.ok) {
+            throw new Error(`GamePlayer-${this.isEditMode ? 'päivitys' : 'tallennus'} epäonnistui`);
+          }
+          
+          const data = await response.json();
+          console.log('GamePlayers saved to backend:', data);
+          alert(`Pelaajatilastot ${this.isEditMode ? 'päivitetty' : 'tallennettu'}!`);
+        } catch (error) {
+          console.error('Virhe GamePlayer-tallennuksessa:', error);
+          alert(`Virhe pelaajatilastojen ${this.isEditMode ? 'päivityksessä' : 'tallennuksessa'}!`);
+        }    
+      },
     async saveGameGoalies() {
       const authStore = useAuthStore();
       const API_KEY = 'ffksdl-asdfd-sdfllsdfdk-954dsfdj-23jhs8'; // Vaihda omaan avaimeseesi
 
       // Muodosta tallennettava lista
       const gameGoalies = this.goalieStats.map(goalie => ({
-        gameId: this.gameId,
+        gameId: this.currentGameId,
         playerId: goalie.playerId || goalie.number, // käytä playerId jos löytyy, muuten numero
         playerName: goalie.name,
         playerNumber: goalie.number,
@@ -1574,25 +1610,32 @@
       }));
 
       try {
-        const response = await fetch(`${config.apiUrl}/gamegoalie`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': API_KEY,
-            'Authorization': `Bearer ${authStore.token}`
-          },
-          body: JSON.stringify(gameGoalies)
-        });
-        if (!response.ok) {
-          throw new Error('GameGoalie-tallennus epäonnistui');
+          const method = this.isEditMode ? 'PUT' : 'POST';
+          const url = this.isEditMode 
+            ? `${config.apiUrl}/gamegoalie/${this.currentGameId}` 
+            : `${config.apiUrl}/gamegoalie`;
+          
+          const response = await fetch(url, {
+            method: method,
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': API_KEY,
+              'Authorization': `Bearer ${authStore.token}`
+            },
+            body: JSON.stringify(gameGoalies)
+          });
+          
+          if (!response.ok) {
+            throw new Error(`GameGoalie-${this.isEditMode ? 'päivitys' : 'tallennus'} epäonnistui`);
+          }
+          
+          const data = await response.json();
+          console.log('GameGoalies saved to backend:', data);
+          alert(`Maalivahtitilastot ${this.isEditMode ? 'päivitetty' : 'tallennettu'}!`);
+        } catch (error) {
+          console.error('Virhe GameGoalie-tallennuksessa:', error);
+          alert(`Virhe maalivahtitilastojen ${this.isEditMode ? 'päivityksessä' : 'tallennuksessa'}!`);
         }
-        const data = await response.json();
-        console.log('GameGoalies saved to backend:', data);
-        alert('Maalivahtitilastot tallennettu!');
-      } catch (error) {
-        console.error('Virhe GameGoalie-tallennuksessa:', error);
-        alert('Virhe maalivahtitilastojen tallennuksessa!');
-      }
     },
     getActionStyle(action) {
         switch (action) {
@@ -1618,6 +1661,95 @@
           console.log('Token on voimassa.');
         }
       },      
+      async loadExistingGame(gameId) {
+        console.log('Ladataan ottelu ID:', gameId);
+        try {
+          // Lataa ottelun perustiedot
+          const gameResponse = await fetch(`${config.apiUrl}/games/${gameId}`, {
+            headers: {
+              'x-api-key': config.apiKey,
+              'Authorization': `Bearer ${this.authStore.token}`
+            }
+          });
+          if (!gameResponse.ok) throw new Error('Ottelun lataus epäonnistui');
+          const game = await gameResponse.json();
+          
+          this.currentGameId = gameId;
+          this.teamNames = game.name;
+          this.shortteamNames = game.shortname;
+
+          // Lataa ottelun tapahtumat
+          await this.loadGameEvents(gameId);
+          
+          // Lataa ottelun maalit
+          await this.loadGoalEvents(gameId);
+          
+        } catch (error) {
+          console.error('Virhe ottelun latauksessa:', error);
+          alert('Ottelun lataus epäonnistui');
+        }
+      },
+      async loadGameEvents(gameId) {
+        try {
+          const response = await fetch(`${config.apiUrl}/gameevents/${gameId}`, {
+            headers: {
+              'x-api-key': config.apiKey,
+              'Authorization': `Bearer ${this.authStore.token}`
+            }
+          });
+          if (!response.ok) throw new Error('Tapahtumien lataus epäonnistui');
+          const events = await response.json();
+          
+          // Muunna backend-data frontendin formaattiin
+          this.events = events.map(event => ({
+            eventId: event.eventId,
+            x: event.xCoordinate,
+            y: event.yCoordinate,
+            player: {
+              playerId: event.playerId,
+              name: event.playerName,
+              number: event.playerNumber
+            },
+            action: event.action,
+            blocker: event.blockerId ? {
+              playerId: event.blockerId,
+              name: event.blockerName,
+              number: event.blockerNumber
+            } : null,
+            goalie: event.goalieId ? {
+              playerId: event.goalieId,
+              name: event.goalieName,
+              number: event.goalieNumber
+            } : null,
+            period: event.period,
+            situation: event.situation,
+            xg: event.xg || 0,
+            penaltyLength: event.penalty2m ? 2 : (event.penalty10m ? 10 : (event.penalty20m ? 20 : null)),
+            penaltyshot: event.penaltyshot || 0
+          }));
+          
+          console.log('Ladatut tapahtumat:', this.events);
+        } catch (error) {
+          console.error('Virhe tapahtumien latauksessa:', error);
+        }
+      },
+      async loadGoalEvents(gameId) {
+        try {
+          const response = await fetch(`${config.apiUrl}/goalevents/${gameId}`, {
+            headers: {
+              'x-api-key': config.apiKey,
+              'Authorization': `Bearer ${this.authStore.token}`
+            }
+          });
+          if (!response.ok) throw new Error('Maalien lataus epäonnistui');
+          const goalEvents = await response.json();
+          
+          this.goalevents = goalEvents;
+          console.log('Ladatut maalit:', this.goalevents);
+        } catch (error) {
+          console.error('Virhe maalien latauksessa:', error);
+        }
+      },
     },
   };
   </script>

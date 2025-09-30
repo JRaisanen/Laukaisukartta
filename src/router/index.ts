@@ -25,6 +25,12 @@ const router = createRouter({ history: createWebHashHistory('/Laukaisukartta/'),
           name: 'kliikki', 
           component: Kliikki, 
         }, 
+        {
+          path: '/kliikki/:gameId?',
+          name: 'Kliikki',
+          component: () => import('../views/Kliikki.vue'),
+          props: true
+        },
         { 
           path: '/gameview', 
           name: 'GameView', 
