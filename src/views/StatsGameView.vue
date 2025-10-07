@@ -122,6 +122,7 @@
       </v-data-table>
     </div>
     <v-btn
+      v-if="authStore.isAuthenticated"
       color="primary"
       @click="editGame"
       prepend-icon="mdi-pencil"
@@ -461,6 +462,7 @@ export default {
       goalieStatsWithSum,
       totalStats,
       totalGoalieStats,
+      authStore,
     };
   },
   methods: {

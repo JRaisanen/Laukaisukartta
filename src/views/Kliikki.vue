@@ -231,6 +231,14 @@
                 label="Lopputulema"
                 required
               />
+              <!-- Näytä tekstikenttä jos vastustajan pelaaja ja maali -->
+              <v-text-field
+                v-if="selectedPlayer && selectedPlayer.playerId === 100 && penaltyshotResult === 'maali'"
+                v-model="opponentScorerName"
+                label="Vastustajan maalintekijän nimi"
+                required
+                class="mt-3"
+              />
             </v-card-text>
             <v-card-actions>
               <v-btn color="primary" @click="confirmPenaltyshotDialog">OK</v-btn>
@@ -1135,7 +1143,7 @@
             console.log('Kulma maaliin:', angle.toFixed(1), 'astetta');
           }
 
-          if (this.selectedPlayer.playerId === 100 && (this.selectedAction === 'torjunta' || this.selectedAction === 'maali' || this.selectedAction === 'ohi' || this.selectedAction === 'blokki')) {
+          if (this.selectedPlayer.playerId === 100 && (this.selectedAction === 'torjunta' || this.selectedAction === 'maali' || this.selectedAction === 'ohi' || this.selectedAction === 'blokki' || this.selectedAction === "RL")) {
             event.goalie = this.selectedGoalie;
           }
 
@@ -1489,12 +1497,18 @@
           this.goalData.scoringPlayer = this.selectedPlayer;
           this.goalData.type = 'rangaistuslaukaus';
 
+           // Käytä syötettyä nimeä jos vastustajan pelaaja
+          let scorerName = this.selectedPlayer.name;
+          if (this.selectedPlayer.playerId === 100 && this.opponentScorerName) {
+            scorerName = this.opponentScorerName;
+          }
+
           const goalEvent = {
             eventId: eventid,
             gameId: this.currentGameId,
             ownteam: this.goalData.goalScoringTeam,
             scorerId: this.goalData.scoringPlayer.playerId,
-            scorerName: this.goalData.scoringPlayer.name,
+            scorerName: scorerName,
             scorerNumber: this.goalData.scoringPlayer.number,
             assistId: null,
             assistName: null,
@@ -1699,7 +1713,7 @@
           });
           if (!response.ok) throw new Error('Tapahtumien lataus epäonnistui');
           const events = await response.json();
-          
+          console.log('Ladatut tapahtumat backendistä:', events);
           // Muunna backend-data frontendin formaattiin
           this.events = events.map(event => ({
             eventId: event.eventId,

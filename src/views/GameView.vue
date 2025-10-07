@@ -474,8 +474,8 @@ export default {
           { value: 'laukauspaikaltaan', title: 'Laukaus paikaltaan' },
           { value: 'suoraansyotosta', title: 'Laukaus suoraan syötöstä' },
           { value: 'rebound', title: 'Rebound' },
-          { value: 'vapari', title: 'Vapaalyönti/kuvio' },
-          //{ value: 'rangaistuslaukaus', title: 'Rangaistuslaukaus' },
+          { value: 'vapari', title: 'Vapari/vaparikuvio' },
+          { value: 'rangaistuslaukaus', title: 'Rangaistuslaukaus' },
           { value: 'omamaali', title: 'Oma maali' },
           // Lisää muita vaihtoehtoja tarpeen mukaan
         ],
@@ -1270,6 +1270,7 @@ export default {
       width: 12px !important;
       height: 12px !important;
       border: 2px solid orange;
+      transform: translate(-30%, -30%);
     }
 
    .circle {

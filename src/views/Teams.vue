@@ -155,7 +155,7 @@
           </v-card>
         </v-dialog>
       </div>
-      <div>
+      <div v-if="authStore.isAuthenticated">
         <v-data-table         
             :headers="headers"
             :hide-default-header="false"

@@ -11,7 +11,24 @@
             <v-list-item-title>{{ game.name }}</v-list-item-title>
             <v-list-item-subtitle>{{ game.date }}</v-list-item-subtitle>
           </v-list-item-content>
-          <v-btn color="error" @click="deleteGame(game.gameId)">Poista</v-btn>
+           <v-btn 
+            color="primary" 
+            @click="editGame(game.gameId)"
+            prepend-icon="mdi-pencil"
+            variant="outlined"
+            size="small"
+          >
+            Editoi
+          </v-btn>
+          <v-btn 
+            color="error" 
+            @click="deleteGame(game.gameId)"
+            prepend-icon="mdi-delete"
+            variant="outlined"
+            size="small"
+          >
+            Poista
+          </v-btn>
         </v-list-item>
       </v-list>
       <p v-if="games.length === 0">Ei otteluita valitulle joukkueelle ja kaudelle.</p>
@@ -20,15 +37,23 @@
   
   <script setup>
   import { ref, onMounted } from 'vue';
+  import { useRouter } from 'vue-router'; // Lisää tämä
   import { useTeamStore } from '../stores/teamStore';
   import { useAuthStore } from '../stores/authStore';
   import config from '../../config';
   
   const teamStore = useTeamStore();
   const authStore = useAuthStore();
+  const router = useRouter();
   
   const games = ref([]);
   
+  // Lisää editGame-metodi
+  const editGame = (gameId) => {
+    console.log(`Editoidaan ottelu ID: ${gameId}`);
+    router.push(`/kliikki/${gameId}`);
+  };
+
   const fetchGames = async () => {
     // Tarkista, että kausi on valittu
     if (!teamStore.selectedTeamSeason) {
