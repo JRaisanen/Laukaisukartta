@@ -1,6 +1,6 @@
 <template>
-  <div class="game-center">
-    <v-container fluid>
+  <div class="game-center-wrapper">
+    <v-container fluid class="pa-2 pa-sm-4">
       <!-- Game Header -->
       <v-card class="mb-4">
         <v-card-title class="d-flex justify-space-between align-center">
@@ -238,6 +238,10 @@ export default {
 </script>
 
 <style scoped>
+.game-center-wrapper {
+  width: 100%;
+}
+
 .game-center {
   padding: 16px;
 }
@@ -258,5 +262,36 @@ export default {
 /* Ensure tab content has proper spacing */
 .v-tabs-window-item {
   padding-top: 16px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 600px) {
+  .v-container {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  .v-card {
+    margin-bottom: 8px;
+  }
+  
+  .v-card-text {
+    padding: 8px !important;
+  }
+  
+  .v-tabs-window-item {
+    padding-top: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .v-container {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+  
+  .v-card-text {
+    padding: 4px !important;
+  }
 }
 </style>

@@ -148,7 +148,7 @@
                   event.playerId < 100 ? 'circle' : 'square',
                   { 'highlighted-marker': selectedEventId === event.eventId || hoveredEventId === event.eventId }
                 ]"
-                :style="{ top: event.yCoordinate + '%', left: event.xCoordinate + '%' }"
+                :style="getMarkerStyle(event)"
                 :title="event.playerNumber + ' ' + event.playerName + ' ' + event.action"
               ></div>
               <div
@@ -156,7 +156,7 @@
                 v-for="event in filteredEvents"
                 :key="event.eventId"
                 class="number"
-                :style="{ top: event.yCoordinate + '%', left: event.xCoordinate + 5 + '%' }"
+                :style="getNumberStyle(event)"
                 :title="event.blockerId ? event.action + ' '+ event.blockerId + ' ' + event.blockerName : event.playerNumber + ' ' + event.playerName + ' ' + event.action"
               >
                 {{ event.playerId === 100 && event.action === 'blokki' ? event.blockerNumber : event.playerId === 100 ? ' ' : event.playerNumber }}
@@ -674,6 +674,25 @@ export default {
       return '-'
     })
     
+    // Computed for positioning markers with fixed coordinates
+    const getMarkerStyle = (event) => {
+      const x = (event.xCoordinate / 100) * 342
+      const y = (event.yCoordinate / 100) * 574
+      return {
+        top: y + 'px',
+        left: x + 'px'
+      }
+    }
+    
+    const getNumberStyle = (event) => {
+      const x = ((event.xCoordinate + 5) / 100) * 342
+      const y = (event.yCoordinate / 100) * 574
+      return {
+        top: y + 'px',
+        left: x + 'px'
+      }
+    }
+    
     // Methods
     const loadEvents = async (gameId) => {
       if (!gameId) return
@@ -1112,6 +1131,8 @@ export default {
       homeTacticalPie,
       awayTacticalPie,
       goalSituationText,
+      getMarkerStyle,
+      getNumberStyle,
       getEventPosition,
       showEventDetails,
       closeGoalDialog,
@@ -1152,14 +1173,17 @@ export default {
 .image-containeri {
   position: relative;
   text-align: center;
-  max-width: 100%;
+  width: 342px;
+  height: 574px;
   margin: 0 auto;
+  overflow: auto;
 }
 
 .image-containeri img {
-  max-width: 100%;
-  height: auto;
+  width: 342px;
+  height: 574px;
   display: block;
+  object-fit: contain;
 }
 
 .overlay {
@@ -1213,6 +1237,56 @@ export default {
   text-shadow: 1px 1px 1px rgba(0,0,0,0.7);
 }
 
+/* Shot and goal markers */
+.marker {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.marker.circle {
+  border-radius: 50%;
+}
+
+.marker.square {
+  border-radius: 2px;
+}
+
+.marker.maali {
+  background-color: lightgreen;
+}
+
+.marker.torjunta {
+  background-color: darkblue;
+}
+
+.marker.blokki {
+  background-color: yellow;
+}
+
+.marker.ohi {
+  background-color: red;
+}
+
+.highlighted-marker {
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  border-width: 3px !important;
+}
+
+.number {
+    position: absolute;
+    background-color: transparent; 
+    padding: 2px 1px;
+    color: black;
+    border: none;
+    border-radius: 1px;
+    transform: translate(-50%, -50%);
+}
+
 .event-list {
   max-height: 400px;
   overflow-y: auto;
@@ -1256,5 +1330,36 @@ export default {
 
 .goal-result {
   color: #4CAF50;
+}
+
+/* Media queries for responsive image handling */
+@media (max-width: 768px) {
+  .image-containeri {
+    width: 100%;
+    max-width: 342px;
+    height: auto;
+    max-height: 574px;
+    overflow: auto;
+  }
+  
+  .image-containeri img {
+    width: 342px;
+    height: 574px;
+  }
+}
+
+@media (max-width: 400px) {
+  .image-containeri {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    max-height: 500px;
+    overflow: auto;
+  }
+  
+  .image-containeri img {
+    width: 342px;
+    height: 574px;
+  }
 }
 </style>
