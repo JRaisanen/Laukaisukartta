@@ -1159,11 +1159,11 @@ export default {
 
 .team-names-display {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .filter-container {
-  margin-bottom: 16px;
+  margin-bottom: 0px;
 }
 
 .checkbox-label {
@@ -1351,9 +1351,9 @@ export default {
 @media (max-width: 400px) {
   .image-containeri {
     width: 100%;
-    max-width: 300px;
+    max-width: 342px;
     height: auto;
-    max-height: 500px;
+    max-height: 574px;
     overflow: auto;
   }
   

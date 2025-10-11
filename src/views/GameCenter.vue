@@ -276,22 +276,22 @@ export default {
   }
   
   .v-card-text {
-    padding: 8px !important;
+    padding: 0px !important;
   }
   
   .v-tabs-window-item {
-    padding-top: 8px;
+    padding-top: 2px;
   }
 }
 
 @media (max-width: 400px) {
   .v-container {
-    padding-left: 4px !important;
-    padding-right: 4px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
   }
   
   .v-card-text {
-    padding: 4px !important;
+    padding: 0px !important;
   }
 }
 </style>
