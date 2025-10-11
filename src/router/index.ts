@@ -5,7 +5,10 @@ import StatsGameView from '../views/StatsGameView.vue'
 import Kliikki from '../views/Kliikki.vue'
 import Teams from '../views/Teams.vue';
 import Login from '../views/Login.vue';
+import Lineups from '../views/LineupsView.vue';
 import GamesView from '../views/GamesView.vue';
+import MatchesView from '../views/MatchesView.vue';
+import GameCenter from '../views/GameCenter.vue';
 import { useTeamStore } from '../stores/teamStore'
 
 const router = createRouter({ history: createWebHashHistory('/Laukaisukartta/'),
@@ -56,6 +59,22 @@ const router = createRouter({ history: createWebHashHistory('/Laukaisukartta/'),
           name: 'GamesView',
           component: GamesView
         },
+        {
+          path: '/lineups',
+          name: 'Lineups',
+          component: Lineups
+        },
+        {
+          path: '/matches',
+          name: 'Matches',
+          component: MatchesView
+        },
+        {
+          path: '/gamecenter/:gameId',
+          name: 'GameCenter',
+          component: GameCenter,
+          props: true
+        }
       ],
   }
 ) 

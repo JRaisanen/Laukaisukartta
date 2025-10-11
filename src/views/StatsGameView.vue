@@ -37,7 +37,7 @@
 
     <div v-else class="stats-table">
       <h3>Pelaajatilastot</h3>
-      <div style="overflow-x: auto; width: 75%; text-align: left;">
+      <div style="overflow-x: auto; width: 80%; text-align: left;">
       <v-data-table
         :items="playerStatsWithSum"
         :headers="playerHeaders"

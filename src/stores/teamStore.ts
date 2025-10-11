@@ -13,6 +13,7 @@ export const useTeamStore = defineStore('team', {
     goalies: [] as any[],
     selectedTeam: null as { teamId: number, name: string } | null | undefined,
     selectedTeamSeason: null as { seasonId: number; teamId: number, name: string } | null | undefined,
+    currentGameId: null as string | null,
   }),
   actions: {
     async fetchTeams() {
@@ -368,6 +369,10 @@ export const useTeamStore = defineStore('team', {
     selectTeam(team: { teamId: number; name: string }) {
       this.selectedTeam = team;
       localStorage.setItem('selectedTeamId', team.teamId.toString()); // Tallenna valittu joukkue
+    },
+    
+    setCurrentGameId(gameId: string | null) {
+      this.currentGameId = gameId;
     },
   }
 });

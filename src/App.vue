@@ -27,6 +27,7 @@ const logout = () => {
       {{ teamStore.selectedTeam?.name || 'Valitse joukkue' }} - 
       {{ teamStore.selectedTeamSeason?.name || 'Valitse kausi' }}
     </v-toolbar-title>
+      <v-btn :disabled="!teamStore.selectedTeam" @click="$router.push('/matches')">Ottelut</v-btn>
       <v-btn :disabled="!teamStore.selectedTeam" @click="$router.push('/gameview')">Laukaisukartta</v-btn>
       <v-btn :disabled="!teamStore.selectedTeam" @click="$router.push('/statsgameview')">Tilastot</v-btn>
       <v-btn :disabled="!teamStore.selectedTeam" @click="$router.push('/statsview')">Tilastot (old)</v-btn>

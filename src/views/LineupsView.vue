@@ -1,0 +1,522 @@
+<template>
+  <div class="container">
+    <div >
+      <h2>Kentälliset</h2>
+      <v-btn
+        v-if="authStore.token"
+        color="primary"
+        variant="outlined"
+        :loading="scrapingLineups"
+        @click="scrapeLineups"
+      >
+        <v-icon left>mdi-download</v-icon>
+        Hae kokoonpanot
+      </v-btn>
+    </div>
+    
+    <!-- Kentällisten valinta -->
+    <div class="lineup-selector">
+      <v-btn-toggle v-model="selectedLineup" mandatory>
+        <v-btn value="1. Kentällinen">I</v-btn>
+        <v-btn value="2. Kentällinen">II</v-btn>
+        <v-btn value="3. Kentällinen">III</v-btn>
+        <v-btn value="4. Kentällinen">IV</v-btn>
+      </v-btn-toggle>
+    </div>
+
+    <!-- Ei kokoonpanotietoja -viesti -->
+    <v-alert
+      v-if="!hasLineupData"
+      type="info"
+      class="mb-4"
+      variant="tonal"
+    >
+      <v-icon>mdi-information</v-icon>
+      <span class="ml-2">
+        Ei kokoonpanotietoja saatavilla.
+        <span v-if="authStore.token">Käytä "Hae kokoonpanot" -nappia hakeaksesi tiedot.</span>
+        <span v-else>Kirjaudu sisään hakeaksesi kokoonpanotiedot.</span>
+      </span>
+    </v-alert>
+
+    <div v-if="hasLineupData" class="lineup-container">
+      <!-- Kotijoukkue -->
+      <div class="team-section home-team">
+        <h3>{{ lineupData.teams?.home?.team_name || 'Kotijoukkue' }}</h3>
+        <div class="field-container">
+          <img src="/kuva.png" alt="Kenttä" class="field-image" />
+          
+          <!-- Kotijoukkueen pelaajat -->
+          <div
+            v-for="player in getHomeLineup"
+            :key="player.person_id"
+            class="player home-player"
+            :style="getPlayerPosition(player, 'home')"
+            @click="showPlayerHistory(player)"
+          >
+            <div class="player-number">{{ player.number }} {{ player.status }}</div>
+            <div class="player-name">{{ getLastName(player.name) }}</div>
+          </div>
+                    <div
+            v-for="player in getAwayLineup"
+            :key="player.person_id"
+            class="player away-player"
+            :style="getPlayerPosition(player, 'away')"
+            @click="showPlayerHistory(player)"
+          >
+            <div class="player-number">{{ player.number }} {{ player.status }}</div>
+            <div class="player-name">{{ getLastName(player.name) }}</div>
+          </div>
+
+        </div>
+                <h3>{{ lineupData.teams?.away?.team_name || 'Vierasjoukkue' }}</h3>
+      </div>
+
+    </div>
+
+    <!-- Pelaajan historia dialogi -->
+    <v-dialog v-model="showHistoryDialog" max-width="1000">
+    <v-card v-if="selectedPlayer">
+        <v-card-title>
+        <span class="headline">#{{ selectedPlayer.number }} {{ selectedPlayer.name }}</span>
+        </v-card-title>
+        <v-card-text>
+        <div class="player-info">
+            <div><strong>Pelipaikka:</strong> {{ selectedPlayer.position }}</div>
+            <div><strong>Status:</strong> {{ selectedPlayer.status }}</div>
+        </div>
+        
+        <h4 class="mt-4">Kausikohtaiset tilastot ({{ selectedPlayer.statistics?.length || 0 }} sarjaa)</h4>
+        <v-data-table
+            :headers="historyHeaders"
+            :items="selectedPlayer.statistics || []"
+            :items-per-page="15"
+            :hide-default-footer="true"
+            :no-data-text="'Ei tilastoja'"
+            density="compact"
+            :sort-by="[{ key: 'Kausi', order: 'desc' }]"
+        >
+            <template #item.Kausi="{ item }">
+            <strong>{{ item.Kausi }}</strong>
+            </template>
+            <template #item.O="{ item }">
+            {{ item.O || 0 }}
+            </template>
+            <template #item.M="{ item }">
+            {{ item.M || 0 }}
+            </template>
+            <template #item.S="{ item }">
+            {{ item.S || 0 }}
+            </template>
+            <template #item.P="{ item }">
+            {{ item.P || 0 }}
+            </template>
+            <template #item.Jmin="{ item }">
+            {{ item.Jmin || 0 }}
+            </template>
+            <template #item.avg="{ item }">
+            {{ getPointsPerGame(item) }}
+            </template>
+        </v-data-table>
+        </v-card-text>
+        <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="showHistoryDialog = false">Sulje</v-btn>
+        </v-card-actions>
+    </v-card>
+    </v-dialog>
+  </div>
+</template>
+
+<script>
+import { ref, computed, onMounted, watch } from 'vue'
+import { useTeamStore } from '../stores/teamStore'
+import { useAuthStore } from '../stores/authStore'
+import config from '../../config'
+
+export default {
+    name: 'LineupsView',
+    setup() {
+        const teamStore = useTeamStore()
+        const authStore = useAuthStore()
+        
+        const selectedLineup = ref('1. Kentällinen')
+        const lineupData = ref({})
+        const showHistoryDialog = ref(false)
+        const selectedPlayer = ref(null)
+        const scrapingLineups = ref(false)
+        
+        const historyHeaders = [
+            { title: 'Kausi', value: 'Kausi', sortable: true, width: '100px' },
+            { title: 'Joukkue', value: 'Joukkue', sortable: true, width: '150px' },
+            { title: 'Sarja', value: 'Sarja', sortable: true, width: '160px' },
+            { title: 'Ottelut', value: 'O', sortable: true, width: '60px' },
+            { title: 'Maalit', value: 'M', sortable: true, width: '60px' },
+            { title: 'Syötöt', value: 'S', sortable: true, width: '60px' },
+            { title: 'Pisteet', value: 'P', sortable: true, width: '60px' },
+            { title: 'Jmin', value: 'Jmin', sortable: true, width: '60px' },
+            { title: 'P/O', value: 'avg', sortable: false, width: '60px' }
+        ]
+        
+        const loadLineupData = async () => {
+            try {
+                const gameId = teamStore.currentGameId
+                if (!gameId) {
+                    console.error('Ei gameId:tä saatavilla')
+                    return
+                }
+                
+                const response = await fetch(`${config.apiUrl}/lineups/${gameId}`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`)
+                }
+                
+                lineupData.value = await response.json()
+                console.log('Lineup data loaded:', lineupData.value)
+            } catch (error) {
+                console.error('Virhe kokoonpanojen latauksessa:', error)
+                //alert('Virhe kokoonpanojen latauksessa')
+            }
+        }
+        
+        // Watch for currentGameId changes
+        watch(() => teamStore.currentGameId, (newGameId) => {
+            if (newGameId) {
+                loadLineupData()
+            }
+        })
+        
+        // Computed properties
+        const getHomeLineup = computed(() => {
+            return lineupData.value.teams?.home?.lineups?.[selectedLineup.value] || []
+        })
+        
+        const getAwayLineup = computed(() => {
+            return lineupData.value.teams?.away?.lineups?.[selectedLineup.value] || []
+        })
+        
+        const getTotalMatches = computed(() => {
+            if (!selectedPlayer.value?.statistics) return 0
+            return selectedPlayer.value.statistics.reduce((sum, stat) => sum + parseInt(stat.O || 0), 0)
+        })
+        
+        const getTotalGoals = computed(() => {
+            if (!selectedPlayer.value?.statistics) return 0
+            return selectedPlayer.value.statistics.reduce((sum, stat) => sum + parseInt(stat.M || 0), 0)
+        })
+        
+        const getTotalAssists = computed(() => {
+            if (!selectedPlayer.value?.statistics) return 0
+            return selectedPlayer.value.statistics.reduce((sum, stat) => sum + parseInt(stat.S || 0), 0)
+        })
+        
+        const getTotalPoints = computed(() => {
+            if (!selectedPlayer.value?.statistics) return 0
+            return selectedPlayer.value.statistics.reduce((sum, stat) => sum + parseInt(stat.P || 0), 0)
+        })
+        
+        const hasLineupData = computed(() => {
+            return lineupData.value.teams?.home?.lineups || lineupData.value.teams?.away?.lineups
+        })
+        
+        // Methods
+        const getPointsPerGame = (item) => {
+            const games = parseInt(item.O || 0)
+            const points = parseInt(item.P || 0)
+            if (games === 0) return '0.00'
+            return (points / games).toFixed(2)
+        }
+        
+        const getPlayerPosition = (player, team) => {
+            const positionType = getPositionType(player.position)
+            const positionDetail = player.position
+            
+            let x, y
+            
+            if (team === 'away') {
+                // Kotijoukkue (vasemmalta oikealle)
+                switch (positionType) {
+                case 'Goalkeeper':
+                    x = 50; y = 82; break
+                case 'Defence':
+                    y = 70
+                    x = positionDetail.includes('VP') ? 30 : 70
+                    break
+                case 'Center':
+                    x = 50; y = 55; break
+                case 'Wing':
+                    y = 55
+                    x = positionDetail.includes('VL') ? 20 : 80
+                    break
+                default:
+                    x = 40; y = 30
+                }
+            } else {
+                // Vierasjoukkue (peilikuva)
+                switch (positionType) {
+                case 'Goalkeeper':
+                    x = 50; y = 17; break
+                case 'Defence':
+                    y = 28
+                    x = positionDetail.includes('VP') ? 30 : 70
+                    break
+                case 'Center':
+                    x = 50; y = 42; break
+                case 'Wing':
+                    y = 42
+                    x = positionDetail.includes('VL') ? 20 : 80
+                    break
+                default:
+                    x = 60; y = 70
+                }
+            }
+            
+            return {
+                position: 'absolute',
+                left: x + '%',
+                top: y + '%',
+                transform: 'translate(-50%, -50%)'
+            }
+        }
+        
+        const getPositionType = (position) => {
+            if (!position) return 'Center'
+            if (position.includes('MV')) return 'Goalkeeper'
+            if (position.includes('VP') || position.includes('OP')) return 'Defence'
+            if (position.includes('KH')) return 'Center'
+            if (position.includes('VL') || position.includes('OL')) return 'Wing'
+            return 'Center'
+        }
+        
+        const getLastName = (fullName) => {
+            if (!fullName) return ''
+            const parts = fullName.split(' ')
+            return parts[0]
+        }
+        
+        const showPlayerHistory = (player) => {
+            selectedPlayer.value = player
+            showHistoryDialog.value = true
+        }
+        
+        const formatDate = (dateString) => {
+            if (!dateString) return '-'
+            return new Date(dateString).toLocaleDateString('fi-FI')
+        }
+        
+        const scrapeLineups = async () => {
+            const gameId = teamStore.currentGameId
+            if (!gameId) {
+                alert('Ottelun ID puuttuu')
+                return
+            }
+            
+            scrapingLineups.value = true
+            
+            try {
+                const response = await fetch(`${config.apiUrl}/scrape-lineups`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authStore.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        gameId: gameId,
+                        stats_count: 8
+                    })
+                })
+                
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+                }
+                
+                const result = await response.json()
+                console.log('Kokoonpanot haettu:', result)
+                
+                // Lataa päivitetyt tiedot
+                await loadLineupData()
+                
+                // Näytä onnistumisviesti
+                alert('Kokoonpanot haettu onnistuneesti!')
+                
+            } catch (error) {
+                console.error('Virhe kokoonpanojen haussa:', error)
+                alert(`Virhe kokoonpanojen haussa: ${error.message}`)
+            } finally {
+                scrapingLineups.value = false
+            }
+        }
+        
+        onMounted(() => {
+            loadLineupData()
+        })
+        
+        return {
+            selectedLineup,
+            lineupData,
+            showHistoryDialog,
+            selectedPlayer,
+            historyHeaders,
+            scrapingLineups,
+            authStore,
+            hasLineupData,
+            loadLineupData,
+            scrapeLineups,
+            getHomeLineup,
+            getAwayLineup,
+            getTotalMatches,
+            getTotalGoals,
+            getTotalAssists,
+            getTotalPoints,
+            getPointsPerGame,
+            getPlayerPosition,
+            getPositionType,
+            getLastName,
+            showPlayerHistory,
+            formatDate
+        }
+    }
+};
+</script>
+
+<style scoped>
+.container {
+  padding: 16px;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-section h2 {
+  margin: 0;
+}
+
+.lineup-selector {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.lineup-container {
+  display: flex;
+  gap: 32px;
+  justify-content: space-around;
+}
+
+.team-section {
+  flex: 1;
+  max-width: 500px;
+}
+
+.team-section h3 {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.field-container {
+  position: relative;
+  width: 100%;
+}
+
+.field-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.player {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid;
+  border-radius: 8px;
+  padding: 4px 8px;
+  min-width: 75px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.8em;
+}
+
+.home-player {
+  border-color: #d32f2f;
+  color: #d32f2f;
+}
+
+.away-player {
+  border-color: #1976d2;
+  color: #1976d2;
+}
+
+.player:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+
+.player-number {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.player-name {
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.player-info {
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.player-info div {
+  margin-bottom: 8px;
+}
+
+/* Responsiivisuus */
+@media (max-width: 768px) {
+  .lineup-container {
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .player {
+    min-width: 50px;
+    padding: 2px 4px;
+    font-size: 0.7em;
+  }
+  
+  .player-name {
+    max-width: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lineup-selector .v-btn {
+    font-size: 0.8em;
+    padding: 8px 12px;
+  }
+  
+  .player {
+    min-width: 40px;
+    padding: 2px;
+    font-size: 0.6em;
+  }
+}
+</style>
