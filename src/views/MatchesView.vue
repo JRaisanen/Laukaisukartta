@@ -1,6 +1,6 @@
 <template>
   <div class="matches-view">
-    <v-container fluid>
+    <v-container fluid class="pa-0">
       <v-card>
         <v-card-title class="d-flex justify-space-between align-center">
           <span>      {{ teamStore.selectedTeam?.name || 'Valitse joukkue' }} - Kausi
@@ -506,7 +506,13 @@ export default {
 
 <style scoped>
 .matches-view {
-  padding: 16px;
+  padding: 0px;
+  margin: 0px;
+}
+
+.v-container {
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .v-data-table {

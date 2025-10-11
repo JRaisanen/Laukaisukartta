@@ -403,7 +403,7 @@ export default {
 
 .lineup-selector {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
 }
 
 .lineup-container {
@@ -419,7 +419,7 @@ export default {
 
 .team-section h3 {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   font-size: 1.2em;
   font-weight: bold;
 }
@@ -442,11 +442,11 @@ export default {
   border: 2px solid;
   border-radius: 8px;
   padding: 4px 8px;
-  min-width: 75px;
+  min-width: 90px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.8em;
+  font-size: 0.9em;
 }
 
 .home-player {
@@ -467,15 +467,16 @@ export default {
 
 .player-number {
   font-weight: bold;
-  font-size: 1.1em;
+  font-size: 1.2em;
 }
 
 .player-name {
-  font-size: 0.9em;
+  font-size: 1.1em;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 80px;
+  max-width: 110px;
 }
 
 .player-info {
@@ -497,26 +498,27 @@ export default {
   }
   
   .player {
-    min-width: 50px;
+    min-width: 70px;
     padding: 2px 4px;
     font-size: 0.7em;
   }
   
   .player-name {
-    max-width: 60px;
+    font-size: 0.95em;
+    max-width: 70px;
   }
 }
 
 @media (max-width: 480px) {
   .lineup-selector .v-btn {
-    font-size: 0.8em;
+    font-size: 0.9em;
     padding: 8px 12px;
   }
   
   .player {
-    min-width: 40px;
+    min-width: 75px;
     padding: 2px;
-    font-size: 0.6em;
+    font-size: 0.8em;
   }
 }
 </style>

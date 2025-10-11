@@ -4,15 +4,17 @@
       <!-- Game Header -->
       <v-card class="mb-4">
         <v-card-title class="d-flex justify-space-between align-center">
-          <div>
+          <div class="game-header-left">
             <h3>{{ gameTitle }}</h3>
-            <v-chip 
-              v-if="gameInfo?.result" 
-              text-color="white"
-              class="mt-2"
-            >
-              {{ gameInfo.result }}
-            </v-chip>
+            <div class="text-center mt-2" v-if="gameInfo?.result">
+              <v-chip 
+                text-color="white"
+                class="result-chip"
+                size="large"
+              >
+                {{ gameInfo.result }}
+              </v-chip>
+            </div>
           </div>
           <div>
             <v-btn 
@@ -62,7 +64,7 @@
             </v-tabs-window-item>
 
             <!-- Shots Tab -->
-            <v-tabs-window-item value="shots">
+            <v-tabs-window-item value="shots"  padding="0">
               <div v-if="gameId">
                 <GameContent />
               </div>
@@ -257,6 +259,17 @@ export default {
 
 .v-chip {
   font-weight: bold;
+}
+
+.game-header-left {
+  flex: 1;
+}
+
+.result-chip {
+  font-size: 1.25rem !important;
+  font-weight: bold;
+  padding: 8px 16px !important;
+  min-width: 80px;
 }
 
 /* Ensure tab content has proper spacing */

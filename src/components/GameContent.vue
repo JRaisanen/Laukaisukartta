@@ -129,7 +129,7 @@
         <v-tab value="three">Maalit</v-tab>
       </v-tabs>
 
-      <v-card-text>
+      <v-card-text class="pa-2">
         <v-tabs-window v-model="tab">
           <v-tabs-window-item value="one">
             <div style="text-align:center; margin-bottom: 4px;">
@@ -751,23 +751,25 @@ export default {
     
     const loadAreas = async () => {
       try {
-        const response = await fetch('/alueet2.json')
-        if (response.ok) {
-          const data = await response.json()
-          const areasData = data.alueet || []
-          areas.value = areasData.map(area => {
-            const points = calculatePoints(area.d)
-            return { ...area, points }
-          })
-          console.log('Alueet ladattu:', areas.value.length)
-          
-          // Calculate area events if we have events loaded
-          if (events.value.length > 0) {
-            calculateAreaEvents()
-          }
+        const response = await fetch('/Laukaisukartta/alueet2.json')
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data = await response.json()
+        const areasData = data.alueet || []
+        areas.value = areasData.map(area => {
+          const points = calculatePoints(area.d)
+          return { ...area, points }
+        })
+        console.log('Alueet ladattu:', areas.value.length)
+        
+        // Calculate area events if we have events loaded
+        if (events.value.length > 0) {
+          calculateAreaEvents()
         }
       } catch (error) {
         console.error('Virhe alueiden lataamisessa:', error)
+        console.log('Yritetään ladata polusta /Laukaisukartta/alueet2.json')
         areas.value = []
       }
     }
