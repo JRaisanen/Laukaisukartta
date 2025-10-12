@@ -87,6 +87,11 @@
         </div>
         
         <h4 class="mt-4">Kausikohtaiset tilastot ({{ selectedPlayer.statistics?.length || 0 }} sarjaa)</h4>
+        <div v-if="selectedPlayer.position && selectedPlayer.position.toUpperCase().includes('MV')" class="mb-2">
+          <small class="text-muted">
+            <strong>Mv:</strong> Maalivahtiottelut, <strong>TO:</strong> Torjunnat, <strong>PM:</strong> Päästetyt maalit, <strong>T%:</strong> Torjuntaprosentti
+          </small>
+        </div>
         <v-data-table
             :headers="historyHeaders"
             :items="selectedPlayer.statistics || []"
@@ -146,17 +151,44 @@ export default {
         const selectedPlayer = ref(null)
         const scrapingLineups = ref(false)
         
-        const historyHeaders = [
-            { title: 'Kausi', value: 'Kausi', sortable: true, width: '100px' },
-            { title: 'Joukkue', value: 'Joukkue', sortable: true, width: '150px' },
-            { title: 'Sarja', value: 'Sarja', sortable: true, width: '160px' },
-            { title: 'Ottelut', value: 'O', sortable: true, width: '60px' },
-            { title: 'Maalit', value: 'M', sortable: true, width: '60px' },
-            { title: 'Syötöt', value: 'S', sortable: true, width: '60px' },
-            { title: 'Pisteet', value: 'P', sortable: true, width: '60px' },
-            { title: 'Jmin', value: 'Jmin', sortable: true, width: '60px' },
-            { title: 'P/O', value: 'avg', sortable: false, width: '60px' }
-        ]
+        // Computed property for headers based on player type
+        const historyHeaders = computed(() => {
+            if (!selectedPlayer.value) {
+                return []
+            }
+            
+            const isGoalkeeper = selectedPlayer.value.position && selectedPlayer.value.position.toUpperCase().includes('MV')
+            
+            const baseHeaders = [
+                { title: 'Kausi', value: 'Kausi', sortable: true, width: '100px' },
+                { title: 'Joukkue', value: 'Joukkue', sortable: true, width: '120px' },
+                { title: 'Sarja', value: 'Sarja', sortable: true, width: '140px' },
+                { title: 'Ottelut', value: 'O', sortable: true, width: '50px' }
+            ]
+            
+            if (isGoalkeeper) {
+                // Maalivahtitilastot
+                return [
+                    ...baseHeaders,
+                    { title: 'Mv', value: 'Mv', sortable: true, width: '50px' },
+                    { title: 'TO', value: 'TO', sortable: true, width: '50px' },
+                    { title: 'PM', value: 'PM', sortable: true, width: '50px' },
+                    { title: 'T%', value: 'T%', sortable: true, width: '60px' },
+                    { title: 'Pisteet', value: 'P', sortable: true, width: '50px' },
+                    { title: 'Jmin', value: 'Jmin', sortable: true, width: '50px' }
+                ]
+            } else {
+                // Kenttäpelaajatilastot
+                return [
+                    ...baseHeaders,
+                    { title: 'Maalit', value: 'M', sortable: true, width: '50px' },
+                    { title: 'Syötöt', value: 'S', sortable: true, width: '50px' },
+                    { title: 'Pisteet', value: 'P', sortable: true, width: '50px' },
+                    { title: 'Jmin', value: 'Jmin', sortable: true, width: '50px' },
+                    { title: 'P/O', value: 'avg', sortable: false, width: '50px' }
+                ]
+            }
+        })
         
         const loadLineupData = async () => {
             try {
