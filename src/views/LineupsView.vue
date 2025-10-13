@@ -17,8 +17,7 @@
     <!-- Kentällisten valinta -->
     <div class="lineup-selector">
       <v-btn-toggle v-model="selectedLineup" mandatory>
-        <v-btn value="1. Kentällinen">I</v-btn>
-        <v-btn value="2. Kentällinen">II</v-btn>
+        <v-btn value="1. Kentällinen">I</v-btn>    <v-btn value="2. Kentällinen">II</v-btn>
         <v-btn value="3. Kentällinen">III</v-btn>
         <v-btn value="4. Kentällinen">IV</v-btn>
       </v-btn-toggle>
@@ -84,6 +83,8 @@
         <div class="player-info">
             <div><strong>Pelipaikka:</strong> {{ selectedPlayer.position }}</div>
             <div><strong>Status:</strong> {{ selectedPlayer.status }}</div>
+            <div v-if="selectedPlayer.birthyear"><strong>Syntymävuosi:</strong> {{ selectedPlayer.birthyear }}</div>
+            <div v-if="selectedPlayer.age && authStore.isAuthenticated"><strong>Ikä:</strong> {{ selectedPlayer.age }} vuotta</div>
         </div>
         
         <h4 class="mt-4">Kausikohtaiset tilastot ({{ selectedPlayer.statistics?.length || 0 }} sarjaa)</h4>
@@ -225,12 +226,90 @@ export default {
         
         // Computed properties
         const getHomeLineup = computed(() => {
-            return lineupData.value.teams?.home?.lineups?.[selectedLineup.value] || []
+            if (!lineupData.value.teams?.home?.lineups) return []
+            
+            const currentLineup = lineupData.value.teams.home.lineups[selectedLineup.value] || []
+            
+            // Kerää kaikki maalivahdit kaikista kentällisistä
+            const allGoalkeepers = []
+            Object.values(lineupData.value.teams.home.lineups).forEach((lineup) => {
+                if (Array.isArray(lineup)) {
+                    lineup.forEach(player => {
+                        if (player.position && player.position.startsWith('MV/')) {
+                            allGoalkeepers.push(player)
+                        }
+                    })
+                }
+            })
+            
+            // Ota vain kentälliset (ei maalivahteja)
+            const fieldPlayers = currentLineup.filter(player => !player.position?.startsWith('MV/'))
+            
+            // Lisää oikea maalivahti kentälliseen
+            const goalkeeper = getGoalkeeperForLineup(selectedLineup.value, allGoalkeepers, lineupData.value.teams.home.lineups)
+            console.log('Home lineup:', selectedLineup.value, 'Goalkeeper:', goalkeeper?.name, goalkeeper?.position)
+            return goalkeeper ? [...fieldPlayers, goalkeeper] : fieldPlayers
         })
         
         const getAwayLineup = computed(() => {
-            return lineupData.value.teams?.away?.lineups?.[selectedLineup.value] || []
+            if (!lineupData.value.teams?.away?.lineups) return []
+            
+            const currentLineup = lineupData.value.teams.away.lineups[selectedLineup.value] || []
+            
+            // Kerää kaikki maalivahdit kaikista kentällisistä
+            const allGoalkeepers = []
+            Object.values(lineupData.value.teams.away.lineups).forEach((lineup) => {
+                if (Array.isArray(lineup)) {
+                    lineup.forEach(player => {
+                        if (player.position && player.position.startsWith('MV/')) {
+                            allGoalkeepers.push(player)
+                        }
+                    })
+                }
+            })
+            
+            // Ota vain kentälliset (ei maalivahteja)
+            const fieldPlayers = currentLineup.filter(player => !player.position?.startsWith('MV/'))
+            
+            // Lisää oikea maalivahti kentälliseen
+            const goalkeeper = getGoalkeeperForLineup(selectedLineup.value, allGoalkeepers, lineupData.value.teams.away.lineups)
+            console.log('Away lineup:', selectedLineup.value, 'Goalkeeper:', goalkeeper?.name, goalkeeper?.position)
+            return goalkeeper ? [...fieldPlayers, goalkeeper] : fieldPlayers
         })
+        
+        const getGoalkeeperForLineup = (lineup, goalkeepers, teamLineups) => {
+            if (!Array.isArray(goalkeepers)) return null
+            
+            // Tarkista onko valittu kentällinen olemassa joukkueella
+            const teamLineupKeys = Object.keys(teamLineups || {})
+            if (!teamLineupKeys.includes(lineup)) {
+                console.log('Lineup not found for team:', lineup, 'Available:', teamLineupKeys)
+                return null // Jos kentällistä ei ole, älä näytä maalivahtia
+            }
+            
+            // Etsi MV/1 ja MV/2
+            const mv1 = goalkeepers.find(gk => gk.position === 'MV/1')
+            const mv2 = goalkeepers.find(gk => gk.position === 'MV/2')
+            
+            // Etsi joukkueen viimeinen kentällinen dynaamisesti
+            const possibleLineups = ['1. Kentällinen', '2. Kentällinen', '3. Kentällinen', '4. Kentällinen']
+            const existingLineups = possibleLineups.filter(lineupName => 
+                teamLineupKeys.includes(lineupName)
+            )
+            const lastLineup = existingLineups[existingLineups.length - 1]
+            
+            console.log('Available lineups:', existingLineups, 'Last:', lastLineup, 'Current:', lineup)
+            
+            if (lineup === lastLineup && mv2) {
+                // Viimeisessä kentällisessä -> MV/2 (jos olemassa)
+                return mv2
+            } else if (mv1) {
+                // Muissa kentällisissä -> MV/1 (tai MV/1 kaikissa jos ei MV/2)
+                return mv1
+            }
+            
+            return null
+        }
         
         const getTotalMatches = computed(() => {
             if (!selectedPlayer.value?.statistics) return 0
@@ -295,13 +374,13 @@ export default {
                     x = 50; y = 17; break
                 case 'Defence':
                     y = 28
-                    x = positionDetail.includes('VP') ? 30 : 70
+                    x = positionDetail.includes('VP') ? 70 : 30
                     break
                 case 'Center':
                     x = 50; y = 42; break
                 case 'Wing':
                     y = 42
-                    x = positionDetail.includes('VL') ? 20 : 80
+                    x = positionDetail.includes('VL') ? 80 : 20
                     break
                 default:
                     x = 60; y = 70
@@ -324,6 +403,8 @@ export default {
             if (position.includes('VL') || position.includes('OL')) return 'Wing'
             return 'Center'
         }
+        
+
         
         const getLastName = (fullName) => {
             if (!fullName) return ''
@@ -349,7 +430,7 @@ export default {
             }
             
             scrapingLineups.value = true
-            
+            console.log('Aloitetaan kokoonpanojen haku...')
             try {
                 const response = await fetch(`${config.apiUrl}/scrape-lineups`, {
                     method: 'POST',
@@ -364,10 +445,18 @@ export default {
                 })
                 
                 if (!response.ok) {
-                    const errorData = await response.json()
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
-                }
-                
+                  const errorData = await response.json()
+            
+                  // Spesifinen käsittely 404-virheelle (sbl_matchid puuttuu)
+                  if (response.status === 404 && errorData.error === 'Game does not have sbl_matchid') {
+                      alert('Ottelulta puuttuu SBL-ottelu ID. Kokoonpanotietoja ei voida hakea automaattisesti.')
+                      return
+                  }          
+
+                  // Muut virheet
+                  throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`)
+                }      
+
                 const result = await response.json()
                 console.log('Kokoonpanot haettu:', result)
                 
@@ -409,6 +498,7 @@ export default {
             getPointsPerGame,
             getPlayerPosition,
             getPositionType,
+            getGoalkeeperForLineup,
             getLastName,
             showPlayerHistory,
             formatDate
@@ -509,6 +599,14 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 110px;
+}
+
+.goalkeeper-info {
+  font-size: 0.7em;
+  font-weight: 500;
+  color: #666;
+  margin-top: 2px;
+  text-align: center;
 }
 
 .player-info {
