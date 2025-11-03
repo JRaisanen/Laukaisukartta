@@ -29,6 +29,7 @@
           :items="games"
           :loading="loading"
           density="compact"
+          :items-per-page="-1"
           :hide-default-footer="true"
           :sort-by="[{ key: 'gameDate', order: 'desc' }]"
           class="elevation-1"

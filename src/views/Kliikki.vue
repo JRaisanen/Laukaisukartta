@@ -54,9 +54,7 @@
 
         <!-- Jos editointitilassa, näytä ottelun tiedot -->
         <div v-if="isEditMode" class="edit-mode-info">
-          <p><strong>Editoidaan ottelua:</strong> {{ teamNames }}</p>
           <p><strong>Tapahtumia:</strong> {{ events.length }}</p>
-          <p><strong>Maaleja:</strong> {{ goalevents.length }}</p>
         </div>
 
 
@@ -248,7 +246,7 @@
         </v-dialog>
       </div>
 
-      <span style="margin-right: 10px;">Erä/kenttätilanne:</span>
+      <span style="margin-right: 10px;">Erä/kenttätilanne/kentällinen:</span>
       <div style="margin: 5px 0; display: flex; align-items: center;">
         <v-list style="display: flex; flex-direction: row; padding: 0;" class="period-list">
             <v-list-item
@@ -280,6 +278,24 @@
             >
               <v-card :color="selectedSituation === situation.value ? 'primary' : ''" class="rounded-card-period" style="text-align: center;">
                 {{ situation.title }}
+              </v-card>
+            </v-list-item>
+          </v-list>      
+        </div>
+
+        <div style="margin: 5px 0; display: flex; align-items: center;">
+        <v-list style="display: flex; flex-direction: row; padding: 0;" class="period-list">
+            <v-list-item
+              v-for="line in lineOptions"
+              :key="line.value"
+              :class="{ selected: selectedLine === line.value,
+                'not-selected': !selectedLine || selectedLine !== line.value
+               }"
+              @click="selectedLine = line.value"
+              style="width: 90px; justify-content: center; cursor: pointer;"
+            >
+              <v-card :color="selectedLine === line.value ? 'primary' : ''" class="rounded-card-period" style="text-align: center;">
+                {{ line.title }}
               </v-card>
             </v-list-item>
           </v-list>      
@@ -542,6 +558,13 @@
           { value: 4, title: 'Tv' }
         ],
         selectedSituation: 1,
+        lineOptions: [
+          { value: 1, title: 'I' },
+          { value: 2, title: 'II' },
+          { value: 3, title: 'III' },
+          { value: 4, title: 'IV' }
+        ],
+        selectedLine: 1,
         goalDialog: false,
         goalData: {
           gameId: null,
@@ -566,9 +589,11 @@
         ],
         goalTypeOptions: [
           { value: 'kuljetus', title: 'Laukaus kuljetuksesta/läpiajosta' },
+          { value: '2vs1', title: 'Ylivoimahyökkäys (2v1 ym)' },
           { value: 'laukauspaikaltaan', title: 'Laukaus paikaltaan' },
           { value: 'suoraansyotosta', title: 'Laukaus suoraan syötöstä' },
           { value: 'rebound', title: 'Rebound' },
+          { value: 'ohjaus', title: 'Ohjaus' },
           { value: 'vapari', title: 'Vapaalyönti/kuvio' },
           //{ value: 'rangaistuslaukaus', title: 'Rangaistuslaukaus' },
           { value: 'omamaali', title: 'Oma maali' },
@@ -927,7 +952,7 @@
           else
           {
 
-            if (this.selectedPlayer.playerId < 100 || this.selectedPlayer.playerId >= 100 && this.selectedAction !== 'blokki')
+            if (this.selectedPlayer.playerId != 100 || this.selectedPlayer.playerId == 100 && this.selectedAction !== 'blokki')
             {
               this.goalData.eventId = await this.addEvent();
               //console.log('Eventid', this.goalData.eventId);
@@ -1104,10 +1129,12 @@
             blocker: null,
             period: this.selectedPeriod,
             situation: this.selectedSituation,
+            line: this.selectedLine,
             penaltyLength: null, // Tämä täytetään dialogissa
             penaltyshot: 0,
           };
 
+          console.log('Tapahtumaketju', event.line);
           this.penaltyLength = 2; // oletusarvo
           this.pendingEvent = event;
           if (this.selectedAction === "jäähy") {
@@ -1126,6 +1153,7 @@
             blocker: this.selectedBlocker,
             period: this.selectedPeriod,
             situation: this.selectedSituation,
+            line: this.selectedLine,
             penaltyLength: null,
             penaltyshot: 0,
           };
@@ -1367,6 +1395,7 @@
         goalieNumber: event.goalie ? event.goalie.number : null,
         period: event.period,
         situation: event.situation,
+        line: event.line,
         xg: event.xg,
         penalty2m: event.penaltyLength === 2 ? 1 : (event.penaltyLength === 4 ? 2 : null),
         penalty10m: event.penaltyLength === 10 ? 1 : null,
@@ -1441,6 +1470,7 @@
     async confirmXgDialog() {
       if (this.pendingEvent) {
         this.pendingEvent.xg = Number(this.xgValue.toFixed(3));
+        console.log('Tallennetaan xG tapahtuma:', this.pendingEvent);
         const eventid = await this.saveSingleEvent(this.pendingEvent); // jos haluat tallentaa heti
         //this.saveSingleEvent(this.pendingEvent); // jos haluat tallentaa heti
         this.pendingEvent.eventId = eventid;
@@ -1737,6 +1767,7 @@
             } : null,
             period: event.period,
             situation: event.situation,
+            line: event.line,
             xg: event.xg || 0,
             penaltyLength: event.penalty2m ? 2 : (event.penalty10m ? 10 : (event.penalty20m ? 20 : null)),
             penaltyshot: event.penaltyshot || 0

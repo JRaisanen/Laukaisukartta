@@ -170,7 +170,7 @@
                 :class="[
                   'marker',
                   event.action,
-                  event.playerId < 100 ? 'circle' : 'square',
+                  event.playerNumber < 100 ? 'circle' : 'square',
                   { 'highlighted-marker': selectedEventId === event.eventId || hoveredEventId === event.eventId }
                 ]"
                 :style="{ top: event.yCoordinate + '%', left: event.xCoordinate + '%' }"
@@ -538,10 +538,10 @@ export default {
         events = events.filter(event => event.playerName === this.selectedPlayer);
       }
       if (!this.showHomeTeam) {
-        events = events.filter(event => event.playerId >= 100);
+        events = events.filter(event => event.playerNumber >= 100);
       }
       if (!this.showOpponentTeam) {
-        events = events.filter(event => event.playerId && event.playerId < 100);
+        events = events.filter(event => event.playerId && event.playerNumber < 100);
       }
       // Suodata erän mukaan
       if (this.selectedPeriod) {
@@ -558,7 +558,7 @@ export default {
       const stats = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, total: 0, xg: 0 };
       const shotActions = ['maali', 'torjunta', 'blokki', 'ohi'];
       this.events.forEach(event => {
-        if (event.playerId < 100 && shotActions.includes(event.action)) {
+        if (event.playerNumber < 100 && shotActions.includes(event.action)) {
           stats[event.action]++;
           stats.total++;
           stats.xg += event.xg || 0;
@@ -571,7 +571,7 @@ export default {
       const stats = { maali: 0, torjunta: 0, blokki: 0, ohi: 0, total: 0, xg: 0 };
       const shotActions = ['maali', 'torjunta', 'blokki', 'ohi'];
       this.events.forEach(event => {
-        if (event.playerId >= 100 && shotActions.includes(event.action)) {
+        if (event.playerNumber >= 100 && shotActions.includes(event.action)) {
           stats[event.action]++;
           stats.total++;
           stats.xg += event.xg || 0;
@@ -603,12 +603,12 @@ export default {
     },
     filteredHomeXg() {
       return this.filteredEvents
-        .filter(e => e.playerId < 100)
+        .filter(e => e.playerNumber < 100)
         .reduce((sum, e) => sum + (e.xg || 0), 0);
     },
     filteredOpponentXg() {
       return this.filteredEvents
-        .filter(e => e.playerId >= 100)
+        .filter(e => e.playerNumber >= 100)
         .reduce((sum, e) => sum + (e.xg || 0), 0);
     },
     goalSituationText() {
@@ -895,7 +895,7 @@ export default {
           const y = (event.yCoordinate / 100) * 574;
           const areaId = this.findAreaContainingPoint(x, y);
           if (areaId) {
-            const team = event.playerId < 100 ? 'home' : 'away';
+            const team = event.playerNumber < 100 ? 'home' : 'away';
             areaEvents[areaId][team][event.action]++;
             areaEvents[areaId][team].yhteensä++;
           }

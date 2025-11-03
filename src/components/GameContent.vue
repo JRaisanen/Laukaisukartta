@@ -145,7 +145,7 @@
                 :class="[
                   'marker',
                   event.action,
-                  event.playerId < 100 ? 'circle' : 'square',
+                  event.playerId != 100 ? 'circle' : 'square',
                   { 'highlighted-marker': selectedEventId === event.eventId || hoveredEventId === event.eventId }
                 ]"
                 :style="getMarkerStyle(event)"
@@ -313,7 +313,7 @@
       </v-list-item>
     </v-list>
 
-    <span style="margin-right: 10px;">Erä/kenttätilanne (klikkaa valituksi/pois):</span>
+    <span style="margin-right: 10px;">Erä/kenttätilanne/kentällinen (klikkaa valituksi/pois):</span>
     <div style="margin: 5px 0; display: flex; align-items: center;">
       <v-list style="display: flex; flex-direction: row; padding: 0;" class="period-list">
           <v-list-item
@@ -345,6 +345,24 @@
           >
             <v-card :color="selectedSituation === situation.value ? 'primary' : ''" class="rounded-card-period" style="text-align: center;">
               {{ situation.title }}
+            </v-card>
+          </v-list-item>
+        </v-list>      
+      </div>
+
+      <div style="margin: 5px 0; display: flex; align-items: center;">
+        <v-list style="display: flex; flex-direction: row; padding: 0;" class="period-list">
+          <v-list-item
+            v-for="line in lineOptions"
+            :key="line.value"
+            :class="{ selected: selectedLine === line.value,
+              'not-selected': !selectedLine || selectedLine !== line.value
+              }"
+            @click="selectedLine = (selectedLine === line.value ? null : line.value)"
+            style="width: 90px; justify-content: center; cursor: pointer;"
+          >
+            <v-card :color="selectedLine === line.value ? 'primary' : ''" class="rounded-card-period" style="text-align: center;">
+              {{ line.title }}
             </v-card>
           </v-list-item>
         </v-list>      
@@ -422,6 +440,7 @@ export default {
     const showEventList = ref(true)
     const selectedPeriod = ref(null)
     const selectedSituation = ref(null)
+    const selectedLine = ref(null)
     
     // Game data
     const areas = ref([])
@@ -433,9 +452,11 @@ export default {
     // Goal dialog options
     const goalTypeOptions = [
       { value: 'kuljetus', title: 'Laukaus kuljetuksesta/läpiajosta' },
+      { value: '2vs1', title: 'Ylivoimahyökkäys (2v1 ym)' },
       { value: 'laukauspaikaltaan', title: 'Laukaus paikaltaan' },
       { value: 'suoraansyotosta', title: 'Laukaus suoraan syötöstä' },
       { value: 'rebound', title: 'Rebound' },
+      { value: 'ohjaus', title: 'Ohjaus' },
       { value: 'vapari', title: 'Vapari/vaparikuvio' },
       { value: 'rangaistuslaukaus', title: 'Rangaistuslaukaus' },
       { value: 'omamaali', title: 'Oma maali' }
@@ -448,9 +469,9 @@ export default {
     ]
     
     const periodOptions = [
-      { title: 'I', value: 1 },
-      { title: 'II', value: 2 },
-      { title: 'III', value: 3 },
+      { title: '1', value: 1 },
+      { title: '2', value: 2 },
+      { title: '3', value: 3 },
       { title: 'JA', value: 4 }
     ]
     
@@ -459,6 +480,12 @@ export default {
         { value: 2, title: 'Yv' },
         { value: 3, title: 'Av' },
         { value: 4, title: 'Tv' },
+    ]
+    const lineOptions = [
+        { value: 1, title: 'I' },
+        { value: 2, title: 'II' },
+        { value: 3, title: 'III' },
+        { value: 4, title: 'IV' },
     ]
     
     const teamStatsHeaders = [
@@ -477,8 +504,8 @@ export default {
     const filteredEvents = computed(() => {
       return events.value.filter(event => {
         // Home/Away team filtering
-        if (!showHomeTeam.value && event.playerId < 100) return false
-        if (!showOpponentTeam.value && event.playerId >= 100) return false
+        if (!showHomeTeam.value && event.playerNumber < 100) return false
+        if (!showOpponentTeam.value && event.playerNumber >= 100) return false
         
         // Player filtering
         if (selectedPlayer.value && event.playerId !== selectedPlayer.value) return false
@@ -488,6 +515,9 @@ export default {
         
         // Suodata kenttätilanteen mukaan
         if (selectedSituation.value && event.situation !== selectedSituation.value) return false
+
+        // Suodata kentällisen mukaan
+        if (selectedLine.value && event.line !== selectedLine.value) return false
 
         // Tactical situation filtering
         //if (selectedSituation.value && event.tacticalsituation !== selectedSituation.value) return false
@@ -511,13 +541,13 @@ export default {
     
     const filteredHomeXg = computed(() => {
       return filteredEvents.value
-        .filter(event => event.playerId < 100)
+        .filter(event => event.playerNumber < 100)
         .reduce((sum, event) => sum + (parseFloat(event.xg) || 0), 0)
     })
     
     const filteredOpponentXg = computed(() => {
       return filteredEvents.value
-        .filter(event => event.playerId >= 100)
+        .filter(event => event.playerNumber >= 100)
         .reduce((sum, event) => sum + (parseFloat(event.xg) || 0), 0)
     })
     
@@ -539,8 +569,8 @@ export default {
     })
     
     const teamStats = computed(() => {
-      const homeEvents = filteredEvents.value.filter(e => e.playerId < 100)
-      const awayEvents = filteredEvents.value.filter(e => e.playerId >= 100)
+      const homeEvents = filteredEvents.value.filter(e => e.playerNumber < 100)
+      const awayEvents = filteredEvents.value.filter(e => e.playerNumber >= 100)
       
       return [
         {
@@ -576,7 +606,7 @@ export default {
         
         // Situation filtering (jos goaleventissa on situation kenttä)
         if (selectedSituation.value && g.situation && g.situation !== selectedSituation.value) return false
-        
+       
         return g.ownteam === 1
       })
       
@@ -677,7 +707,7 @@ export default {
     // Computed for positioning markers with fixed coordinates
     const getMarkerStyle = (event) => {
       const x = (event.xCoordinate / 100) * 342
-      const y = (event.yCoordinate / 100) * 574
+      const y = (event.yCoordinate / 100) * 574+3
       return {
         top: y + 'px',
         left: x + 'px'
@@ -1064,7 +1094,7 @@ export default {
         const areaId = findAreaContainingPoint(x, y)
         
         if (areaId) {
-          const team = event.playerId < 100 ? 'home' : 'away'
+          const team = event.playerNumber < 100 ? 'home' : 'away'
           newAreaEvents[areaId][team][event.action]++
           newAreaEvents[areaId][team].yhteensä++
         }
@@ -1110,6 +1140,7 @@ export default {
       showEventList,
       selectedPeriod,
       selectedSituation,
+      selectedLine,
       areas,
       areaEvents,
       goalevents,
@@ -1117,6 +1148,7 @@ export default {
       actions,
       periodOptions,
       situationOptions,
+      lineOptions,
       goalTypeOptions,
       tacticalSituationOptions,
       teamStatsHeaders,
@@ -1239,6 +1271,13 @@ export default {
   text-shadow: 1px 1px 1px rgba(0,0,0,0.7);
 }
 
+.marker2 {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
 /* Shot and goal markers */
 .marker {
   position: absolute;
@@ -1255,7 +1294,7 @@ export default {
 }
 
 .marker.square {
-  border-radius: 2px;
+  border-radius: 0px;
 }
 
 .marker.maali {

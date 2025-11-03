@@ -64,7 +64,7 @@
             </v-tabs-window-item>
 
             <!-- Shots Tab -->
-            <v-tabs-window-item value="shots"  padding="0">
+            <v-tabs-window-item value="shots">
               <div v-if="gameId">
                 <GameContent />
               </div>
