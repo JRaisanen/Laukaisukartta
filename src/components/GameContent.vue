@@ -92,19 +92,41 @@
     </v-dialog>
 
     <!-- Team Names Display -->
+    <!-- Muutetaan filter-container osio -->
     <div v-if="events.length > 0" class="filter-container">
-      <v-container class="ma-0 pa-0">
-        <v-row no-gutters>
-          <v-col>
-            <v-checkbox class="checkbox-label" label="Omat" v-model="showHomeTeam"></v-checkbox>
-          </v-col>
-          <v-col>
-              <v-checkbox class="checkbox-label" label="Vastustaja" v-model="showOpponentTeam"></v-checkbox>
-          </v-col>
-          <v-col>
-            <v-checkbox class="checkbox-label" label="Numerot" v-model="showNumbers"></v-checkbox>
-          </v-col>
-          <v-col>
+      <div class="team-filter-wrapper">
+        <v-list class="period-list team-filter-list">
+          <v-list-item
+            :class="{ selected: showHomeTeam, 'not-selected': !showHomeTeam }"
+            @click="showHomeTeam = !showHomeTeam"
+            class="team-filter-item"
+          >
+            <v-card :color="showHomeTeam ? 'primary' : ''" class="rounded-card-team">
+              Omat
+            </v-card>
+          </v-list-item>
+          
+          <v-list-item
+            :class="{ selected: showOpponentTeam, 'not-selected': !showOpponentTeam }"
+            @click="showOpponentTeam = !showOpponentTeam"
+            class="team-filter-item"
+          >
+            <v-card :color="showOpponentTeam ? 'primary' : ''" class="rounded-card-team">
+              Vastustaja
+            </v-card>
+          </v-list-item>
+          
+          <v-list-item
+            :class="{ selected: showNumbers, 'not-selected': !showNumbers }"
+            @click="showNumbers = !showNumbers"
+            class="team-filter-item"
+          >
+            <v-card :color="showNumbers ? 'primary' : ''" class="rounded-card-team">
+              Numerot
+            </v-card>
+          </v-list-item>
+          
+          <v-list-item class="player-select-item">
             <v-select
               v-model="selectedPlayer"
               :items="allPlayers"
@@ -112,10 +134,12 @@
               item-title="name"
               item-value="id"
               variant="outlined"
+              density="compact"
+              class="player-select"
             ></v-select>
-          </v-col>
-        </v-row>
-      </v-container>
+          </v-list-item>
+        </v-list>      
+      </div>
     </div>
 
     <div class="map-and-eventlist">
@@ -555,7 +579,7 @@ export default {
       // Get unique players based on playerId and playerName
       const uniquePlayersMap = new Map()
       events.value.forEach(event => {
-        if (event.playerId && event.playerName) {
+        if (event.playerId && event.playerName && event.playerId !== 100) {
           uniquePlayersMap.set(event.playerId, {
             id: event.playerId,
             name: event.playerName
@@ -1373,6 +1397,125 @@ export default {
   color: #4CAF50;
 }
 
+/* Responsiiviset team filter säännöt */
+.team-filter-wrapper {
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.team-filter-list {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.team-filter-item {
+  width: 115px;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.player-select-item {
+  width: 200px;
+  padding-left: 16px;
+  flex-shrink: 1;
+  min-width: 150px;
+}
+
+.rounded-card-team {
+  border-radius: 25px;
+  height: 30px;
+  width: 85px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  padding: 4px 8px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+.player-select {
+  min-width: 150px;
+}
+
+/* Responsiiviset media queryt */
+@media (max-width: 768px) {
+  .team-filter-list {
+    flex-wrap: wrap;
+  }
+  
+  .team-filter-item {
+    width: 95px;
+  }
+  
+  .rounded-card-team {
+    width: 75px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+  
+  .player-select-item {
+    width: 100%;
+    padding-left: 0;
+    margin-top: 8px;
+    order: 4;
+  }
+}
+
+@media (max-width: 600px) {
+  .team-filter-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .team-filter-list {
+    justify-content: center;
+    margin-bottom: 0px;
+  }
+  
+  .team-filter-item {
+    width: 80px;
+    flex: 1;
+    max-width: 100px;
+  }
+  
+  .rounded-card-team {
+    width: 70px;
+    height: 26px;
+    font-size: 0.75rem;
+  }
+  
+  .player-select-item {
+    width: 100%;
+    padding: 0;
+    margin-top: 5px;
+  }
+}
+
+@media (max-width: 400px) {
+  .team-filter-list {
+    gap: 0px;
+  }
+  
+  .team-filter-item {
+    width: 70px;
+  }
+  
+  .rounded-card-team {
+    width: 60px;
+    height: 24px;
+    font-size: 0.7rem;
+    padding: 2px 4px;
+  }
+}
+
+
 /* Media queries for responsive image handling */
 @media (max-width: 768px) {
   .image-containeri {
@@ -1387,6 +1530,8 @@ export default {
     width: 342px;
     height: 574px;
   }
+
+
 }
 
 @media (max-width: 400px) {

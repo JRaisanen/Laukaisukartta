@@ -509,7 +509,7 @@ export default {
 
 <style scoped>
 .container {
-  padding: 16px;
+  padding: 0px 18px 8px;
 }
 
 .header-section {

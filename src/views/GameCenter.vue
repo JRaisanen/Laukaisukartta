@@ -4,32 +4,93 @@
       <!-- Game Header -->
       <v-card class="mb-4">
         <v-card-title class="d-flex justify-space-between align-center">
-          <div class="game-header-left">
-            <h3>{{ gameTitle }}</h3>
-            <div class="text-center mt-2" v-if="gameInfo?.result">
-              <v-chip 
-                text-color="white"
-                class="result-chip"
-                size="large"
-              >
-                {{ gameInfo.result }}
-              </v-chip>
+          <div class="d-flex align-center">
+            <div class="game-header-content">
+              <!-- Joukkueet logojen kanssa -->
+              <div class="teams-header d-flex align-center justify-center mb-2">
+                <!-- Jos joukkueiden nimet ja logot ovat saatavilla -->
+                <template v-if="gameInfo?.homeTeamName && gameInfo?.awayTeamName">
+                  <div class="team-info d-flex flex-column align-center">
+                    <img 
+                      v-if="gameInfo?.homeTeamLogo"
+                      :src="gameInfo.homeTeamLogo"
+                      :alt="gameInfo?.homeTeamName || 'Kotijoukkue'"
+                      class="team-logo mb-1"
+                      @error="onLogoError"
+                    />
+                    <span class="team-name">{{ gameInfo.homeTeamName }}</span>
+                  </div>
+                  
+                  <div class="vs-section mx-3">
+                    <span class="vs-text">vs</span>
+                    <div v-if="gameInfo?.result" class="result-display mt-1">
+                      <v-chip 
+                        text-color="white"
+                        class="result-chip"
+                        size="small"
+                      >
+                        {{ gameInfo.result }}
+                      </v-chip>
+                    </div>
+                  </div>
+                  
+                  <div class="team-info d-flex flex-column align-center">
+                    <img 
+                      v-if="gameInfo?.awayTeamLogo"
+                      :src="gameInfo.awayTeamLogo"
+                      :alt="gameInfo?.awayTeamName || 'Vierasjoukkue'"
+                      class="team-logo mb-1"
+                      @error="onLogoError"
+                    />
+                    <span class="team-name">{{ gameInfo.awayTeamName }}</span>
+                  </div>
+                </template>
+                
+                <!-- Jos joukkueiden nimiä ei ole, näytä ottelun nimi -->
+                <template v-else>
+                  <div class="match-title-fallback">
+                    <h3 class="mb-0">{{ gameTitle }}</h3>
+                    
+                    <!-- Painike joukkuetietojen hakemiseen kirjautuneille -->
+                    <div v-if="authStore.token && !scrapingGameInfo" class="mt-2">
+                      <v-btn
+                        @click="scrapeGameInfo"
+                        color="primary"
+                        size="small"
+                        :loading="scrapingGameInfo"
+                        prepend-icon="mdi-download"
+                      >
+                        Hae joukkuetiedot
+                      </v-btn>
+                    </div>
+                    
+                    <div v-if="gameInfo?.result" class="result-display mt-2">
+                      <v-chip 
+                        text-color="white"
+                        class="result-chip"
+                        size="small"
+                      >
+                        {{ gameInfo.result }}
+                      </v-chip>
+                    </div>
+                  </div>
+                </template>
+              </div>
+
+              <div v-if="gameInfo?.gameDate" class="text-center">
+                <span class="game-date">{{ formatDate(gameInfo.gameDate) }}</span>
+              </div>              
             </div>
-          </div>
-          <div>
             <v-btn 
               icon 
               @click="goBack"
-              class="mr-2"
+              class="mr-3"
+              size="small"
             >
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
           </div>
-        </v-card-title>
-        
-        <v-card-subtitle v-if="gameInfo?.gameDate">
-          {{ formatDate(gameInfo.gameDate) }}
-        </v-card-subtitle>
+        </v-card-title>        
       </v-card>
 
       <!-- Tabs -->
@@ -117,6 +178,7 @@ export default {
     const activeTab = ref('lineup')
     const loading = ref(false)
     const gameInfo = ref(null)
+    const scrapingGameInfo = ref(false) // Uusi muuttuja
     
     // Get gameId from route params
     const gameId = computed(() => {
@@ -124,12 +186,20 @@ export default {
     })
     
     const gameTitle = computed(() => {
+      // Jos molemmat joukkueiden nimet ovat saatavilla, käytä niitä
+      if (gameInfo.value?.homeTeamName && gameInfo.value?.awayTeamName) {
+        return `${gameInfo.value.homeTeamName} vs ${gameInfo.value.awayTeamName}`
+      }
+      
+      // Jos joukkueiden nimiä ei ole, käytä ottelun nimeä
       if (gameInfo.value?.name) {
         return gameInfo.value.name
       }
+      
+      // Viimeisenä vaihtoehtona käytä gameId:tä
       return gameId.value ? `Ottelu #${gameId.value}` : 'Game Center'
     })
-    
+
     const loadGameInfo = async () => {
       if (!gameId.value) return
       
@@ -144,6 +214,9 @@ export default {
         const data = await response.json()
         gameInfo.value = data
         
+        // Hae joukkuetiedot erillisellä kutsulla
+        await loadTeamInfo()
+
         // Automaattinen tabin valinta ottelun tilan perusteella
         setDefaultTab()
         
@@ -154,6 +227,32 @@ export default {
       }
     }
     
+    const loadTeamInfo = async () => {
+      if (!gameId.value) return
+      
+      try {
+        const response = await fetch(`${config.apiUrl}/gameinfo/${gameId.value}`)
+        
+        if (!response.ok) {
+          console.warn('Joukkuetietojen haku epäonnistui, käytetään oletustietoja')
+          return
+        }
+        
+        const teamData = await response.json()
+        
+        // Päivitetään vain joukkuetiedot gameInfo:on
+        if (gameInfo.value) {
+          gameInfo.value.homeTeamName = teamData.home_team?.name
+          gameInfo.value.awayTeamName = teamData.away_team?.name
+          gameInfo.value.homeTeamLogo = teamData.home_team?.logo_url
+          gameInfo.value.awayTeamLogo = teamData.away_team?.logo_url
+        }
+        
+      } catch (error) {
+        console.warn('Virhe joukkuetietojen lataamisessa:', error)
+      }
+    }
+
     const setDefaultTab = () => {
       if (!gameInfo.value) return
       
@@ -165,7 +264,7 @@ export default {
         activeTab.value = 'lineup'
       }
     }
-    
+        
     const formatDate = (dateStr) => {
       if (!dateStr) return ''
       const date = new Date(dateStr)
@@ -190,6 +289,48 @@ export default {
       return 'grey'
     }
     
+    const scrapeGameInfo = async () => {
+      if (!gameId.value) {
+        alert('Ottelun ID puuttuu')
+        return
+      }
+      
+      scrapingGameInfo.value = true
+      console.log('Aloitetaan joukkuetietojen haku...')
+      try {
+        const response = await fetch(`${config.apiUrl}/scrape-gameinfo`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authStore.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            gameId: gameId.value
+          })
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`)
+        }
+        
+        const result = await response.json()
+        console.log('Joukkuetiedot haettu:', result)
+        
+        // Lataa päivitetyt tiedot
+        await loadTeamInfo()
+        
+        // Näytä onnistumisviesti
+        alert('Joukkuetiedot haettu onnistuneesti!')
+        
+      } catch (error) {
+        console.error('Virhe joukkuetietojen haussa:', error)
+        alert(`Virhe joukkuetietojen haussa: ${error.message}`)
+      } finally {
+        scrapingGameInfo.value = false
+      }
+    }
+
     const goBack = () => {
       router.push('/matches')
     }
@@ -198,6 +339,11 @@ export default {
       loadGameInfo()
       // Trigger refresh on child components if needed
       // This could be enhanced by emitting events to child components
+    }
+
+    const onLogoError = (event) => {
+      // Piilotetaan kuva jos se ei lataudu
+      event.target.style.display = 'none'
     }
     
     // Watch for route changes
@@ -229,11 +375,16 @@ export default {
       gameId,
       gameTitle,
       loadGameInfo,
+      loadTeamInfo,
       setDefaultTab,
       formatDate,
       getResultColor,
       goBack,
-      refreshData
+      refreshData,
+      onLogoError,
+      scrapingGameInfo,  // Uusi
+      scrapeGameInfo,
+      authStore
     }
   }
 }
@@ -248,6 +399,11 @@ export default {
   padding: 16px;
 }
 
+.game-date {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: normal;
+}
 .v-tabs {
   margin-bottom: 0;
 }
@@ -265,16 +421,82 @@ export default {
   flex: 1;
 }
 
+.v-card-text {
+    padding-left: 16px;
+    padding-top: 0px;
+}
+
+/*
 .result-chip {
   font-size: 1.25rem !important;
   font-weight: bold;
-  padding: 8px 16px !important;
+  padding: 0px 22px !important;
   min-width: 80px;
+  
 }
-
+*/
 /* Ensure tab content has proper spacing */
 .v-tabs-window-item {
   padding-top: 16px;
+}
+
+.game-header-content {
+  flex: 1;
+  text-align: center;
+}
+
+.teams-header {
+  min-height: 50px;
+}
+
+.team-info {
+  flex: 1;
+}
+
+.team-logo {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.team-name {
+  font-weight: 500;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.vs-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.vs-text {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: normal;
+}
+
+.result-display {
+  margin-top: 4px;
+}
+
+.result-chip {
+  font-size: 0.875rem !important;
+  font-weight: bold;
+  padding: 2px 22px !important;
+  min-width: 50px;
+}
+
+.game-date {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: normal;
 }
 
 /* Mobile optimizations */
@@ -294,6 +516,20 @@ export default {
   
   .v-tabs-window-item {
     padding-top: 2px;
+  }
+
+  .team-logo {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .team-name {
+    font-size: 0.9rem;
+    max-width: 100px;
+  }
+  
+  .vs-section {
+    min-width: 50px;
   }
 }
 
