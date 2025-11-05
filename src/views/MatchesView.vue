@@ -4,24 +4,16 @@
       <v-card>
         <v-card-title class="d-flex justify-space-between align-center">
           <span>      {{ teamStore.selectedTeam?.name || 'Valitse joukkue' }} - Kausi
-      {{ teamStore.selectedTeamSeason?.name || 'Valitse kausi' }}
-</span>
-          <v-tooltip 
-            :text="authStore.isAuthenticated ? 'Lisää uusi ottelu' : 'Kirjaudu sisään lisätäksesi otteluita'"
-            location="bottom"
-          >
-            <template v-slot:activator="{ props }">
-              <v-btn 
-                v-bind="props"
-                color="primary" 
-                @click="showAddDialog = true"
-                :disabled="!authStore.isAuthenticated"
-              >
-                <v-icon left>mdi-plus</v-icon>
-                Lisää ottelu
-              </v-btn>
-            </template>
-          </v-tooltip>
+                      {{ teamStore.selectedTeamSeason?.name || 'Valitse kausi' }}
+          </span>
+          <v-btn 
+              v-if="authStore.isAuthenticated"
+              color="primary" 
+              @click="showAddDialog = true"
+            >
+            <v-icon left>mdi-plus</v-icon>
+              Lisää ottelu
+          </v-btn>        
         </v-card-title>
         
         <v-data-table

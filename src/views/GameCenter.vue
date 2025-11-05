@@ -3,7 +3,7 @@
     <v-container fluid class="pa-2 pa-sm-4">
       <!-- Game Header -->
       <v-card class="mb-4">
-        <v-card-title class="d-flex justify-space-between align-center">
+        <v-card-title>
           <div class="d-flex align-center">
             <div class="game-header-content">
               <!-- Joukkueet logojen kanssa -->
@@ -94,7 +94,7 @@
       </v-card>
 
       <!-- Tabs -->
-      <v-card>
+      <v-card >
         <v-tabs v-model="activeTab" color="primary">
           <v-tab value="lineup">
             <v-icon left>mdi-account-group</v-icon>
@@ -404,8 +404,20 @@ export default {
   color: rgba(0, 0, 0, 0.6);
   font-weight: normal;
 }
+
+.v-card {
+  width: 100%;
+  border-radius: 0; /* Poistaa pyöristetyt kulmat reunoilta */
+}
+
 .v-tabs {
+  width: 100%;
   margin-bottom: 0;
+}
+
+.v-tabs .v-tab {
+  flex: 1; /* Jakaa tabit tasaisesti koko leveydelle */
+  max-width: none !important;
 }
 
 .v-card-title h2 {
