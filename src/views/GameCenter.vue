@@ -5,7 +5,7 @@
       <v-card class="mb-4">
         <v-card-title>
           <div class="d-flex align-center">
-            <div class="game-header-content">
+            <div class="game-header-content">            
               <!-- Joukkueet logojen kanssa -->
               <div class="teams-header d-flex align-center justify-center mb-2">
                 <!-- Jos joukkueiden nimet ja logot ovat saatavilla -->
@@ -22,16 +22,22 @@
                   </div>
                   
                   <div class="vs-section mx-3">
-                    <span class="vs-text">vs</span>
+                    <div v-if="gameInfo?.gameDate" class="text-center">
+                      <span class="game-date">{{ formatDate(gameInfo.gameDate) }}</span>
+                    </div>              
+
                     <div v-if="gameInfo?.result" class="result-display mt-1">
+                      
                       <v-chip 
                         text-color="white"
                         class="result-chip"
-                        size="small"
                       >
                         {{ gameInfo.result }}
                       </v-chip>
+
                     </div>
+                    <span v-else class="vs-text">vs</span>
+                    
                   </div>
                   
                   <div class="team-info d-flex flex-column align-center">
@@ -64,11 +70,11 @@
                       </v-btn>
                     </div>
                     
-                    <div v-if="gameInfo?.result" class="result-display mt-2">
+                    <div v-if="gameInfo?.result" class="result-display">
                       <v-chip 
                         text-color="white"
                         class="result-chip"
-                        size="small"
+                        size="x-large"
                       >
                         {{ gameInfo.result }}
                       </v-chip>
@@ -77,9 +83,6 @@
                 </template>
               </div>
 
-              <div v-if="gameInfo?.gameDate" class="text-center">
-                <span class="game-date">{{ formatDate(gameInfo.gameDate) }}</span>
-              </div>              
             </div>
             <v-btn 
               icon 
@@ -399,12 +402,6 @@ export default {
   padding: 16px;
 }
 
-.game-date {
-  font-size: 0.875rem;
-  color: rgba(0, 0, 0, 0.6);
-  font-weight: normal;
-}
-
 .v-card {
   width: 100%;
   border-radius: 0; /* Poistaa pyöristetyt kulmat reunoilta */
@@ -499,16 +496,17 @@ export default {
 }
 
 .result-chip {
-  font-size: 0.875rem !important;
+  font-size: 2.5rem !important;
   font-weight: bold;
-  padding: 2px 22px !important;
-  min-width: 50px;
+  padding: 2px 14px !important;
+  min-width: 80px;
+  min-height: 60px;
 }
 
 .game-date {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: rgba(0, 0, 0, 0.6);
-  font-weight: normal;
+  font-weight: bold;
 }
 
 /* Mobile optimizations */

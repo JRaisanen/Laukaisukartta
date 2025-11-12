@@ -1964,7 +1964,6 @@ li:hover {
     padding-left: 10%;
     padding-right: 10%;
     margin-bottom: 2px;
-
 }
 
 
