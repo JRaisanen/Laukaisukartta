@@ -630,11 +630,16 @@
   .selected-btn {
     background-color: #1976d2;
     color: white;
-    margin-top: 9px;
+    margin-top: 5px;
   }
   .action-buttons {
     display: flex;
     gap: 8px;
+  }
+
+  /* Lisää marginaali kaikille slide-group buttoneille */
+  .v-slide-group .v-btn {
+    margin: 8px;
   }
 
   </style>

@@ -92,55 +92,6 @@
     </v-dialog>
 
     <!-- Team Names Display -->
-    <!-- Muutetaan filter-container osio -->
-    <div v-if="events.length > 0" class="filter-container">
-      <div class="team-filter-wrapper">
-        <v-list class="period-list team-filter-list">
-          <v-list-item
-            :class="{ selected: showHomeTeam, 'not-selected': !showHomeTeam }"
-            @click="showHomeTeam = !showHomeTeam"
-            class="team-filter-item"
-          >
-            <v-card :color="showHomeTeam ? 'primary' : ''" class="rounded-card-team">
-              Omat
-            </v-card>
-          </v-list-item>
-          
-          <v-list-item
-            :class="{ selected: showOpponentTeam, 'not-selected': !showOpponentTeam }"
-            @click="showOpponentTeam = !showOpponentTeam"
-            class="team-filter-item"
-          >
-            <v-card :color="showOpponentTeam ? 'primary' : ''" class="rounded-card-team">
-              Vastustaja
-            </v-card>
-          </v-list-item>
-          
-          <v-list-item
-            :class="{ selected: showNumbers, 'not-selected': !showNumbers }"
-            @click="showNumbers = !showNumbers"
-            class="team-filter-item"
-          >
-            <v-card :color="showNumbers ? 'primary' : ''" class="rounded-card-team">
-              Numerot
-            </v-card>
-          </v-list-item>
-          
-          <v-list-item class="player-select-item">
-            <v-select
-              v-model="selectedPlayer"
-              :items="allPlayers"
-              label="Valitse pelaaja"
-              item-title="name"
-              item-value="id"
-              variant="outlined"
-              density="compact"
-              class="player-select"
-            ></v-select>
-          </v-list-item>
-        </v-list>      
-      </div>
-    </div>
 
     <div class="map-and-eventlist">
     <v-card>
@@ -288,6 +239,7 @@
         </v-tabs-window>
       </v-card-text>
   </v-card>
+  
     <div v-if="tab === 'one'" class="event-list-side">
       <div style="display: flex; align-items: center; margin-bottom: 8px;">
         <h3 style="margin: 0;">Tapahtumat</h3>
@@ -323,7 +275,7 @@
   </div>
 
     <h5>Selitteet/suodattimet (ympyrä = oma joukkue/neliö = vastustaja):</h5>
-
+    
     <v-list class="legend horizontal-list">
       <v-list-item
         v-for="action in actions"
@@ -336,6 +288,56 @@
         </v-list-item-title>
       </v-list-item>
     </v-list>
+
+        <!-- Muutetaan filter-container osio -->
+    <div v-if="events.length > 0" class="filter-container">
+      <div class="team-filter-wrapper">
+        <v-list class="period-list team-filter-list">
+          <v-list-item
+            :class="{ selected: showHomeTeam, 'not-selected': !showHomeTeam }"
+            @click="showHomeTeam = !showHomeTeam"
+            class="team-filter-item"
+          >
+            <v-card :color="showHomeTeam ? 'primary' : ''" class="rounded-card-team">
+              Omat
+            </v-card>
+          </v-list-item>
+          
+          <v-list-item
+            :class="{ selected: showOpponentTeam, 'not-selected': !showOpponentTeam }"
+            @click="showOpponentTeam = !showOpponentTeam"
+            class="team-filter-item"
+          >
+            <v-card :color="showOpponentTeam ? 'primary' : ''" class="rounded-card-team">
+              Vastustaja
+            </v-card>
+          </v-list-item>
+          
+          <v-list-item
+            :class="{ selected: showNumbers, 'not-selected': !showNumbers }"
+            @click="showNumbers = !showNumbers"
+            class="team-filter-item"
+          >
+            <v-card :color="showNumbers ? 'primary' : ''" class="rounded-card-team">
+              Numerot
+            </v-card>
+          </v-list-item>
+          
+          <v-list-item class="player-select-item">
+            <v-select
+              v-model="selectedPlayer"
+              :items="allPlayers"
+              label="Valitse pelaaja"
+              item-title="name"
+              item-value="id"
+              variant="outlined"
+              density="compact"
+              class="player-select"
+            ></v-select>
+          </v-list-item>
+        </v-list>      
+      </div>
+    </div>
 
     <span style="margin-right: 10px;">Erä/kenttätilanne/kentällinen (klikkaa valituksi/pois):</span>
     <div style="margin: 5px 0; display: flex; align-items: center;">
@@ -457,7 +459,7 @@ export default {
     // Filter states
     const showHomeTeam = ref(true)
     const showOpponentTeam = ref(true)
-    const showNumbers = ref(true)
+    const showNumbers = ref(false)
     const selectedPlayer = ref(null)
     const selectedEventId = ref(null)
     const hoveredEventId = ref(null)

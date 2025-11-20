@@ -16,7 +16,7 @@ const router = createRouter({ history: createWebHashHistory('/Laukaisukartta/'),
       routes: [
         {
           path: '/',
-          redirect: '/teams',
+          redirect: '/matches',
         },
         {
           path: '/login',
@@ -81,9 +81,13 @@ const router = createRouter({ history: createWebHashHistory('/Laukaisukartta/'),
 
 router.beforeEach((to, from, next) => {
   const teamStore = useTeamStore()
-  const savedTeamId = localStorage.getItem('selectedTeamId')
-  const savedSeasonId = localStorage.getItem('selectedSeasonId')
-  
+  const savedTeamId = localStorage.getItem('selectedTeamId') || '12'
+  const savedSeasonId = localStorage.getItem('selectedTeamSeasonId') || '19'
+
+  localStorage.setItem('selectedTeamId', savedTeamId); // Tallenna valittu joukkue
+  localStorage.setItem('selectedTeamSeasonId', savedSeasonId); // Tallenna valittu kausi
+
+  console.log('Before each - tallennettu joukkueid ' + savedTeamId + ' ja seasonid ' + savedSeasonId);
   teamStore.fetchTeams();
   if (savedTeamId){
     teamStore.fetchTeamSeasons(parseInt(savedTeamId)); 

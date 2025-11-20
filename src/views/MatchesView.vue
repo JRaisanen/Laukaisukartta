@@ -232,7 +232,7 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTeamStore } from '../stores/teamStore';
 import { useAuthStore } from '../stores/authStore';
@@ -286,11 +286,19 @@ export default {
     ]
     
     const loadGames = async () => {
+      // Odota että joukkue ja kausi ovat valittu
+      if (!teamStore.selectedTeam?.teamId || !teamStore.selectedTeamSeason?.seasonId) {
+        console.log('Odotetaan joukkue- ja kausitietoja...')
+        return
+      }
+
       loading.value = true
       try {
         const seasonId =  teamStore.selectedTeamSeason?.seasonId         
         const teamId = teamStore.selectedTeam.teamId || authStore.user?.team_id
 
+        console.error('Joukkue ID: ' + teamId )
+        
         if (!teamId) {
           console.error('Joukkue ID puuttuu')
           return
@@ -468,8 +476,19 @@ export default {
       router.push(`/gamecenter/${gameId}`)
     }
     
+     // Watch joukkue- ja kausitietoja ja lataa ottelut kun ne ovat saatavilla
+    watch(
+      () => [teamStore.selectedTeam?.teamId, teamStore.selectedTeamSeason?.seasonId],
+      ([teamId, seasonId]) => {
+        if (teamId && seasonId) {
+          loadGames()
+        }
+      },
+      { immediate: true }
+    )
+
     onMounted(() => {
-      loadGames()
+      //loadGames()
     })
     
     return {

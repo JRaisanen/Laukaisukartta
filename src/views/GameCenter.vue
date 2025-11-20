@@ -5,9 +5,18 @@
       <v-card class="mb-4">
         <v-card-title>
           <div class="d-flex align-center">
-            <div class="game-header-content">            
+            <div class="game-header-content">                        
               <!-- Joukkueet logojen kanssa -->
               <div class="teams-header d-flex align-center justify-center mb-2">
+                <v-btn 
+                  icon 
+                  @click="goBack"
+                  class="mr-0"
+                  size="small"
+                >
+                  <v-icon>mdi-arrow-left</v-icon>
+                </v-btn>
+
                 <!-- Jos joukkueiden nimet ja logot ovat saatavilla -->
                 <template v-if="gameInfo?.homeTeamName && gameInfo?.awayTeamName">
                   <div class="team-info d-flex flex-column align-center">
@@ -84,14 +93,6 @@
               </div>
 
             </div>
-            <v-btn 
-              icon 
-              @click="goBack"
-              class="mr-3"
-              size="small"
-            >
-              <v-icon>mdi-arrow-left</v-icon>
-            </v-btn>
           </div>
         </v-card-title>        
       </v-card>

@@ -53,8 +53,8 @@
             :style="getPlayerPosition(player, 'home')"
             @click="showPlayerHistory(player)"
           >
-            <div class="player-number">{{ player.number }} {{ player.status }}</div>
-            <div class="player-name">{{ getLastName(player.name) }}</div>
+            <div class="player-number">#{{ player.number }} {{ player.status }} {{ getBirthYear(player.birthyear) }}</div>
+             <div class="player-name">{{ getLastName(player.name) }}</div>
           </div>
                     <div
             v-for="player in getAwayLineup"
@@ -63,7 +63,7 @@
             :style="getPlayerPosition(player, 'away')"
             @click="showPlayerHistory(player)"
           >
-            <div class="player-number">{{ player.number }} {{ player.status }}</div>
+            <div class="player-number">#{{ player.number }} {{ player.status }} {{ getBirthYear(player.birthyear) }}</div>
             <div class="player-name">{{ getLastName(player.name) }}</div>
           </div>
 
@@ -362,7 +362,7 @@ export default {
                     x = 50; y = 55; break
                 case 'Wing':
                     y = 55
-                    x = positionDetail.includes('VL') ? 20 : 80
+                    x = positionDetail.includes('VL') ? 17 : 83
                     break
                 default:
                     x = 40; y = 30
@@ -380,7 +380,7 @@ export default {
                     x = 50; y = 42; break
                 case 'Wing':
                     y = 42
-                    x = positionDetail.includes('VL') ? 80 : 20
+                    x = positionDetail.includes('VL') ? 83 : 17
                     break
                 default:
                     x = 60; y = 70
@@ -403,8 +403,27 @@ export default {
             if (position.includes('VL') || position.includes('OL')) return 'Wing'
             return 'Center'
         }
-        
 
+        const getBirthYear = (birthyear) => {
+            if (!birthyear) return ''
+            const yearString = birthyear.toString()
+            const lastTwoDigits = yearString.slice(-2)
+            return `-${lastTwoDigits}`          
+        }
+
+        const getLastNameWithYear = (fullName, birthyear) => {
+            if (!fullName) return ''
+            const parts = fullName.split(' ')
+            const lastName = parts[0]
+            
+            if (birthyear) {
+                const yearString = birthyear.toString()
+                const lastTwoDigits = yearString.slice(-2)
+                return `${lastName} -${lastTwoDigits}`
+            }
+            
+            return lastName
+        }
         
         const getLastName = (fullName) => {
             if (!fullName) return ''
@@ -500,6 +519,8 @@ export default {
             getPositionType,
             getGoalkeeperForLineup,
             getLastName,
+            getBirthYear,
+            getLastNameWithYear,
             showPlayerHistory,
             formatDate
         }
@@ -564,7 +585,7 @@ export default {
   border: 2px solid;
   border-radius: 8px;
   padding: 4px 8px;
-  min-width: 90px;
+  min-width: 100px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -589,16 +610,17 @@ export default {
 
 .player-number {
   font-weight: bold;
-  font-size: 1.2em;
+  font-size: 1.0em;
+  max-width: 125px;
 }
 
 .player-name {
-  font-size: 1.1em;
+  font-size: 1.0em;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 110px;
+  max-width: 125px;
 }
 
 .goalkeeper-info {
@@ -628,14 +650,14 @@ export default {
   }
   
   .player {
-    min-width: 70px;
+    min-width: 80px;
     padding: 2px 4px;
     font-size: 0.7em;
   }
   
   .player-name {
     font-size: 0.95em;
-    max-width: 70px;
+    max-width: 80px;
   }
 }
 
@@ -646,7 +668,7 @@ export default {
   }
   
   .player {
-    min-width: 75px;
+    min-width: 80px;
     padding: 2px;
     font-size: 0.8em;
   }
