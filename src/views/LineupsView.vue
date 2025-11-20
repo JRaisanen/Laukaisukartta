@@ -54,7 +54,13 @@
             @click="showPlayerHistory(player)"
           >
             <div class="player-number">#{{ player.number }} {{ player.status }} {{ getBirthYear(player.birthyear) }}</div>
-             <div class="player-name">{{ getLastName(player.name) }}</div>
+            <div class="player-name">{{ getLastName(player.name) }}</div>
+            <div v-if="getPositionType(player.position) === 'Goalkeeper'" class="player-stats">
+              {{ getLastThreeSeasonsMvGames(player) }} / {{ getLastThreeSeasonsTO(player) }} / {{ getLastThreeSeasonsPM(player) }} / {{ getLastThreeSeasonsSavePercent(player) }}%
+            </div>
+            <div v-else class="player-stats">
+              {{ getLastThreeSeasonsMatches(player) }} / {{ getLastThreeSeasonsGoals(player) }} + {{ getLastThreeSeasonsAssists(player) }} = {{ getLastThreeSeasonsPoints(player) }}
+            </div>
           </div>
                     <div
             v-for="player in getAwayLineup"
@@ -65,6 +71,12 @@
           >
             <div class="player-number">#{{ player.number }} {{ player.status }} {{ getBirthYear(player.birthyear) }}</div>
             <div class="player-name">{{ getLastName(player.name) }}</div>
+            <div v-if="getPositionType(player.position) === 'Goalkeeper'" class="player-stats">
+              {{ getLastThreeSeasonsMvGames(player) }} / {{ getLastThreeSeasonsTO(player) }} / {{ getLastThreeSeasonsPM(player) }} / {{ getLastThreeSeasonsSavePercent(player) }}%
+            </div>
+            <div v-else class="player-stats">
+              {{ getLastThreeSeasonsMatches(player) }} / {{ getLastThreeSeasonsGoals(player) }} + {{ getLastThreeSeasonsAssists(player) }} = {{ getLastThreeSeasonsPoints(player) }}
+            </div>
           </div>
 
         </div>
@@ -331,6 +343,87 @@ export default {
             return selectedPlayer.value.statistics.reduce((sum, stat) => sum + parseInt(stat.P || 0), 0)
         })
         
+        // Kolmen viimeisimmän kauden tilastot
+        const getLastThreeSeasonsMatches = (player) => {
+            if (!player?.statistics || player.statistics.length === 0) return 0
+            const sortedStats = [...player.statistics].sort((a, b) => {
+                return b.Kausi.localeCompare(a.Kausi)
+            })
+            const lastThree = sortedStats.slice(0, 3)
+            return lastThree.reduce((sum, stat) => sum + parseInt(stat.O || 0), 0)
+        }
+        
+        const getLastThreeSeasonsGoals = (player) => {
+            if (!player?.statistics || player.statistics.length === 0) return 0
+            const sortedStats = [...player.statistics].sort((a, b) => {
+                return b.Kausi.localeCompare(a.Kausi)
+            })
+            const lastThree = sortedStats.slice(0, 3)
+            return lastThree.reduce((sum, stat) => sum + parseInt(stat.M || 0), 0)
+        }
+        
+        const getLastThreeSeasonsAssists = (player) => {
+            if (!player?.statistics || player.statistics.length === 0) return 0
+            const sortedStats = [...player.statistics].sort((a, b) => {
+                return b.Kausi.localeCompare(a.Kausi)
+            })
+            const lastThree = sortedStats.slice(0, 3)
+            return lastThree.reduce((sum, stat) => sum + parseInt(stat.S || 0), 0)
+        }
+        
+        const getLastThreeSeasonsPoints = (player) => {
+            if (!player?.statistics || player.statistics.length === 0) return 0
+            const sortedStats = [...player.statistics].sort((a, b) => {
+                return b.Kausi.localeCompare(a.Kausi)
+            })
+            const lastThree = sortedStats.slice(0, 3)
+            return lastThree.reduce((sum, stat) => sum + parseInt(stat.P || 0), 0)
+        }
+
+         // Maalivahtien tilastot kolmelta viimeisimmältä kaudelta
+        const getLastThreeSeasonsMvGames = (player) => {
+            if (!player?.statistics || player.statistics.length === 0) return 0
+            const sortedStats = [...player.statistics].sort((a, b) => {
+                return b.Kausi.localeCompare(a.Kausi)
+            })
+            const lastThree = sortedStats.slice(0, 3)
+            return lastThree.reduce((sum, stat) => sum + parseInt(stat.Mv || 0), 0)
+        }
+        
+        const getLastThreeSeasonsTO = (player) => {
+            if (!player?.statistics || player.statistics.length === 0) return 0
+            const sortedStats = [...player.statistics].sort((a, b) => {
+                return b.Kausi.localeCompare(a.Kausi)
+            })
+            const lastThree = sortedStats.slice(0, 3)
+            return lastThree.reduce((sum, stat) => sum + parseInt(stat.TO || 0), 0)
+        }
+        
+        const getLastThreeSeasonsPM = (player) => {
+            if (!player?.statistics || player.statistics.length === 0) return 0
+            const sortedStats = [...player.statistics].sort((a, b) => {
+                return b.Kausi.localeCompare(a.Kausi)
+            })
+            const lastThree = sortedStats.slice(0, 3)
+            return lastThree.reduce((sum, stat) => sum + parseInt(stat.PM || 0), 0)
+        }
+        
+        const getLastThreeSeasonsSavePercent = (player) => {
+            if (!player?.statistics || player.statistics.length === 0) return '0.0'
+            const sortedStats = [...player.statistics].sort((a, b) => {
+                return b.Kausi.localeCompare(a.Kausi)
+            })
+            const lastThree = sortedStats.slice(0, 3)
+            
+            const totalTO = lastThree.reduce((sum, stat) => sum + parseInt(stat.TO || 0), 0)
+            const totalPM = lastThree.reduce((sum, stat) => sum + parseInt(stat.PM || 0), 0)
+            
+            if (totalTO + totalPM === 0) return '0.0'
+            
+            const savePercent = (totalTO / (totalTO + totalPM)) * 100
+            return savePercent.toFixed(1)
+        }
+
         const hasLineupData = computed(() => {
             return lineupData.value.teams?.home?.lineups || lineupData.value.teams?.away?.lineups
         })
@@ -359,9 +452,9 @@ export default {
                     x = positionDetail.includes('VP') ? 30 : 70
                     break
                 case 'Center':
-                    x = 50; y = 55; break
+                    x = 50; y = 57; break
                 case 'Wing':
-                    y = 55
+                    y = 57
                     x = positionDetail.includes('VL') ? 17 : 83
                     break
                 default:
@@ -373,7 +466,7 @@ export default {
                 case 'Goalkeeper':
                     x = 50; y = 17; break
                 case 'Defence':
-                    y = 28
+                    y = 29
                     x = positionDetail.includes('VP') ? 70 : 30
                     break
                 case 'Center':
@@ -514,6 +607,14 @@ export default {
             getTotalGoals,
             getTotalAssists,
             getTotalPoints,
+            getLastThreeSeasonsMatches,
+            getLastThreeSeasonsGoals,
+            getLastThreeSeasonsAssists,
+            getLastThreeSeasonsPoints,
+            getLastThreeSeasonsMvGames,
+            getLastThreeSeasonsTO,
+            getLastThreeSeasonsPM,
+            getLastThreeSeasonsSavePercent,
             getPointsPerGame,
             getPlayerPosition,
             getPositionType,
@@ -616,6 +717,15 @@ export default {
 
 .player-name {
   font-size: 1.0em;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 125px;
+}
+
+.player-stats {
+  font-size: 0.8em;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
