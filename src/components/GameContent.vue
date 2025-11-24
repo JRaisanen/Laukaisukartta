@@ -503,8 +503,8 @@ export default {
     
     const situationOptions = [
         { value: 1, title: '5v5' },
-        { value: 2, title: 'Yv' },
-        { value: 3, title: 'Av' },
+        { value: 2, title: 'Av' },
+        { value: 3, title: 'Yv' },
         { value: 4, title: 'Tv' },
     ]
     const lineOptions = [

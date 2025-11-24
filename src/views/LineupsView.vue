@@ -349,7 +349,7 @@ export default {
             const sortedStats = [...player.statistics].sort((a, b) => {
                 return b.Kausi.localeCompare(a.Kausi)
             })
-            const lastThree = sortedStats.slice(0, 3)
+            const lastThree = sortedStats.slice(0, 4)
             return lastThree.reduce((sum, stat) => sum + parseInt(stat.O || 0), 0)
         }
         
@@ -358,7 +358,7 @@ export default {
             const sortedStats = [...player.statistics].sort((a, b) => {
                 return b.Kausi.localeCompare(a.Kausi)
             })
-            const lastThree = sortedStats.slice(0, 3)
+            const lastThree = sortedStats.slice(0, 4)
             return lastThree.reduce((sum, stat) => sum + parseInt(stat.M || 0), 0)
         }
         
@@ -367,7 +367,7 @@ export default {
             const sortedStats = [...player.statistics].sort((a, b) => {
                 return b.Kausi.localeCompare(a.Kausi)
             })
-            const lastThree = sortedStats.slice(0, 3)
+            const lastThree = sortedStats.slice(0, 4)
             return lastThree.reduce((sum, stat) => sum + parseInt(stat.S || 0), 0)
         }
         
@@ -376,7 +376,7 @@ export default {
             const sortedStats = [...player.statistics].sort((a, b) => {
                 return b.Kausi.localeCompare(a.Kausi)
             })
-            const lastThree = sortedStats.slice(0, 3)
+            const lastThree = sortedStats.slice(0, 4)
             return lastThree.reduce((sum, stat) => sum + parseInt(stat.P || 0), 0)
         }
 
@@ -386,7 +386,7 @@ export default {
             const sortedStats = [...player.statistics].sort((a, b) => {
                 return b.Kausi.localeCompare(a.Kausi)
             })
-            const lastThree = sortedStats.slice(0, 3)
+            const lastThree = sortedStats.slice(0, 4)
             return lastThree.reduce((sum, stat) => sum + parseInt(stat.Mv || 0), 0)
         }
         
@@ -395,7 +395,7 @@ export default {
             const sortedStats = [...player.statistics].sort((a, b) => {
                 return b.Kausi.localeCompare(a.Kausi)
             })
-            const lastThree = sortedStats.slice(0, 3)
+            const lastThree = sortedStats.slice(0, 4)
             return lastThree.reduce((sum, stat) => sum + parseInt(stat.TO || 0), 0)
         }
         
@@ -404,7 +404,7 @@ export default {
             const sortedStats = [...player.statistics].sort((a, b) => {
                 return b.Kausi.localeCompare(a.Kausi)
             })
-            const lastThree = sortedStats.slice(0, 3)
+            const lastThree = sortedStats.slice(0, 4)
             return lastThree.reduce((sum, stat) => sum + parseInt(stat.PM || 0), 0)
         }
         
@@ -413,7 +413,7 @@ export default {
             const sortedStats = [...player.statistics].sort((a, b) => {
                 return b.Kausi.localeCompare(a.Kausi)
             })
-            const lastThree = sortedStats.slice(0, 3)
+            const lastThree = sortedStats.slice(0, 4)
             
             const totalTO = lastThree.reduce((sum, stat) => sum + parseInt(stat.TO || 0), 0)
             const totalPM = lastThree.reduce((sum, stat) => sum + parseInt(stat.PM || 0), 0)
