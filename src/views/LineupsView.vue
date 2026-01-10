@@ -346,77 +346,85 @@ export default {
         // Kolmen viimeisimmän kauden tilastot
         const getLastThreeSeasonsMatches = (player) => {
             if (!player?.statistics || player.statistics.length === 0) return 0
-            const sortedStats = [...player.statistics].sort((a, b) => {
-                return b.Kausi.localeCompare(a.Kausi)
-            })
-            const lastThree = sortedStats.slice(0, 4)
-            return lastThree.reduce((sum, stat) => sum + parseInt(stat.O || 0), 0)
+            
+            // Suodata vain halutun kauden ja sarjan rivit
+            const filteredStats = player.statistics.filter(stat => 
+                stat.Kausi === '2025-2026' && stat.Sarja === 'T21 SM-SARJA'
+            )
+            
+            return filteredStats.reduce((sum, stat) => sum + parseInt(stat.O || 0), 0)
         }
         
         const getLastThreeSeasonsGoals = (player) => {
             if (!player?.statistics || player.statistics.length === 0) return 0
-            const sortedStats = [...player.statistics].sort((a, b) => {
-                return b.Kausi.localeCompare(a.Kausi)
-            })
-            const lastThree = sortedStats.slice(0, 4)
-            return lastThree.reduce((sum, stat) => sum + parseInt(stat.M || 0), 0)
+            
+            const filteredStats = player.statistics.filter(stat => 
+                stat.Kausi === '2025-2026' && stat.Sarja === 'T21 SM-SARJA'
+            )
+            
+            return filteredStats.reduce((sum, stat) => sum + parseInt(stat.M || 0), 0)
         }
         
         const getLastThreeSeasonsAssists = (player) => {
             if (!player?.statistics || player.statistics.length === 0) return 0
-            const sortedStats = [...player.statistics].sort((a, b) => {
-                return b.Kausi.localeCompare(a.Kausi)
-            })
-            const lastThree = sortedStats.slice(0, 4)
-            return lastThree.reduce((sum, stat) => sum + parseInt(stat.S || 0), 0)
+            
+            const filteredStats = player.statistics.filter(stat => 
+                stat.Kausi === '2025-2026' && stat.Sarja === 'T21 SM-SARJA'
+            )
+            
+            return filteredStats.reduce((sum, stat) => sum + parseInt(stat.S || 0), 0)
         }
         
         const getLastThreeSeasonsPoints = (player) => {
             if (!player?.statistics || player.statistics.length === 0) return 0
-            const sortedStats = [...player.statistics].sort((a, b) => {
-                return b.Kausi.localeCompare(a.Kausi)
-            })
-            const lastThree = sortedStats.slice(0, 4)
-            return lastThree.reduce((sum, stat) => sum + parseInt(stat.P || 0), 0)
+            
+            const filteredStats = player.statistics.filter(stat => 
+                stat.Kausi === '2025-2026' && stat.Sarja === 'T21 SM-SARJA'
+            )
+            
+            return filteredStats.reduce((sum, stat) => sum + parseInt(stat.P || 0), 0)
         }
 
          // Maalivahtien tilastot kolmelta viimeisimmältä kaudelta
         const getLastThreeSeasonsMvGames = (player) => {
             if (!player?.statistics || player.statistics.length === 0) return 0
-            const sortedStats = [...player.statistics].sort((a, b) => {
-                return b.Kausi.localeCompare(a.Kausi)
-            })
-            const lastThree = sortedStats.slice(0, 4)
-            return lastThree.reduce((sum, stat) => sum + parseInt(stat.Mv || 0), 0)
+            
+            const filteredStats = player.statistics.filter(stat => 
+                stat.Kausi === '2025-2026' && stat.Sarja === 'T21 SM-SARJA'
+            )
+            
+            return filteredStats.reduce((sum, stat) => sum + parseInt(stat.Mv || 0), 0)
         }
         
         const getLastThreeSeasonsTO = (player) => {
             if (!player?.statistics || player.statistics.length === 0) return 0
-            const sortedStats = [...player.statistics].sort((a, b) => {
-                return b.Kausi.localeCompare(a.Kausi)
-            })
-            const lastThree = sortedStats.slice(0, 4)
-            return lastThree.reduce((sum, stat) => sum + parseInt(stat.TO || 0), 0)
+            
+            const filteredStats = player.statistics.filter(stat => 
+                stat.Kausi === '2025-2026' && stat.Sarja === 'T21 SM-SARJA'
+            )
+            
+            return filteredStats.reduce((sum, stat) => sum + parseInt(stat.TO || 0), 0)
         }
         
         const getLastThreeSeasonsPM = (player) => {
             if (!player?.statistics || player.statistics.length === 0) return 0
-            const sortedStats = [...player.statistics].sort((a, b) => {
-                return b.Kausi.localeCompare(a.Kausi)
-            })
-            const lastThree = sortedStats.slice(0, 4)
-            return lastThree.reduce((sum, stat) => sum + parseInt(stat.PM || 0), 0)
+            
+            const filteredStats = player.statistics.filter(stat => 
+                stat.Kausi === '2025-2026' && stat.Sarja === 'T21 SM-SARJA'
+            )
+            
+            return filteredStats.reduce((sum, stat) => sum + parseInt(stat.PM || 0), 0)
         }
         
         const getLastThreeSeasonsSavePercent = (player) => {
             if (!player?.statistics || player.statistics.length === 0) return '0.0'
-            const sortedStats = [...player.statistics].sort((a, b) => {
-                return b.Kausi.localeCompare(a.Kausi)
-            })
-            const lastThree = sortedStats.slice(0, 4)
             
-            const totalTO = lastThree.reduce((sum, stat) => sum + parseInt(stat.TO || 0), 0)
-            const totalPM = lastThree.reduce((sum, stat) => sum + parseInt(stat.PM || 0), 0)
+            const filteredStats = player.statistics.filter(stat => 
+                stat.Kausi === '2025-2026' && stat.Sarja === 'T21 SM-SARJA'
+            )
+            
+            const totalTO = filteredStats.reduce((sum, stat) => sum + parseInt(stat.TO || 0), 0)
+            const totalPM = filteredStats.reduce((sum, stat) => sum + parseInt(stat.PM || 0), 0)
             
             if (totalTO + totalPM === 0) return '0.0'
             

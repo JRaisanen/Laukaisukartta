@@ -470,14 +470,15 @@ export default {
       showGoalDialog: false,
       selectedGoalEvent: null,
       goalTypeOptions: [
-          { value: 'kuljetus', title: 'Laukaus kuljetuksesta/läpiajosta' },
-          { value: 'laukauspaikaltaan', title: 'Laukaus paikaltaan' },
-          { value: 'suoraansyotosta', title: 'Laukaus suoraan syötöstä' },
-          { value: 'rebound', title: 'Rebound' },
-          { value: 'vapari', title: 'Vapari/vaparikuvio' },
-          { value: 'rangaistuslaukaus', title: 'Rangaistuslaukaus' },
-          { value: 'omamaali', title: 'Oma maali' },
-          // Lisää muita vaihtoehtoja tarpeen mukaan
+              { value: 'kuljetus', title: 'Laukaus kuljetuksesta/läpiajosta' },
+              { value: '2vs1', title: 'Ylivoimahyökkäys (2v1 ym)' },
+              { value: 'laukauspaikaltaan', title: 'Laukaus paikaltaan' },
+              { value: 'suoraansyotosta', title: 'Laukaus suoraan syötöstä' },
+              { value: 'rebound', title: 'Rebound' },
+              { value: 'ohjaus', title: 'Ohjaus' },
+              { value: 'vapari', title: 'Vapari/vaparikuvio' },
+              { value: 'rangaistuslaukaus', title: 'Rangaistuslaukaus' },
+              { value: 'omamaali', title: 'Oma maali' }
         ],
       tacticalSituationOptions: [
           { value: 'organisoitu', title: 'Organisoitu hyökkäys' },

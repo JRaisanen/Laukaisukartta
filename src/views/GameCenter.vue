@@ -114,6 +114,11 @@
             <v-icon left>mdi-chart-box</v-icon>
             Tilastot
           </v-tab>
+          
+          <v-tab v-if="authStore.isAuthenticated" value="ai">
+            <v-icon left>mdi-brain</v-icon>
+            AI Analyysi
+          </v-tab>
         </v-tabs>
 
         <v-card-text>
@@ -142,6 +147,54 @@
             <v-tabs-window-item value="stats">
               <div v-if="gameId">
                 <StatsContent />
+              </div>
+              <v-alert v-else type="error" class="ma-4">
+                Ottelun ID puuttuu
+              </v-alert>
+            </v-tabs-window-item>
+            
+            <!-- AI Analysis Tab -->
+            <v-tabs-window-item value="ai" v-if="authStore.isAuthenticated">
+              <div v-if="gameId">
+                <v-card class="ma-4">
+                  <v-card-title>AI Analyysi</v-card-title>
+                  <v-card-text>
+                    <div class="d-flex flex-column align-center mb-4">
+                      <v-btn
+                        @click="runAIAnalysis"
+                        color="primary"
+                        size="large"
+                        :loading="loadingAnalysis"
+                        :disabled="loadingAnalysis"
+                        prepend-icon="mdi-brain"
+                      >
+                        Tee analyysi
+                      </v-btn>
+                    </div>
+                    
+                    <v-alert v-if="analysisStatus" type="info" class="mt-4">
+                      <v-progress-circular
+                        indeterminate
+                        color="primary"
+                        size="20"
+                        class="mr-3"
+                      ></v-progress-circular>
+                      {{ analysisStatus }}
+                    </v-alert>
+                    
+                    <v-card v-if="analysisResult" variant="outlined" class="mt-4">
+                      <v-card-text>
+                        <div class="analysis-content">
+                          {{ analysisResult }}
+                        </div>
+                      </v-card-text>
+                    </v-card>
+                    
+                    <v-alert v-if="analysisError" type="error" class="mt-4">
+                      {{ analysisError }}
+                    </v-alert>
+                  </v-card-text>
+                </v-card>
               </div>
               <v-alert v-else type="error" class="ma-4">
                 Ottelun ID puuttuu
@@ -183,6 +236,10 @@ export default {
     const loading = ref(false)
     const gameInfo = ref(null)
     const scrapingGameInfo = ref(false) // Uusi muuttuja
+    const loadingAnalysis = ref(false)
+    const analysisResult = ref(null)
+    const analysisError = ref(null)
+    const analysisStatus = ref(null)
     
     // Get gameId from route params
     const gameId = computed(() => {
@@ -303,6 +360,7 @@ export default {
       console.log('Aloitetaan joukkuetietojen haku...')
       try {
         const response = await fetch(`${config.apiUrl}/scrape-gameinfo`, {
+        //const response = await fetch(`${config.apiUrl}/gatheraidata`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${authStore.token}`,
@@ -350,6 +408,113 @@ export default {
       event.target.style.display = 'none'
     }
     
+    const checkAnalysisStatus = async (threadId, runId) => {
+      try {
+        const response = await fetch(`${config.apiUrl}/ai-analysis-status/${threadId}/${runId}`, {
+          headers: {
+            'Authorization': `Bearer ${authStore.token}`
+          }
+        })
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        
+        return await response.json()
+      } catch (error) {
+        console.error('Virhe statuksen tarkistuksessa:', error)
+        throw error
+      }
+    }
+    
+    const runAIAnalysis = async () => {
+      if (!gameId.value) {
+        analysisError.value = 'Ottelun ID puuttuu'
+        return
+      }
+      
+      loadingAnalysis.value = true
+      analysisError.value = null
+      analysisResult.value = null
+      analysisStatus.value = 'Käynnistetään analyysi...'
+      
+      try {
+        // Käynnistä analyysi
+        const response = await fetch(`${config.apiUrl}/analyze-game-with-ai`, {
+        //const response = await fetch(`${config.apiUrl}/test-code-interpreter`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authStore.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            gameId: gameId.value, 
+            question: "Analysoi ottelu eräkohtaisesti" 
+          })
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`)
+        }
+        
+        const result = await response.json()
+        const { threadId, runId } = result
+        
+        analysisStatus.value = `Analyysi käynnistetty. Ladatut tiedostot: ${result.filesUploaded || 0}. Odotetaan tulosta...`
+        
+        // Pollaa statusta kunnes valmis
+        let attempts = 0
+        const maxAttempts = 10 // Max 5 minuuttia (60 * 5s)
+        
+        while (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 10000)) // Odota 5 sekuntia
+          
+          const statusResult = await checkAnalysisStatus(threadId, runId)
+          
+          if (statusResult.status === 'completed') {
+            // Analyysi valmis
+            const response = statusResult.response
+            let analysisText = ''
+            
+            if (Array.isArray(response)) {
+              response.forEach(item => {
+                if (item.type === 'text') {
+                  analysisText += item.text.value + '\n'
+                }
+              })
+            } else if (typeof response === 'string') {
+              analysisText = response
+            } else if (response?.text?.value) {
+              analysisText = response.text.value
+            }
+            
+            analysisResult.value = analysisText || 'Analyysi valmis, mutta ei sisältöä'
+            analysisStatus.value = null
+            break
+          } else if (statusResult.status === 'failed') {
+            throw new Error(statusResult.error || 'Analyysi epäonnistui')
+          } else {
+            // Vielä käynnissä
+            analysisStatus.value = `Analyysi käynnissä... (${attempts + 1}/${maxAttempts})`
+          }
+          
+          attempts++
+        }
+        
+        if (attempts >= maxAttempts) {
+          throw new Error('Analyysi aikakatkaistiin (maksimiaika ylittyi)')
+        }
+        
+      } catch (error) {
+        console.error('Virhe AI-analyysin suorittamisessa:', error)
+        analysisError.value = `Virhe AI-analyysin suorittamisessa: ${error.message}`
+        analysisStatus.value = null
+      } finally {
+        loadingAnalysis.value = false
+      }
+    }
+    
     // Watch for route changes
     watch(() => route.params.gameId, (newGameId) => {
       if (newGameId) {
@@ -388,7 +553,12 @@ export default {
       onLogoError,
       scrapingGameInfo,  // Uusi
       scrapeGameInfo,
-      authStore
+      authStore,
+      loadingAnalysis,
+      analysisResult,
+      analysisError,
+      analysisStatus,
+      runAIAnalysis
     }
   }
 }
@@ -553,5 +723,15 @@ export default {
   .v-card-text {
     padding: 0px !important;
   }
+}
+
+.analysis-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 1rem;
+  line-height: 1.6;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
 }
 </style>

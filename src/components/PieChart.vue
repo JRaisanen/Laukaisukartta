@@ -17,7 +17,17 @@ const props = defineProps({
   title: String,
   colors: {
     type: Array,
-    default: () => ['#1976d2', '#43a047', '#fbc02d', '#e53935', '#8e24aa', '#00bcd4', '#ff9800']
+    default: () => [
+      '#1976d2', // Sininen
+      '#43a047', // Vihreä
+      '#fbc02d', // Keltainen
+      '#e53935', // Punainen
+      '#8e24aa', // Violetti
+      '#00bcd4', // Syaani
+      '#ff9800', // Oranssi
+      '#795548', // Ruskea
+      '#607d8b'  // Siniharmaa    
+    ]
   }
 });
 
