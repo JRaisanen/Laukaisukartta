@@ -115,7 +115,7 @@
             Tilastot
           </v-tab>
           
-          <v-tab v-if="authStore.isAuthenticated" value="ai">
+          <v-tab v-if="authStore.isAuthenticated || analysisResult" value="ai">
             <v-icon left>mdi-brain</v-icon>
             AI Analyysi
           </v-tab>
@@ -154,12 +154,12 @@
             </v-tabs-window-item>
             
             <!-- AI Analysis Tab -->
-            <v-tabs-window-item value="ai" v-if="authStore.isAuthenticated">
+            <v-tabs-window-item value="ai" v-if="authStore.isAuthenticated || analysisResult">
               <div v-if="gameId">
                 <v-card class="ma-4">
                   <v-card-title>AI Analyysi</v-card-title>
                   <v-card-text>
-                    <div class="d-flex flex-column align-center mb-4">
+                    <div v-if="authStore.isAuthenticated" class="d-flex flex-column align-center mb-4">
                       <v-btn
                         @click="runAIAnalysis"
                         color="primary"
@@ -169,6 +169,29 @@
                         prepend-icon="mdi-brain"
                       >
                         Tee analyysi
+                      </v-btn>
+                    </div>  
+
+                    <div v-if="authStore.isAuthenticated" class="d-flex flex-column align-center mb-4">
+                      <v-btn
+                        @click="saveAIAnalysis"
+                        color="primary"
+                        size="large"
+                        :disabled="!analysisResult"
+                        prepend-icon="mdi-content-save"
+                      >
+                        Tallenna analyysi
+                      </v-btn>
+                    </div>  
+                    <div v-if="authStore.isAuthenticated" class="d-flex flex-column align-center mb-4">
+
+                      <v-btn
+                        @click="deleteAIFiles"
+                        color="primary"
+                        size="large"
+                        prepend-icon="mdi-brain"
+                      >
+                        Poista AI-tiedostot
                       </v-btn>
                     </div>
                     
@@ -277,6 +300,10 @@ export default {
         
         // Hae joukkuetiedot erillisellä kutsulla
         await loadTeamInfo()
+        
+        console.log('Ottelutiedot ladattu:', data)
+        // Hae AI-analyysi jos se on olemassa
+        await loadAIAnalysis()
 
         // Automaattinen tabin valinta ottelun tilan perusteella
         setDefaultTab()
@@ -311,6 +338,27 @@ export default {
         
       } catch (error) {
         console.warn('Virhe joukkuetietojen lataamisessa:', error)
+      }
+    }
+
+    const loadAIAnalysis = async () => {
+      if (!gameId.value) return
+      
+      try {
+        const response = await fetch(`${config.apiUrl}/get-ai-analysis/${gameId.value}`)
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.analysis) {
+            analysisResult.value = data.analysis
+            console.log('AI-analyysi ladattu tietokannasta')
+          }
+        } else if (response.status !== 404) {
+          // 404 on ok (ei analyysiä), muut virheet logitetaan
+          console.warn('Virhe AI-analyysin lataamisessa:', response.status)
+        }
+      } catch (error) {
+        console.warn('Virhe AI-analyysin lataamisessa:', error)
       }
     }
 
@@ -465,7 +513,7 @@ export default {
         
         // Pollaa statusta kunnes valmis
         let attempts = 0
-        const maxAttempts = 10 // Max 5 minuuttia (60 * 5s)
+        const maxAttempts = 15 // Max 5 minuuttia (60 * 5s)
         
         while (attempts < maxAttempts) {
           await new Promise(resolve => setTimeout(resolve, 10000)) // Odota 5 sekuntia
@@ -514,6 +562,79 @@ export default {
         loadingAnalysis.value = false
       }
     }
+
+    const deleteAIFiles = async () => {
+      if (!gameId.value) {
+        alert('Ottelun ID puuttuu')
+        return
+      }
+      
+      if (!confirm('Haluatko varmasti poistaa kaikki AI-tiedostot?')) {
+        return
+      }
+      
+      try {
+        const response = await fetch(`${config.apiUrl}/openai-files`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authStore.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`)
+        }
+        
+        const result = await response.json()
+        console.log('AI-tiedostot poistettu:', result)
+        alert(`AI-tiedostot poistettu onnistuneesti! Poistettu: ${result.deletedCount || 0} tiedostoa`)
+        
+      } catch (error) {
+        console.error('Virhe AI-tiedostojen poistossa:', error)
+        alert(`Virhe AI-tiedostojen poistossa: ${error.message}`)
+      }
+    }
+
+    const saveAIAnalysis = async () => {
+      if (!gameId.value) {
+        alert('Ottelun ID puuttuu')
+        return
+      }
+      
+      if (!analysisResult.value) {
+        alert('Ei tallennettavaa analyysiä. Tee ensin analyysi.')
+        return
+      }
+      
+      try {
+        const response = await fetch(`${config.apiUrl}/save-ai-analysis`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authStore.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            gameId: gameId.value,
+            analysis: analysisResult.value
+          })
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`)
+        }
+        
+        const result = await response.json()
+        console.log('AI-analyysi tallennettu:', result)
+        alert('AI-analyysi tallennettu onnistuneesti!')
+        
+      } catch (error) {
+        console.error('Virhe AI-analyysin tallennuksessa:', error)
+        alert(`Virhe AI-analyysin tallennuksessa: ${error.message}`)
+      }
+    }
     
     // Watch for route changes
     watch(() => route.params.gameId, (newGameId) => {
@@ -545,6 +666,7 @@ export default {
       gameTitle,
       loadGameInfo,
       loadTeamInfo,
+      loadAIAnalysis,
       setDefaultTab,
       formatDate,
       getResultColor,
@@ -558,7 +680,9 @@ export default {
       analysisResult,
       analysisError,
       analysisStatus,
-      runAIAnalysis
+      runAIAnalysis,
+      saveAIAnalysis,
+      deleteAIFiles
     }
   }
 }
