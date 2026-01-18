@@ -26,7 +26,8 @@ const props = defineProps({
       '#00bcd4', // Syaani
       '#ff9800', // Oranssi
       '#795548', // Ruskea
-      '#607d8b'  // Siniharmaa    
+      '#607d8b',  // Siniharmaa    
+      '#ec407a'  // Pinkki
     ]
   }
 });

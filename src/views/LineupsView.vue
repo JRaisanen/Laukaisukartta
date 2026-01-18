@@ -845,14 +845,14 @@ export default {
   }
   
   .player {
-    min-width: 80px;
+    min-width: 100px;
     padding: 2px 4px;
     font-size: 0.7em;
   }
   
   .player-name {
     font-size: 0.95em;
-    max-width: 80px;
+    max-width: 110px;
   }
 }
 
@@ -863,7 +863,7 @@ export default {
   }
   
   .player {
-    min-width: 80px;
+    min-width: 95px;
     padding: 2px;
     font-size: 0.8em;
   }

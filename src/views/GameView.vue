@@ -472,6 +472,7 @@ export default {
       goalTypeOptions: [
               { value: 'kuljetus', title: 'Laukaus kuljetuksesta/läpiajosta' },
               { value: '2vs1', title: 'Ylivoimahyökkäys (2v1 ym)' },
+              { value: 'kantti', title: 'Kanttilaukaus' },
               { value: 'laukauspaikaltaan', title: 'Laukaus paikaltaan' },
               { value: 'suoraansyotosta', title: 'Laukaus suoraan syötöstä' },
               { value: 'rebound', title: 'Rebound' },
