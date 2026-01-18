@@ -20,6 +20,7 @@
         <v-btn value="1. Kentällinen">I</v-btn>    <v-btn value="2. Kentällinen">II</v-btn>
         <v-btn value="3. Kentällinen">III</v-btn>
         <v-btn value="4. Kentällinen">IV</v-btn>
+        <v-btn value="Ei kokoonpanossa">Ei kokoonpanossa</v-btn>
       </v-btn-toggle>
     </div>
 
@@ -62,7 +63,9 @@
               {{ getLastThreeSeasonsMatches(player) }} / {{ getLastThreeSeasonsGoals(player) }} + {{ getLastThreeSeasonsAssists(player) }} = {{ getLastThreeSeasonsPoints(player) }}
             </div>
           </div>
-                    <div
+          
+          <!-- Vierasjoukkueen pelaajat -->
+          <div
             v-for="player in getAwayLineup"
             :key="player.person_id"
             class="player away-player"
@@ -76,6 +79,32 @@
             </div>
             <div v-else class="player-stats">
               {{ getLastThreeSeasonsMatches(player) }} / {{ getLastThreeSeasonsGoals(player) }} + {{ getLastThreeSeasonsAssists(player) }} = {{ getLastThreeSeasonsPoints(player) }}
+            </div>
+          </div>
+          
+          <!-- Puuttuvat pelaajat kotijoukkueesta -->
+          <div
+            v-for="(player, index) in getMissingHomePlayers"
+            :key="'missing-home-' + player.player_id"
+            class="player home-player"
+            :style="getMissingPlayerPosition(index, getMissingHomePlayers.length, 'home')"
+          >
+            <div class="player-name">{{ player.player_name }}</div>
+            <div class="player-stats">
+              {{ player.played_matches }} / {{ player.goals }} + {{ player.assists }} = {{ player.points }}
+            </div>
+          </div>
+          
+          <!-- Puuttuvat pelaajat vierasjoukkueesta -->
+          <div
+            v-for="(player, index) in getMissingAwayPlayers"
+            :key="'missing-away-' + player.player_id"
+            class="player away-player"
+            :style="getMissingPlayerPosition(index, getMissingAwayPlayers.length, 'away')"
+          >
+            <div class="player-name">{{ player.player_name }}</div>
+            <div class="player-stats">
+              {{ player.played_matches }} / {{ player.goals }} + {{ player.assists }} = {{ player.points }}
             </div>
           </div>
 
@@ -205,6 +234,7 @@ export default {
         
         const loadLineupData = async () => {
             try {
+                console.log('Ladataan kokoonpanotietoja...')
                 const gameId = teamStore.currentGameId
                 if (!gameId) {
                     console.error('Ei gameId:tä saatavilla')
@@ -287,6 +317,16 @@ export default {
             const goalkeeper = getGoalkeeperForLineup(selectedLineup.value, allGoalkeepers, lineupData.value.teams.away.lineups)
             console.log('Away lineup:', selectedLineup.value, 'Goalkeeper:', goalkeeper?.name, goalkeeper?.position)
             return goalkeeper ? [...fieldPlayers, goalkeeper] : fieldPlayers
+        })
+        
+        const getMissingHomePlayers = computed(() => {
+            if (selectedLineup.value !== 'Ei kokoonpanossa') return []
+            return lineupData.value.missing_key_players?.home?.missing_players || []
+        })
+        
+        const getMissingAwayPlayers = computed(() => {
+            if (selectedLineup.value !== 'Ei kokoonpanossa') return []
+            return lineupData.value.missing_key_players?.away?.missing_players || []
         })
         
         const getGoalkeeperForLineup = (lineup, goalkeepers, teamLineups) => {
@@ -532,6 +572,40 @@ export default {
             return parts[0]
         }
         
+        const getMissingPlayerPosition = (index, totalPlayers, team) => {
+            // Sijoita pelaajat riveihin, 3-4 per rivi
+            const playersPerRow = 2
+            const row = Math.floor(index / playersPerRow)
+            const col = index % playersPerRow
+            const totalCols = Math.min(totalPlayers - (row * playersPerRow), playersPerRow)
+            
+            // Laske x-koordinaatti tasaisesti jakaen
+            const spacing = 110 / (totalCols + 1)
+            let x
+            if (col == 0)
+                x = 25
+            else
+                x = spacing * (col + 1)
+            
+            // Y-koordinaatti riippuen joukkueesta ja rivistä
+            let y
+            if (team === 'home') {
+                // Kotijoukkue (yläosa)
+                y = 44 - (row * 9)
+            } else {
+                // Vierasjoukkue (alaosa)
+                //y = 70 - (row * 10)
+                y = 55 + (row * 9)
+            }
+            
+            return {
+                position: 'absolute',
+                left: x + '%',
+                top: y + '%',
+                transform: 'translate(-50%, -50%)'
+            }
+        }
+        
         const showPlayerHistory = (player) => {
             selectedPlayer.value = player
             showHistoryDialog.value = true
@@ -611,6 +685,8 @@ export default {
             scrapeLineups,
             getHomeLineup,
             getAwayLineup,
+            getMissingHomePlayers,
+            getMissingAwayPlayers,
             getTotalMatches,
             getTotalGoals,
             getTotalAssists,
@@ -625,6 +701,7 @@ export default {
             getLastThreeSeasonsSavePercent,
             getPointsPerGame,
             getPlayerPosition,
+            getMissingPlayerPosition,
             getPositionType,
             getGoalkeeperForLineup,
             getLastName,
