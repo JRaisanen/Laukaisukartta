@@ -456,25 +456,6 @@ export default {
       event.target.style.display = 'none'
     }
     
-    const checkAnalysisStatus = async (threadId, runId) => {
-      try {
-        const response = await fetch(`${config.apiUrl}/ai-analysis-status/${threadId}/${runId}`, {
-          headers: {
-            'Authorization': `Bearer ${authStore.token}`
-          }
-        })
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        
-        return await response.json()
-      } catch (error) {
-        console.error('Virhe statuksen tarkistuksessa:', error)
-        throw error
-      }
-    }
-    
     const runAIAnalysis = async () => {
       if (!gameId.value) {
         analysisError.value = 'Ottelun ID puuttuu'
@@ -484,12 +465,10 @@ export default {
       loadingAnalysis.value = true
       analysisError.value = null
       analysisResult.value = null
-      analysisStatus.value = 'Käynnistetään analyysi...'
+      analysisStatus.value = 'Analysoidaan peliä...'
       
       try {
-        // Käynnistä analyysi
         const response = await fetch(`${config.apiUrl}/analyze-game-with-ai`, {
-        //const response = await fetch(`${config.apiUrl}/test-code-interpreter`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${authStore.token}`,
@@ -507,51 +486,16 @@ export default {
         }
         
         const result = await response.json()
-        const { threadId, runId } = result
         
-        analysisStatus.value = `Analyysi käynnistetty. Ladatut tiedostot: ${result.filesUploaded || 0}. Odotetaan tulosta...`
-        
-        // Pollaa statusta kunnes valmis
-        let attempts = 0
-        const maxAttempts = 15 // Max 5 minuuttia (60 * 5s)
-        
-        while (attempts < maxAttempts) {
-          await new Promise(resolve => setTimeout(resolve, 10000)) // Odota 5 sekuntia
-          
-          const statusResult = await checkAnalysisStatus(threadId, runId)
-          
-          if (statusResult.status === 'completed') {
-            // Analyysi valmis
-            const response = statusResult.response
-            let analysisText = ''
-            
-            if (Array.isArray(response)) {
-              response.forEach(item => {
-                if (item.type === 'text') {
-                  analysisText += item.text.value + '\n'
-                }
-              })
-            } else if (typeof response === 'string') {
-              analysisText = response
-            } else if (response?.text?.value) {
-              analysisText = response.text.value
-            }
-            
-            analysisResult.value = analysisText || 'Analyysi valmis, mutta ei sisältöä'
-            analysisStatus.value = null
-            break
-          } else if (statusResult.status === 'failed') {
-            throw new Error(statusResult.error || 'Analyysi epäonnistui')
-          } else {
-            // Vielä käynnissä
-            analysisStatus.value = `Analyysi käynnissä... (${attempts + 1}/${maxAttempts})`
-          }
-          
-          attempts++
-        }
-        
-        if (attempts >= maxAttempts) {
-          throw new Error('Analyysi aikakatkaistiin (maksimiaika ylittyi)')
+        if (result.status === 'completed' && result.analysis) {
+          analysisResult.value = result.analysis
+          analysisStatus.value = null
+          console.log('Analyysi valmis:', {
+            model: result.model,
+            usage: result.usage
+          })
+        } else {
+          throw new Error('Analyysi ei palauttanut tulosta')
         }
         
       } catch (error) {
