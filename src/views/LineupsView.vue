@@ -12,6 +12,16 @@
         <v-icon left>mdi-download</v-icon>
         Hae kokoonpanot
       </v-btn>
+      <v-btn
+        v-if="authStore.token"
+        color="primary"
+        variant="outlined"
+        :loading="scrapingLineups"
+        @click="pregameAIanalysis"
+      >
+        <v-icon left>mdi-download</v-icon>
+        Tee AI analyysi
+      </v-btn>
     </div>
     
     <!-- Kentällisten valinta -->
@@ -114,6 +124,18 @@
 
     </div>
 
+    <!-- AI Pregame Analysis -->
+    <v-card v-if="pregameAnalysis" class="mb-4">
+      <v-card-title class="d-flex align-center">
+        <v-icon color="primary" class="mr-2">mdi-brain</v-icon>
+        <span>AI Ennakkoanalyysi</span>
+      </v-card-title>
+      <v-card-text>
+        <div class="analysis-content" v-html="formatAnalysisText(pregameAnalysis)"></div>
+      </v-card-text>
+    </v-card>
+
+
     <!-- Pelaajan historia dialogi -->
     <v-dialog v-model="showHistoryDialog" max-width="1000">
     <v-card v-if="selectedPlayer">
@@ -192,6 +214,7 @@ export default {
         const showHistoryDialog = ref(false)
         const selectedPlayer = ref(null)
         const scrapingLineups = ref(false)
+        const pregameAnalysis = ref(null)
         
         // Computed property for headers based on player type
         const historyHeaders = computed(() => {
@@ -253,6 +276,9 @@ export default {
                 
                 lineupData.value = await response.json()
                 console.log('Lineup data loaded:', lineupData.value)
+
+                 // Lataa pregame-analyysi
+                await loadPregameAnalysis()
             } catch (error) {
                 console.error('Virhe kokoonpanojen latauksessa:', error)
                 //alert('Virhe kokoonpanojen latauksessa')
@@ -634,7 +660,7 @@ export default {
                     },
                     body: JSON.stringify({
                         gameId: gameId,
-                        stats_count: 8
+                        stats_count: 5
                     })
                 })
                 
@@ -667,6 +693,81 @@ export default {
                 scrapingLineups.value = false
             }
         }
+
+        const loadPregameAnalysis = async () => {
+            try {
+                const gameId = teamStore.currentGameId
+                if (!gameId) return
+                
+                const response = await fetch(`${config.apiUrl}/get-pregame-analysis/${gameId}`)
+                
+                if (response.ok) {
+                    const data = await response.json()
+                    if (data.analysis) {
+                        pregameAnalysis.value = data.analysis
+                        console.log('Pregame-analyysi ladattu' , data.analysis)
+                    }
+                } else if (response.status !== 404) {
+                    console.warn('Virhe pregame-analyysin lataamisessa:', response.status)
+                }
+            } catch (error) {
+                console.warn('Virhe pregame-analyysin lataamisessa:', error)
+            }
+        }
+
+        const formatAnalysisText = (text) => {
+            if (!text) return ''
+            // Muunna rivinvaihdot <br> tageiksi
+            return text.replace(/\n/g, '<br>')
+        }
+        
+        const pregameAIanalysis = async () => {
+            const gameId = teamStore.currentGameId
+            if (!gameId) {
+                alert('Ottelun ID puuttuu')
+                return
+            }
+            
+            scrapingLineups.value = true
+            console.log('Aloitetaan pregame-analyysi...')
+            try {
+                const response = await fetch(`${config.apiUrl}/pregame-ai-analysis`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authStore.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        gameId: gameId
+                    })
+                })
+                
+                if (!response.ok) {
+                  const errorData = await response.json()
+            
+                  if (response.status === 404 && errorData.error === 'Game does not have sbl_matchid') {
+                      alert('Ottelulta puuttuu SBL-ottelu ID. Analyysiä ei voida tehdä automaattisesti.')
+                      return
+                  }          
+
+                  throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`)
+                }      
+
+                const result = await response.json()
+                console.log('Analyysi tehty:', result)
+                
+                // Lataa päivitetty analyysi
+                await loadPregameAnalysis()
+                
+                alert('Analyysi tehty onnistuneesti!')
+                
+            } catch (error) {
+                console.error('Virhe analyysin suorittamisessa:', error)
+                alert(`Virhe analyysin suorittamisessa: ${error.message}`)
+            } finally {
+                scrapingLineups.value = false
+            }
+        }
         
         onMounted(() => {
             loadLineupData()
@@ -683,6 +784,10 @@ export default {
             hasLineupData,
             loadLineupData,
             scrapeLineups,
+            pregameAIanalysis,
+            pregameAnalysis,
+            loadPregameAnalysis,
+            formatAnalysisText,
             getHomeLineup,
             getAwayLineup,
             getMissingHomePlayers,
@@ -717,6 +822,16 @@ export default {
 <style scoped>
 .container {
   padding: 0px 18px 8px;
+}
+
+.analysis-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 1rem;
+  line-height: 1.6;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
 }
 
 .header-section {
