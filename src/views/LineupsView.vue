@@ -22,6 +22,16 @@
         <v-icon left>mdi-download</v-icon>
         Tee AI analyysi
       </v-btn>
+      <v-btn
+        v-if="authStore.token"
+        color="primary"
+        variant="outlined"
+        :loading="convertingToSpeech"
+        @click="textToSpeech"
+      >
+        <v-icon left>mdi-volume-high</v-icon>
+        Tallenna puheeksi
+      </v-btn>
     </div>
     
     <!-- Kentällisten valinta -->
@@ -124,6 +134,16 @@
 
     </div>
 
+    <v-btn
+        v-if="audioAnalysisExists"
+        color="success"
+        variant="outlined"
+        @click="downloadAudioAnalysis"
+        >
+        <v-icon left>mdi-download</v-icon>
+        Lataa audioanalyysi
+    </v-btn>
+
     <!-- AI Pregame Analysis -->
     <v-card v-if="pregameAnalysis" class="mb-4">
       <v-card-title class="d-flex align-center">
@@ -214,7 +234,10 @@ export default {
         const showHistoryDialog = ref(false)
         const selectedPlayer = ref(null)
         const scrapingLineups = ref(false)
+        const convertingToSpeech = ref(false)
         const pregameAnalysis = ref(null)
+        const audioAnalysisExists = ref(false)
+        const audioDownloadPath = ref(null)
         
         // Computed property for headers based on player type
         const historyHeaders = computed(() => {
@@ -279,6 +302,8 @@ export default {
 
                  // Lataa pregame-analyysi
                 await loadPregameAnalysis()
+                // Tarkista audio-analyysin olemassaolo
+                await checkPregameAnalysis()
             } catch (error) {
                 console.error('Virhe kokoonpanojen latauksessa:', error)
                 //alert('Virhe kokoonpanojen latauksessa')
@@ -714,6 +739,39 @@ export default {
                 console.warn('Virhe pregame-analyysin lataamisessa:', error)
             }
         }
+        
+        const checkPregameAnalysis = async () => {
+            try {
+                const gameId = teamStore.currentGameId
+                if (!gameId) return
+                
+                const response = await fetch(`${config.apiUrl}/check-pregame-analysis/${gameId}`)
+                
+                if (response.ok) {
+                    const data = await response.json()
+                    audioAnalysisExists.value = data.audioAnalysis?.exists || false
+                    audioDownloadPath.value = data.audioAnalysis?.downloadPath || null
+                    console.log('Audio-analyysi löytyy:', audioAnalysisExists.value, audioDownloadPath.value)
+                }
+            } catch (error) {
+                console.warn('Virhe analyysin tarkistuksessa:', error)
+                audioAnalysisExists.value = false
+                audioDownloadPath.value = null
+            }
+        }
+        
+        const downloadAudioAnalysis = () => {
+            if (!audioDownloadPath.value) {
+                alert('Audio-analyysiä ei löydy')
+                return
+            }
+            
+            const downloadUrl = `${config.apiUrl}${audioDownloadPath.value}`
+            console.log('Ladataan audio:', downloadUrl)
+            
+            // Avaa latauslinkki uudessa välilehdessä
+            window.open(downloadUrl, '_blank')
+        }
 
         const formatAnalysisText = (text) => {
             if (!text) return ''
@@ -758,6 +816,7 @@ export default {
                 
                 // Lataa päivitetty analyysi
                 await loadPregameAnalysis()
+                await checkPregameAnalysis()
                 
                 alert('Analyysi tehty onnistuneesti!')
                 
@@ -766,6 +825,49 @@ export default {
                 alert(`Virhe analyysin suorittamisessa: ${error.message}`)
             } finally {
                 scrapingLineups.value = false
+            }
+        }
+        
+        const textToSpeech = async () => {
+            const gameId = teamStore.currentGameId
+            if (!gameId) {
+                alert('Ottelun ID puuttuu')
+                return
+            }
+            
+            convertingToSpeech.value = true
+            console.log('Muunnetaan analyysi puheeksi...')
+            try {
+                const response = await fetch(`${config.apiUrl}/text-to-speech`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authStore.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        gameId: gameId,
+                        analysisType: 'pregame'
+                    })
+                })
+                
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`)
+                }
+                
+                const result = await response.json()
+                console.log('Puhemuunnos valmis:', result)
+                
+                // Päivitä audio-analyysin tila
+                await checkPregameAnalysis()
+                
+                alert('Analyysi muunnettu puheeksi onnistuneesti!')
+                
+            } catch (error) {
+                console.error('Virhe puhemuunnoksessa:', error)
+                alert(`Virhe puhemuunnoksessa: ${error.message}`)
+            } finally {
+                convertingToSpeech.value = false
             }
         }
         
@@ -780,11 +882,16 @@ export default {
             selectedPlayer,
             historyHeaders,
             scrapingLineups,
+            convertingToSpeech,
             authStore,
             hasLineupData,
+            audioAnalysisExists,
             loadLineupData,
             scrapeLineups,
             pregameAIanalysis,
+            textToSpeech,
+            checkPregameAnalysis,
+            downloadAudioAnalysis,
             pregameAnalysis,
             loadPregameAnalysis,
             formatAnalysisText,
